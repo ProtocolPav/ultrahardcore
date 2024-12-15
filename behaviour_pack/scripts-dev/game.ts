@@ -1,6 +1,7 @@
-import { system, world} from "@minecraft/server";
+import {Effect, EntityComponentTypes, GameMode, ItemStack, Player, system, TimeOfDay, world} from "@minecraft/server";
 import {TeamsManager} from "./teams";
-import { MessageManager } from "./messagebar";
+import {MessageManager} from "./messagebar";
+import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
 
 class Settings {
     border_radius: number;
@@ -114,15 +115,34 @@ export class GameManager {
         this.game_time = -30
     }
 
+    private start_game() {
+        this.waiting_to_start = false
+        this.game_running = true
+
+        const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10)
+        world.gameRules.pvp = false
+        world.gameRules.naturalRegeneration = false
+        world.setTimeOfDay(TimeOfDay.Day)
+
+        world.getAllPlayers().forEach((player: Player) => {
+            player.getEffects().forEach((effect: Effect) => {
+                player.removeEffect(effect.typeId)
+            })
+            player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
+            player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
+            player.addEffect(MinecraftEffectTypes.Resistance, 30, {amplifier: 100})
+            player.setGameMode(GameMode.survival)
+        })
+
+        this.teams_manager.spread_teams(this.settings.border_radius)
+    }
+
     private game_loop() {
         if (this.waiting_to_start || this.game_running) {
             this.game_time++
 
-            if (this.game_time === 1) {
-                this.waiting_to_start = false
-                this.game_running = true
-
-                // Code to start the game here!
+            if (this.game_time === 0) {
+                this.start_game()
             }
         }
 

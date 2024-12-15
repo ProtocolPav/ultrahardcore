@@ -1,4 +1,4 @@
-import { Player, world } from "@minecraft/server";
+import {MinecraftDimensionTypes, Player, world} from "@minecraft/server";
 import {MessageManager} from "./messagebar";
 
 class Team {
@@ -68,5 +68,24 @@ export class TeamsManager {
             new Team('team_purple', "Team Amethyst", "§u", "textures/items/amethyst_shard"),
             new Team('team_pink', "Team Petal", "§d", "textures/items/pink_petals"),
         ]
+    }
+
+    spread_teams(radius: number) {
+        this.teams.forEach(team => {
+            let r = radius * Math.sqrt(Math.random())
+            let theta = Math.random() * 2 * Math.PI
+
+            let coordinates = { x: r * Math.cos(theta), y: 0, z: r * Math.sin(theta) }
+
+            let block = world.getDimension(MinecraftDimensionTypes.overworld).getTopmostBlock(
+                {x: coordinates.x, z: coordinates.z},
+            )
+
+            if (block) coordinates.y = block.y+1
+
+            team.players.forEach((player: Player) => {
+                player.teleport(coordinates, {keepVelocity: false})
+            })
+        })
     }
 }
