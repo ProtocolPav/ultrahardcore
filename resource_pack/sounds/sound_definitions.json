@@ -25,9 +25,17 @@
       "category": "ui",
       "sounds": ["sounds/uhc/you_died"]
     },
+    "uhc.team.win": {
+      "category": "ui",
+      "sounds": ["sounds/uhc/team_win"]
+    },
     "uhc.music": {
       "category": "music",
       "sounds": ["sounds/uhc/music"]
+    },
+    "uhc.music.win": {
+      "category": "music",
+      "sounds": ["sounds/uhc/win_music"]
     }
   }
 }
