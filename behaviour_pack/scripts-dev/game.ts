@@ -1,4 +1,14 @@
-import {Effect, EntityComponentTypes, GameMode, ItemStack, Player, system, TimeOfDay, world} from "@minecraft/server";
+import {
+    Effect,
+    EntityComponentTypes,
+    GameMode,
+    ItemStack,
+    Player,
+    system,
+    TicksPerSecond,
+    TimeOfDay,
+    world
+} from "@minecraft/server";
 import {TeamsManager} from "./teams";
 import {MessageManager} from "./messagebar";
 import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
@@ -130,7 +140,7 @@ export class GameManager {
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
-            player.addEffect(MinecraftEffectTypes.Resistance, 30, {amplifier: 100})
+            player.addEffect(MinecraftEffectTypes.Regeneration, TicksPerSecond*30, {amplifier: 3})
             player.setGameMode(GameMode.survival)
         })
 
@@ -147,6 +157,13 @@ export class GameManager {
         }
 
         this.teams_manager.teams.forEach((team) => {team.update()})
-        this.message_manager.set_bar(this.game_time, this.game_running, this.waiting_to_start)
+        this.message_manager.set_bar(
+            this.game_time,
+            this.game_running,
+            this.waiting_to_start,
+            this.settings.grace_period_mins,
+            this.settings.main_period_mins,
+            this.settings.deathmatch_enabled
+        )
     }
 }
