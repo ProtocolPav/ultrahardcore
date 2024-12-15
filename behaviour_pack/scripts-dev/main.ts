@@ -1,16 +1,15 @@
 import {
     EntityComponentTypes,
     GameMode,
-    InputMode,
     ItemStack,
-    MinecraftDimensionTypes,
     system,
     TicksPerSecond,
     world
 } from "@minecraft/server";
-import {ActionFormData, MessageFormData} from "@minecraft/server-ui";
 import {GameManager} from "./game";
 import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
+import {team_form} from "./forms/team";
+import {admin_form} from "./forms/admin";
 
 let game_manager: GameManager
 
@@ -59,71 +58,10 @@ world.afterEvents.playerSpawn.subscribe(event => {
 
 world.afterEvents.itemUse.subscribe(event => {
     if (event.itemStack.typeId === MinecraftItemTypes.Book && !game_manager.game_running) {
-        const form = new ActionFormData();
-        form.title('Select a Team')
-        game_manager.teams_manager.teams.forEach(team => {
-            form.button(team.get_team_name(), team.icon)
-        })
-
-        // @ts-ignore
-        form.show(event.source).then(r => {
-            // This will stop the code when the player closes the form
-            if (r.canceled) return;
-
-            let response = r.selection;
-
-            if (response !== undefined) {
-                game_manager.teams_manager.teams[response].add_player(event.source, game_manager.message_manager)
-            }
-
-        }).catch(e => {
-            console.error(e, e.stack);
-        });
+        team_form(game_manager, event.source)
     }
 
     else if (event.itemStack.typeId === MinecraftItemTypes.Paper && !game_manager.game_running) {
-        const form = new ActionFormData();
-        form.title('UHC Manager')
-        form.button('Settings', 'textures/ui/icon_setting')
-        form.button('Start Game', 'textures/ui/dressing_room_skins')
-
-        // @ts-ignore
-        form.show(event.source).then(r => {
-            // This will stop the code when the player closes the form
-            if (r.canceled) return;
-
-            let response = r.selection;
-            switch (response) {
-                case 0:
-                    console.log()
-                    break;
-
-                case 1:
-                    const confirm_start_form = new MessageFormData()
-                    confirm_start_form.title('Are you sure?')
-                    confirm_start_form.body(
-                        'Pressing start will begin a 30 second countdown, ' +
-                        'after which each team will be teleported and the UHC begins.\n\n' +
-                        "Once the game starts, you §l§4can't§r:\n" +
-                        "- Stop the game\n" +
-                        "- Have any new players join the game\n" +
-                        "- Change any settings")
-                    confirm_start_form.button1("I'm Sure")
-                    confirm_start_form.button2("Cancel")
-
-                    //@ts-ignore
-                    confirm_start_form.show(event.source).then(r => {
-                        if(r.canceled || r.selection == 1){
-                            return
-                        }
-
-                        game_manager.begin_countdown_to_start()
-                    })
-                    break;
-            }
-
-        }).catch(e => {
-            console.error(e, e.stack);
-        });
+        admin_form(game_manager, event.source)
     }
 });

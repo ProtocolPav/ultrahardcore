@@ -1,5 +1,5 @@
 import {ActionFormData, MessageFormData, ModalFormData} from "@minecraft/server-ui";
-import {GameManager, Settings} from "../game";
+import {GameManager} from "../game";
 import {Player} from "@minecraft/server";
 
 export function admin_form(game_manager: GameManager, player: Player) {
@@ -55,14 +55,14 @@ function confirm_start_form(game_manager: GameManager, player: Player) {
 function settings_form(game_manager: GameManager, player: Player) {
     const form = new ModalFormData()
     form.title('UHC Settings')
-    form.slider('Border Circular Radius', 500, 4000, 500, 1500)
-    form.slider('Max players per team', 1, 10, 1, 3)
-    form.toggle('Enable random loot chests to spawn', true)
-    form.toggle('Enable centre chests around 0,0', true)
-    form.slider('Grace Period length (minutes)', 5, 60, 5, 30)
-    form.slider('Main Game length (After Grace Period)', 20, 120, 10, 60)
-    form.toggle('Enable Deathmatch', true)
-    form.toggle('Enable Regeneration at halftime', true)
+    form.slider('Border Circular Radius', 500, 4000, 500, game_manager.settings.border_radius)
+    form.slider('Max players per team', 1, 10, 1, game_manager.settings.players_per_team)
+    form.toggle('Enable random loot chests to spawn', game_manager.settings.loot_chests_enabled)
+    form.toggle('Enable centre loot chests', game_manager.settings.centre_chests_enabled)
+    form.slider('Grace Period length (minutes)', 5, 60, 5, game_manager.settings.grace_period_mins)
+    form.slider('Main Game length (After Grace Period)', 20, 120, 10, game_manager.settings.main_period_mins)
+    form.toggle('Enable Deathmatch', game_manager.settings.deathmatch_enabled)
+    form.toggle('Enable Regeneration at halftime', game_manager.settings.halftime_regeneration)
     form.submitButton('Confirm Changes')
 
     //@ts-ignore
