@@ -1,0 +1,33 @@
+{
+  "format_version": "1.14.0",
+  "sound_definitions": {
+    "uhc.start": {
+      "category": "ui",
+      "sounds": ["sounds/uhc/game_start"]
+    },
+    "uhc.start.before": {
+      "category": "ui",
+      "sounds": ["sounds/uhc/before_start"]
+    },
+    "uhc.checkpoint": {
+      "category": "ui",
+      "sounds": ["sounds/uhc/game_checkpoint"]
+    },
+    "uhc.team.join": {
+      "category": "ui",
+      "sounds": ["sounds/uhc/join_team"]
+    },
+    "uhc.team.death.global": {
+      "category": "ui",
+      "sounds": ["sounds/uhc/player_die"]
+    },
+    "uhc.team.death": {
+      "category": "ui",
+      "sounds": ["sounds/uhc/you_died"]
+    },
+    "uhc.music": {
+      "category": "music",
+      "sounds": ["sounds/uhc/music"]
+    }
+  }
+}

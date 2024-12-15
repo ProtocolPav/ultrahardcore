@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "target": "es6",
+      "module": "commonjs",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "typeRoots": ["./node_modules/@types", "./types"]  // Add this line to include custom types
+    },
+    "include": [
+      "behaviour_pack/scripts-dev/**/*.ts"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+  }

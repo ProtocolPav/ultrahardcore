@@ -1,0 +1,22 @@
+{
+  "format_version": 2,
+  "metadata": {
+    "authors": [
+      "ProtocolPav"
+    ]
+  },
+  "header": {
+    "name": "Ultra Hardcore Resource Pack",
+    "description": "Resources needed for the UHC Pack",
+    "min_engine_version": [ 1, 21, 40 ],
+    "uuid": "27f809f2-8c53-49d8-b9e0-08e8dc26dd72",
+    "version": [ 1, 0, 0 ]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "7458a4ff-6a60-40c8-97ec-d4a93b1c55ed",
+      "version": [ 1, 0, 0 ]
+    }
+  ]
+}
