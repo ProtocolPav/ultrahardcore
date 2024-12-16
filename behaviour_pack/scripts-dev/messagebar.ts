@@ -23,12 +23,12 @@ export class MessageManager {
             if (sound) {
                 player.playSound(sound, {location: player.location, volume: 100})
             }
-            player.sendMessage(message)
+            player.sendMessage(`§l§e[UHC]§r ${message}`)
         } else {
             if (sound) {
                 world.getDimension(MinecraftDimensionTypes.overworld).playSound(sound, {x: 0, y:0, z: 0}, {volume:1000})
             }
-            world.sendMessage(message)
+            world.sendMessage(`§l§e[UHC]§r ${message}`)
         }
     }
 

@@ -118,12 +118,13 @@ export class GameManager {
 
     begin_countdown_to_start() {
         this.message_manager.send_message(
-            `§l§e[UHC]§r The game is about to start! Lock in and get ready. May the best team win.`,
+            `The game is about to start! 
+            Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
             'uhc.start.before'
             )
         world.stopMusic()
         this.waiting_to_start = true
-        this.game_time = -30
+        this.game_time = -16
     }
 
     private start_game() {
@@ -133,6 +134,8 @@ export class GameManager {
         const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10)
         world.gameRules.pvp = false
         world.gameRules.naturalRegeneration = false
+        world.gameRules.doInsomnia = false
+        world.gameRules.showCoordinates = true
         world.setTimeOfDay(TimeOfDay.Day)
 
         world.getAllPlayers().forEach((player: Player) => {
@@ -162,15 +165,21 @@ export class GameManager {
                 world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
             else if (this.game_time === this.settings.grace_period_mins*60) {
-                // end grace period
+                world.gameRules.pvp = true
+                this.message_manager.send_message('Grace Period has ended. PVP is now enabled. Good luck.')
             }
 
             // Halftime
-            else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60 - 3) {
+            else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60/2 - 3) {
                 world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
-            else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60) {
-                // halftime
+            else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60/2) {
+                let halftime_message = "Congratulations on making it through half of the game!"
+                if (this.settings.halftime_regeneration) {
+                    halftime_message = `${halftime_message} Each team has been granted regeneration for 30 seconds.`
+                }
+
+                this.message_manager.send_message(halftime_message)
             }
 
             // Deathmatch

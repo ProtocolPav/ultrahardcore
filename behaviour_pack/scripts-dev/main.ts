@@ -34,25 +34,28 @@ world.afterEvents.playerSpawn.subscribe(event => {
 
         system.runTimeout(() => {
             game_manager.message_manager.send_message(
-                `§l§e[UHC]§r Welcome, §l${event.player.name}§r to the §6Everthorn UHC §l4§r! The game is about to start. Sit back, relax, and good luck!`,
+                `Welcome, §l${event.player.name}§r to the §6Everthorn UHC §l4§r! The game is about to start. Sit back, relax, and good luck!`,
                 'random.toast',
                 event.player
             )
         }, TicksPerSecond*5)
         system.runTimeout(() => {
             game_manager.message_manager.send_message(
-                {"text": `§l§e[UHC]§r Select your team by pressing :_input_key.use: or  on mobile`},
+                {"text": `Select your team by pressing :_input_key.use: or  on mobile`},
                 'random.toast',
                 event.player
             )
         }, TicksPerSecond*8)
         system.runTimeout(() => {
             game_manager.message_manager.send_message(
-                `§l§e[UHC]§r For admins: To start the game and edit settings, right click any Paper`,
+                `For admins: To start the game and edit settings, right click any Paper`,
                 'random.toast',
                 event.player
             )
         }, TicksPerSecond*18)
+    }
+    else if (game_manager.game_running) { // If a player spawns and is not in a team, put in spectator mode and TP to a random player
+
     }
 })
 

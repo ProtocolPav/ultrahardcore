@@ -41,7 +41,7 @@ class Team {
         player.addTag(`uhc:${this.string_id}`)
         player.nameTag = `${this.colour}${player.name}§r`
 
-        message_manager.send_message(`§l§e[UHC]§r ${player.name} has joined ${this.get_team_name()}!`, 'uhc.team.join')
+        message_manager.send_message(`${player.name} has joined ${this.get_team_name()}!`, 'uhc.team.join')
     }
 
     remove_player(player: Player) {

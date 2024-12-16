@@ -50,7 +50,7 @@ var Team = class {
     }
     player.addTag(`uhc:${this.string_id}`);
     player.nameTag = `${this.colour}${player.name}\xA7r`;
-    message_manager.send_message(`\xA7l\xA7e[UHC]\xA7r ${player.name} has joined ${this.get_team_name()}!`, "uhc.team.join");
+    message_manager.send_message(`${player.name} has joined ${this.get_team_name()}!`, "uhc.team.join");
   }
   remove_player(player) {
     player.removeTag(`uhc:${this.string_id}`);
@@ -110,12 +110,12 @@ var MessageManager = class {
       if (sound) {
         player.playSound(sound, { location: player.location, volume: 100 });
       }
-      player.sendMessage(message);
+      player.sendMessage(`\xA7l\xA7e[UHC]\xA7r ${message}`);
     } else {
       if (sound) {
         world2.getDimension(MinecraftDimensionTypes2.overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       }
-      world2.sendMessage(message);
+      world2.sendMessage(`\xA7l\xA7e[UHC]\xA7r ${message}`);
     }
   }
   game_start_cycle(game_time) {
@@ -3155,12 +3155,13 @@ var GameManager = class _GameManager {
   }
   begin_countdown_to_start() {
     this.message_manager.send_message(
-      `\xA7l\xA7e[UHC]\xA7r The game is about to start! Lock in and get ready. May the best team win.`,
+      `The game is about to start! 
+            Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
       "uhc.start.before"
     );
     world3.stopMusic();
     this.waiting_to_start = true;
-    this.game_time = -30;
+    this.game_time = -16;
   }
   start_game() {
     this.waiting_to_start = false;
@@ -3168,6 +3169,8 @@ var GameManager = class _GameManager {
     const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10);
     world3.gameRules.pvp = false;
     world3.gameRules.naturalRegeneration = false;
+    world3.gameRules.doInsomnia = false;
+    world3.gameRules.showCoordinates = true;
     world3.setTimeOfDay(TimeOfDay.Day);
     world3.getAllPlayers().forEach((player) => {
       player.getEffects().forEach((effect) => {
@@ -3189,9 +3192,16 @@ var GameManager = class _GameManager {
       } else if (this.game_time === this.settings.grace_period_mins * 60 - 3) {
         world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === this.settings.grace_period_mins * 60) {
-      } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 - 3) {
+        world3.gameRules.pvp = true;
+        this.message_manager.send_message("Grace Period has ended. PVP is now enabled. Good luck.");
+      } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2 - 3) {
         world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
-      } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60) {
+      } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2) {
+        let halftime_message = "Congratulations on making it through half of the game.";
+        if (this.settings.halftime_regeneration) {
+          halftime_message = `${halftime_message} Each team has been granted regeneration for 30 seconds.`;
+        }
+        this.message_manager.send_message(halftime_message);
       } else if (this.game_time === this.settings.main_period_mins * 60 - 3) {
         world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === this.settings.main_period_mins * 60) {
@@ -3256,7 +3266,7 @@ function confirm_start_form(game_manager2, player) {
   const form = new MessageFormData();
   form.title("Are you sure?");
   form.body(
-    "Pressing start will begin a 30 second countdown, after which each team will be teleported and the UHC begins.\n\nOnce the game starts, you \xA7l\xA74can't\xA7r:\n- Stop the game\n- Have any new players join the game\n- Change any settings"
+    "Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\nOnce the game starts, you \xA7l\xA74can't\xA7r:\n- Stop the game\n- Have any new players join the game\n- Change any settings"
   );
   form.button1("I'm Sure");
   form.button2("Cancel");
@@ -3274,8 +3284,8 @@ function settings_form(game_manager2, player) {
   form.slider("Max players per team", 1, 10, 1, game_manager2.settings.players_per_team);
   form.toggle("Enable random loot chests to spawn", game_manager2.settings.loot_chests_enabled);
   form.toggle("Enable centre loot chests", game_manager2.settings.centre_chests_enabled);
-  form.slider("Grace Period length (minutes)", 5, 60, 5, game_manager2.settings.grace_period_mins);
-  form.slider("Main Game length (After Grace Period)", 20, 120, 10, game_manager2.settings.main_period_mins);
+  form.slider("Grace Period length (minutes)", 1, 60, 5, game_manager2.settings.grace_period_mins);
+  form.slider("Main Game length (After Grace Period)", 5, 120, 10, game_manager2.settings.main_period_mins);
   form.toggle("Enable Deathmatch", game_manager2.settings.deathmatch_enabled);
   form.toggle("Enable Regeneration at halftime", game_manager2.settings.halftime_regeneration);
   form.submitButton("Confirm Changes");
@@ -3314,21 +3324,21 @@ world4.afterEvents.playerSpawn.subscribe((event) => {
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
     system2.runTimeout(() => {
       game_manager.message_manager.send_message(
-        `\xA7l\xA7e[UHC]\xA7r Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l4\xA7r! The game is about to start. Sit back, relax, and good luck!`,
+        `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l4\xA7r! The game is about to start. Sit back, relax, and good luck!`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond2 * 5);
     system2.runTimeout(() => {
       game_manager.message_manager.send_message(
-        { "text": `\xA7l\xA7e[UHC]\xA7r Select your team by pressing :_input_key.use: or \uE018 on mobile` },
+        { "text": `Select your team by pressing :_input_key.use: or \uE018 on mobile` },
         "random.toast",
         event.player
       );
     }, TicksPerSecond2 * 8);
     system2.runTimeout(() => {
       game_manager.message_manager.send_message(
-        `\xA7l\xA7e[UHC]\xA7r For admins: To start the game and edit settings, right click any Paper`,
+        `For admins: To start the game and edit settings, right click any Paper`,
         "random.toast",
         event.player
       );

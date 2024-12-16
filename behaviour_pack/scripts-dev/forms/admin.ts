@@ -33,7 +33,7 @@ function confirm_start_form(game_manager: GameManager, player: Player) {
     const form = new MessageFormData()
     form.title('Are you sure?')
     form.body(
-        'Pressing start will begin a 30 second countdown, ' +
+        'Pressing start will begin a 15 second countdown, ' +
         'after which each team will be teleported and the UHC begins.\n\n' +
         "Once the game starts, you §l§4can't§r:\n" +
         "- Stop the game\n" +
@@ -59,8 +59,10 @@ function settings_form(game_manager: GameManager, player: Player) {
     form.slider('Max players per team', 1, 10, 1, game_manager.settings.players_per_team)
     form.toggle('Enable random loot chests to spawn', game_manager.settings.loot_chests_enabled)
     form.toggle('Enable centre loot chests', game_manager.settings.centre_chests_enabled)
-    form.slider('Grace Period length (minutes)', 5, 60, 5, game_manager.settings.grace_period_mins)
-    form.slider('Main Game length (After Grace Period)', 20, 120, 10, game_manager.settings.main_period_mins)
+    // form.slider('Grace Period length (minutes)', 5, 60, 5, game_manager.settings.grace_period_mins)
+    // form.slider('Main Game length (After Grace Period)', 20, 120, 10, game_manager.settings.main_period_mins)
+    form.slider('Grace Period length (minutes)', 1, 60, 5, game_manager.settings.grace_period_mins)
+    form.slider('Main Game length (After Grace Period)', 5, 120, 10, game_manager.settings.main_period_mins)
     form.toggle('Enable Deathmatch', game_manager.settings.deathmatch_enabled)
     form.toggle('Enable Regeneration at halftime', game_manager.settings.halftime_regeneration)
     form.submitButton('Confirm Changes')
