@@ -2,12 +2,13 @@ import {
     Effect,
     EntityComponentTypes,
     GameMode,
-    ItemStack,
+    ItemStack, MinecraftDimensionTypes,
     Player,
     system,
     TicksPerSecond,
     TimeOfDay,
-    world
+    world,
+    DisplaySlotId
 } from "@minecraft/server";
 import {TeamsManager} from "./teams";
 import {MessageManager} from "./messagebar";
@@ -140,7 +141,8 @@ export class GameManager {
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
-            player.addEffect(MinecraftEffectTypes.Regeneration, TicksPerSecond*30, {amplifier: 3})
+            player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond*60, {amplifier: 100})
+            player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
             player.setGameMode(GameMode.survival)
         })
 
@@ -153,6 +155,30 @@ export class GameManager {
 
             if (this.game_time === 0) {
                 this.start_game()
+            }
+
+            // Grace Period Ends
+            else if (this.game_time === this.settings.grace_period_mins*60 - 3) {
+                world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
+            }
+            else if (this.game_time === this.settings.grace_period_mins*60) {
+                // end grace period
+            }
+
+            // Halftime
+            else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60 - 3) {
+                world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
+            }
+            else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60) {
+                // halftime
+            }
+
+            // Deathmatch
+            else if (this.game_time === (this.settings.main_period_mins)*60 - 3) {
+                world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
+            }
+            else if (this.game_time === (this.settings.main_period_mins)*60) {
+                // Deathmatch or game end
             }
         }
 

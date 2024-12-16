@@ -1,41 +1,6 @@
 import {MinecraftDimensionTypes, Player, RawMessage, world} from "@minecraft/server";
 
-interface MessageType {
-    cycle_length: number
-    type: string
-}
-
 export class MessageManager {
-    tips: string[] = [];
-    tip: string
-    cycle: number = 0;
-    cycle_index: number = 0
-    cycle_message_type: MessageType[]
-
-    constructor() {
-        this.tips = [
-            "Kill every team to win",
-            "Natural regeneration is off - don't take damage.",
-            "When you see a team, it's either fight or flight",
-        ];
-        this.tip = ''
-
-        this.cycle = 0;
-        this.cycle_index = 0
-        // this.cycle_message_type = [
-        //     {cycle_length: 120, type: 'time'},
-        //     {cycle_length: 20, type: 'tip'},
-        //     {cycle_length: 200, type: 'time'},
-        //     {cycle_length: 30, type: 'time_left'},
-        //     {cycle_length: 200, type: 'time'},
-        //     {cycle_length: 30, type: 'time_left'}
-        // ]
-        this.cycle_message_type = [
-            {cycle_length: 20, type: 'time'},
-            {cycle_length: 20, type: 'tip'},
-            {cycle_length: 20, type: 'time_left'}
-        ]
-    }
 
     set_bar(game_time: number, running: boolean, waiting_to_start: boolean, grace_period: number, end: number, deathmatch: boolean) {
         if (!running && !waiting_to_start) {
@@ -80,40 +45,21 @@ export class MessageManager {
     }
 
     private game_cycle(game_time: number, grace_period: number, end: number, deathmatch: boolean) {
-        let message = ''
-        const message_type = this.cycle_message_type[this.cycle_index]
+        let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
+        let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
+        let message = `§h${minutes}:${seconds}`
 
-        if (message_type.type === 'time') {
-            let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
-            let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
-            message = `§h${minutes}:${seconds}`
+        if (game_time > (grace_period-5)*60 && game_time < grace_period*60) {
+            let minutes = Math.floor((grace_period * 60 - game_time) / 60).toString().padStart(2, "0");
+            let seconds = Math.floor((grace_period * 60 - game_time) % 60).toString().padStart(2, "0");
+
+            message = `§6Grace period ends in §h${minutes}:${seconds}`
         }
 
-        else if (message_type.type === 'tip') {
-            let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
-            let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
-            message = `§h${minutes}:${seconds} | ${this.tip}`
-        }
-
-        else if (message_type.type === 'time_left') {
-            let minutes = Math.floor((grace_period + end - game_time) / 60).toString().padStart(2, "0");
-            let seconds = Math.floor((grace_period + end - game_time) % 60).toString().padStart(2, "0");
-
-            if (game_time < grace_period) {
-                message = `§6Grace period ends in §h${minutes}:${seconds}`
-            } else if (deathmatch) {
-                message = `§mDeathmatch starts in §h${minutes}:${seconds}`
-            } else {
-                message = `§6Game ends in §h${minutes}:${seconds}`
-            }
-        }
-
-        this.cycle++
-
-        if (this.cycle > message_type.cycle_length) {
-            this.cycle = 0
-            this.cycle_index++
-            this.tip = this.tips[Math.floor(Math.random() * this.tips.length)]
+        else if (game_time > (grace_period+end-5)*60 && game_time < (grace_period+end)*60) {
+            let minutes = Math.floor(((grace_period + end) * 60 - game_time) / 60).toString().padStart(2, "0");
+            let seconds = Math.floor(((grace_period + end) * 60 - game_time) % 60).toString().padStart(2, "0");
+            message = `${deathmatch ? '§mDeathmatch starts' : '§6Game ends'} in §h${minutes}:${seconds}`
         }
 
         world.getAllPlayers().forEach((player) => {
