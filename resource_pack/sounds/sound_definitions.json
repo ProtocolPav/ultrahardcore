@@ -31,11 +31,21 @@
     },
     "uhc.music": {
       "category": "music",
-      "sounds": ["sounds/uhc/music", "sounds/uhc/win_music"]
+      "sounds": ["sounds/uhc/music", "sounds/uhc/music_2"]
     },
     "uhc.music.win": {
       "category": "music",
-      "sounds": ["sounds/uhc/win_music"]
+      "sounds": ["sounds/uhc/victory"]
+    },
+    "uhc.music.deathmatch": {
+      "category": "music",
+      "sounds": [
+        "sounds/uhc/deathmatch_1",
+        "sounds/uhc/deathmatch_2",
+        "sounds/uhc/deathmatch_3",
+        "sounds/uhc/deathmatch_4",
+        "sounds/uhc/deathmatch_5"
+      ]
     }
   }
 }

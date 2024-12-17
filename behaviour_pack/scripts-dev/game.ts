@@ -12,7 +12,7 @@ import {
 } from "@minecraft/server";
 import {TeamsManager} from "./teams";
 import {MessageManager} from "./messagebar";
-import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
+import {MinecraftEffectTypes, MinecraftEntityTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
 
 class Settings {
     border_radius: number;
@@ -65,18 +65,37 @@ export class GameManager {
     message_manager: MessageManager
     settings: Settings
     game_time: number;
-    game_running: boolean;
-    waiting_to_start: boolean
+    game_status: 'waiting' | 'starting' | 'running' | 'finished'
     initialized: boolean
+    items: ItemStack[]
 
-    private constructor(teams_manager: TeamsManager, game_running: boolean, game_time: number, initialized: boolean, message_manager: MessageManager, settings: Settings) {
+    private constructor(
+        teams_manager: TeamsManager,
+        game_status: 'waiting' | 'starting' | 'running' | 'finished',
+        game_time: number,
+        initialized: boolean,
+        message_manager: MessageManager,
+        settings: Settings
+    ) {
         this.teams_manager = teams_manager;
-        this.game_running = game_running;
+        this.game_status = game_status;
         this.game_time = game_time;
-        this.waiting_to_start = false
         this.initialized = initialized;
         this.message_manager = message_manager;
         this.settings = settings
+        this.items = [
+            new ItemStack(MinecraftItemTypes.Redstone, 1),
+            new ItemStack('minecraft:resin_clump', 1),
+            new ItemStack(MinecraftItemTypes.Honeycomb, 1),
+            new ItemStack(MinecraftItemTypes.TurtleScute, 1),
+            new ItemStack(MinecraftItemTypes.Emerald, 1),
+            new ItemStack(MinecraftItemTypes.EchoShard, 1),
+            new ItemStack(MinecraftItemTypes.PrismarineShard, 1),
+            new ItemStack(MinecraftItemTypes.Diamond, 1),
+            new ItemStack(MinecraftItemTypes.ShulkerShell, 1),
+            new ItemStack(MinecraftItemTypes.AmethystShard, 1),
+            new ItemStack(MinecraftItemTypes.PinkPetals, 1)
+        ]
 
         system.runInterval(() => this.game_loop(), 20)
     }
@@ -96,11 +115,11 @@ export class GameManager {
 
         if (!initialized) {
             const game_time = 0
-            const game_running = false
+            const game_status = 'waiting'
             initialized = true;
 
             world.setDynamicProperty("uhc:game_time", game_time);
-            world.setDynamicProperty("uhc:game_running", game_running);
+            world.setDynamicProperty("uhc:game_status", game_status);
             // @ts-ignore
             world.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, {objective: world.scoreboard.getObjective('uhc:teams')})
             world.setDynamicProperty("uhc:initialized", initialized);
@@ -108,7 +127,8 @@ export class GameManager {
 
         return new GameManager(
             teams_manager,
-            Boolean(world.getDynamicProperty("uhc:game_running")),
+            // @ts-ignore
+            String(world.getDynamicProperty("uhc:game_status")),
             Number(world.getDynamicProperty("uhc:game_time")),
             initialized,
             messageBarManager,
@@ -118,24 +138,51 @@ export class GameManager {
 
     begin_countdown_to_start() {
         this.message_manager.send_message(
-            `The game is about to start! 
-            Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
+            `The game is about to start! ` +
+            `Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
             'uhc.start.before'
             )
         world.stopMusic()
-        this.waiting_to_start = true
+        this.game_status = 'starting'
         this.game_time = -16
     }
 
+    private update_dynamic_properties() {
+        world.setDynamicProperty("uhc:game_time", this.game_time);
+        world.setDynamicProperty("uhc:game_status", this.game_status);
+        this.teams_manager.teams.forEach((team) => {
+            team.update()
+        })
+    }
+
+    private border() {
+        const players = world.getAllPlayers()
+
+        players.forEach((player) => {
+            let distance = Math.sqrt(player.location.x**2 + player.location.z**2)
+            if (distance > this.settings.border_radius) {
+                let angle = Math.atan2(player.location.z, player.location.x)
+                let tp_location = {
+                    x: (this.settings.border_radius-1) * Math.cos(angle),
+                    y: player.location.y,
+                    z: (this.settings.border_radius-1) * Math.sin(angle)
+                }
+
+                this.message_manager.send_message("Stay within the border", 'uhc.team.death.global', player)
+                player.teleport(tp_location)
+            }
+        })
+    }
+
     private start_game() {
-        this.waiting_to_start = false
-        this.game_running = true
+        this.game_status = 'running'
 
         const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10)
         world.gameRules.pvp = false
         world.gameRules.naturalRegeneration = false
         world.gameRules.doInsomnia = false
         world.gameRules.showCoordinates = true
+        world.gameRules.doImmediateRespawn = true
         world.setTimeOfDay(TimeOfDay.Day)
 
         world.getAllPlayers().forEach((player: Player) => {
@@ -152,16 +199,46 @@ export class GameManager {
         this.teams_manager.spread_teams(this.settings.border_radius)
     }
 
+    private finish_game(team: any) {
+        this.message_manager.send_message(`${team.get_team_name()} has won the UHC!`, 'uhc.team.win')
+        world.stopMusic()
+        world.playMusic('uhc.music.win', {volume: 2})
+        this.game_status = 'finished'
+
+        const winning_player = world.getPlayers({name: team.players[0].name})[0]
+
+        world.getAllPlayers().forEach((player: Player) => {
+            player.teleport(winning_player.location)
+            player.setGameMode(GameMode.survival)
+            player.addEffect(MinecraftEffectTypes.Resistance, 20000000, {amplifier: 100})
+        })
+    }
+
+    private deathmatch() {
+        world.stopMusic()
+        world.playMusic('uhc.music.deathmatch', {volume: 0.6, loop: true})
+    }
+
     private game_loop() {
-        if (this.waiting_to_start || this.game_running) {
+        if (this.game_status === 'starting') {
             this.game_time++
 
             if (this.game_time === 0) {
                 this.start_game()
             }
+        }
+
+        else if (this.game_status === 'running') {
+            // Core UHC loops
+            this.game_time++
+            this.border()
+            let team = this.teams_manager.winner_check()
+            if (team) {
+                this.finish_game(team)
+            }
 
             // Grace Period Ends
-            else if (this.game_time === this.settings.grace_period_mins*60 - 3) {
+            if (this.game_time === this.settings.grace_period_mins*60 - 3) {
                 world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
             else if (this.game_time === this.settings.grace_period_mins*60) {
@@ -183,19 +260,36 @@ export class GameManager {
             }
 
             // Deathmatch
-            else if (this.game_time === (this.settings.main_period_mins)*60 - 3) {
+            else if (this.game_time === (this.settings.grace_period_mins+this.settings.main_period_mins)*60 - 3) {
                 world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
-            else if (this.game_time === (this.settings.main_period_mins)*60) {
-                // Deathmatch or game end
+            else if (this.game_time === (this.settings.grace_period_mins+this.settings.main_period_mins)*60) {
+                if (this.settings.deathmatch_enabled) {
+                    this.deathmatch()
+                } else {
+                    this.message_manager.send_message('The UHC has ended, and no team has won.')
+                    this.game_status = 'finished'
+                }
             }
         }
 
-        this.teams_manager.teams.forEach((team) => {team.update()})
+        else if (this.game_status === 'finished') {
+            world.getAllPlayers().forEach((player: Player) => {
+                player.dimension.spawnItem(
+                    this.items[Math.floor(Math.random() * this.items.length)],
+                    {
+                        x: player.location.x + (Math.floor(Math.random() * 10) * Math.random() < 0.5 ? 1 : -1),
+                        y: player.location.y + 12,
+                        z: player.location.z + (Math.floor(Math.random() * 10) * Math.random() < 0.5 ? 1 : -1)
+                    }
+                )
+            })
+        }
+
+        this.update_dynamic_properties()
         this.message_manager.set_bar(
             this.game_time,
-            this.game_running,
-            this.waiting_to_start,
+            this.game_status,
             this.settings.grace_period_mins,
             this.settings.main_period_mins,
             this.settings.deathmatch_enabled

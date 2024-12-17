@@ -44,10 +44,19 @@ class Team {
         message_manager.send_message(`${player.name} has joined ${this.get_team_name()}!`, 'uhc.team.join')
     }
 
-    remove_player(player: Player) {
+    remove_player(player: Player, message_manager: MessageManager) {
         player.removeTag(`uhc:${this.string_id}`)
         player.nameTag = player.name
-        player.dimension.playSound('uhc.team.death.global', player.location, {volume:100})
+
+        if (this.players.length === 1) {
+            message_manager.send_message(`${this.get_team_name()} has been eliminated!`, 'uhc.team.death')
+        } else {
+            player.dimension.playSound('uhc.team.death.global', player.location, {volume:10000})
+
+            this.players.forEach((player: Player) => {
+                player.playSound('uhc.team.death', {volume:100})
+            })
+        }
     }
 }
 
@@ -87,5 +96,25 @@ export class TeamsManager {
                 player.teleport(coordinates, {keepVelocity: false})
             })
         })
+    }
+
+    winner_check(): Team | undefined {
+        let teams_alive = 0
+        let winning_team: Team | undefined = undefined
+
+        this.teams.forEach(team => {
+            if (team.players.length > 0) {
+                teams_alive ++
+                winning_team = team
+            }
+        })
+
+        if (teams_alive === 1) {
+            return winning_team
+        }
+    }
+
+    get_team(player: Player) {
+        return this.teams.find(team => team.players.includes(player))
     }
 }

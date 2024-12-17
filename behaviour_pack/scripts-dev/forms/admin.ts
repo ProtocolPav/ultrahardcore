@@ -62,7 +62,7 @@ function settings_form(game_manager: GameManager, player: Player) {
     // form.slider('Grace Period length (minutes)', 5, 60, 5, game_manager.settings.grace_period_mins)
     // form.slider('Main Game length (After Grace Period)', 20, 120, 10, game_manager.settings.main_period_mins)
     form.slider('Grace Period length (minutes)', 1, 60, 5, game_manager.settings.grace_period_mins)
-    form.slider('Main Game length (After Grace Period)', 5, 120, 10, game_manager.settings.main_period_mins)
+    form.slider('Main Game length (After Grace Period)', 1.5, 120, 10, game_manager.settings.main_period_mins)
     form.toggle('Enable Deathmatch', game_manager.settings.deathmatch_enabled)
     form.toggle('Enable Regeneration at halftime', game_manager.settings.halftime_regeneration)
     form.submitButton('Confirm Changes')

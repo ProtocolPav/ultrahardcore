@@ -2,19 +2,23 @@ import {MinecraftDimensionTypes, Player, RawMessage, world} from "@minecraft/ser
 
 export class MessageManager {
 
-    set_bar(game_time: number, running: boolean, waiting_to_start: boolean, grace_period: number, end: number, deathmatch: boolean) {
-        if (!running && !waiting_to_start) {
+    set_bar(game_time: number, status: string, grace_period: number, end: number, deathmatch: boolean) {
+        if (status === 'waiting') {
             world.getAllPlayers().forEach((player) => {
                 player.onScreenDisplay.setActionBar(`§6Game is starting soon`)
             })
         }
 
-        else if (!running && waiting_to_start) {
+        else if (status === 'starting') {
             this.game_start_cycle(game_time)
         }
 
-        else if (running) {
+        else if (status === 'running') {
             this.game_cycle(game_time, grace_period, end, deathmatch)
+        }
+
+        else if (status === 'finished') {
+            this.finished_cycle(game_time)
         }
     }
 
@@ -23,12 +27,12 @@ export class MessageManager {
             if (sound) {
                 player.playSound(sound, {location: player.location, volume: 100})
             }
-            player.sendMessage(`§l§e[UHC]§r ${message}`)
+            player.sendMessage({"text": `§l§e[UHC]§r ${message}`})
         } else {
             if (sound) {
                 world.getDimension(MinecraftDimensionTypes.overworld).playSound(sound, {x: 0, y:0, z: 0}, {volume:1000})
             }
-            world.sendMessage(`§l§e[UHC]§r ${message}`)
+            world.sendMessage({"text": `§l§e[UHC]§r ${message}`})
         }
     }
 
@@ -61,6 +65,16 @@ export class MessageManager {
             let seconds = Math.floor(((grace_period + end) * 60 - game_time) % 60).toString().padStart(2, "0");
             message = `${deathmatch ? '§mDeathmatch starts' : '§6Game ends'} in §h${minutes}:${seconds}`
         }
+
+        world.getAllPlayers().forEach((player) => {
+            player.onScreenDisplay.setActionBar(message)
+        })
+    }
+
+    private finished_cycle(game_time: number) {
+        let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
+        let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
+        let message = `Finished at §h${minutes}:${seconds}`
 
         world.getAllPlayers().forEach((player) => {
             player.onScreenDisplay.setActionBar(message)

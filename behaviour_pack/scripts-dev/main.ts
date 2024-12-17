@@ -1,11 +1,4 @@
-import {
-    EntityComponentTypes,
-    GameMode,
-    ItemStack,
-    system,
-    TicksPerSecond,
-    world
-} from "@minecraft/server";
+import {EntityComponentTypes, GameMode, ItemStack, Player, system, TicksPerSecond, world} from "@minecraft/server";
 import {GameManager} from "./game";
 import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
 import {team_form} from "./forms/team";
@@ -18,7 +11,7 @@ world.afterEvents.worldInitialize.subscribe(event => {
 })
 
 world.afterEvents.playerSpawn.subscribe(event => {
-    if (!game_manager.game_running && event.initialSpawn) {
+    if (game_manager.game_status !== 'running' && event.initialSpawn) {
         let team_book = new ItemStack(MinecraftItemTypes.Book, 1)
         team_book.setLore(['Select your UHC Team'])
         team_book.nameTag = '§r§fTeam Selector | §l§8[§r§bUse§l§8]§r'
@@ -41,30 +34,42 @@ world.afterEvents.playerSpawn.subscribe(event => {
         }, TicksPerSecond*5)
         system.runTimeout(() => {
             game_manager.message_manager.send_message(
-                {"text": `Select your team by pressing :_input_key.use: or  on mobile`},
+                `Select your team by pressing :_input_key.use: or  on mobile`,
                 'random.toast',
                 event.player
             )
         }, TicksPerSecond*8)
         system.runTimeout(() => {
             game_manager.message_manager.send_message(
-                `For admins: To start the game and edit settings, right click any Paper`,
+                `For admins: To start the game or edit settings, do /give @p paper and right click it`,
                 'random.toast',
                 event.player
             )
         }, TicksPerSecond*18)
     }
-    else if (game_manager.game_running) { // If a player spawns and is not in a team, put in spectator mode and TP to a random player
-
+    else if (game_manager.game_status === 'running') {
+        event.player.setGameMode(GameMode.spectator)
+        // @ts-ignore
+        event.player.teleport(event.player.getDynamicProperty('uhc:death_location'))
     }
 })
 
 world.afterEvents.itemUse.subscribe(event => {
-    if (event.itemStack.typeId === MinecraftItemTypes.Book && !game_manager.game_running) {
+    if (event.itemStack.typeId === MinecraftItemTypes.Book && game_manager.game_status !== 'running') {
         team_form(game_manager, event.source)
     }
 
-    else if (event.itemStack.typeId === MinecraftItemTypes.Paper && !game_manager.game_running) {
+    else if (event.itemStack.typeId === MinecraftItemTypes.Paper && game_manager.game_status !== 'running') {
         admin_form(game_manager, event.source)
     }
-});
+})
+
+world.afterEvents.entityDie.subscribe(event => {
+    if (event.deadEntity instanceof Player) {
+        const team = game_manager.teams_manager.get_team(event.deadEntity)
+        if (team) {
+            team.remove_player(event.deadEntity, game_manager.message_manager)
+            event.deadEntity.setDynamicProperty('uhc:death_location', event.deadEntity.location)
+        }
+    }
+})
