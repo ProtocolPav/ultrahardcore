@@ -41,10 +41,7 @@
       "category": "music",
       "sounds": [
         "sounds/uhc/deathmatch_1",
-        "sounds/uhc/deathmatch_2",
-        "sounds/uhc/deathmatch_3",
-        "sounds/uhc/deathmatch_4",
-        "sounds/uhc/deathmatch_5"
+        "sounds/uhc/deathmatch_4"
       ]
     }
   }

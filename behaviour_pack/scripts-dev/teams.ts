@@ -1,5 +1,6 @@
-import {MinecraftDimensionTypes, Player, world} from "@minecraft/server";
+import {MinecraftDimensionTypes, Player, TicksPerSecond, world} from "@minecraft/server";
 import {MessageManager} from "./messagebar";
+import {MinecraftEffectTypes} from "@minecraft/vanilla-data";
 
 class Team {
     private readonly string_id: string
@@ -93,6 +94,7 @@ export class TeamsManager {
             if (block) coordinates.y = block.y+1
 
             team.players.forEach((player: Player) => {
+                player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond*60, {amplifier: 100})
                 player.teleport(coordinates, {keepVelocity: false})
             })
         })

@@ -1,176 +1,21 @@
 // behaviour_pack/scripts-dev/main.ts
-import { EntityComponentTypes as EntityComponentTypes2, GameMode as GameMode2, ItemStack as ItemStack2, Player as Player4, system as system2, TicksPerSecond as TicksPerSecond2, world as world4 } from "@minecraft/server";
+import { EntityComponentTypes as EntityComponentTypes2, GameMode as GameMode2, ItemStack as ItemStack2, Player as Player4, system as system2, TicksPerSecond as TicksPerSecond3, world as world4 } from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/game.ts
 import {
+  DisplaySlotId,
   EntityComponentTypes,
   GameMode,
   ItemStack,
   MinecraftDimensionTypes as MinecraftDimensionTypes4,
   system,
-  TicksPerSecond,
+  TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
-  world as world3,
-  DisplaySlotId
+  world as world3
 } from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/teams.ts
-import { MinecraftDimensionTypes, world } from "@minecraft/server";
-var Team = class {
-  constructor(string_id, name, colour, icon) {
-    this.players = [];
-    this.string_id = string_id;
-    this.name = name;
-    this.colour = colour;
-    this.icon = icon;
-    this.players = [];
-    world.scoreboard.getObjective("uhc:teams")?.setScore(this.get_team_name(), this.players.length);
-  }
-  get_team_name() {
-    return `${this.colour}${this.name}\xA7r`;
-  }
-  update() {
-    this.players = world.getPlayers({ tags: [`uhc:${this.string_id}`] });
-    world.scoreboard.getObjective("uhc:teams")?.setScore(this.get_team_name(), this.players.length);
-    this.players.forEach((player) => {
-      player.nameTag = `${this.colour}${player.name}\xA7r`;
-    });
-  }
-  add_player(player, message_manager) {
-    let player_team_tags = player.getTags().filter((tag) => tag.startsWith("uhc:"));
-    if (player_team_tags.length > 0) {
-      player_team_tags.forEach((tag) => player.removeTag(tag));
-    }
-    player.addTag(`uhc:${this.string_id}`);
-    player.nameTag = `${this.colour}${player.name}\xA7r`;
-    message_manager.send_message(`${player.name} has joined ${this.get_team_name()}!`, "uhc.team.join");
-  }
-  remove_player(player, message_manager) {
-    player.removeTag(`uhc:${this.string_id}`);
-    player.nameTag = player.name;
-    if (this.players.length === 1) {
-      message_manager.send_message(`${this.get_team_name()} has been eliminated!`, "uhc.team.death");
-    } else {
-      player.dimension.playSound("uhc.team.death.global", player.location, { volume: 1e4 });
-      this.players.forEach((player2) => {
-        player2.playSound("uhc.team.death", { volume: 100 });
-      });
-    }
-  }
-};
-var TeamsManager = class {
-  constructor() {
-    this.teams = [];
-    this.teams = [
-      new Team("team_red", "Team Redstone", "\xA7m", "textures/items/redstone_dust"),
-      new Team("team_orange", "Team Resin", "\xA76", "textures/items/resin_clump"),
-      new Team("team_yellow", "Team Honeycomb", "\xA7g", "textures/items/honeycomb"),
-      new Team("team_green", "Team Turtle", "\xA7q", "textures/items/turtle_shell_piece"),
-      new Team("team_lime", "Team Emerald", "\xA7a", "textures/items/emerald"),
-      new Team("team_blue", "Team Echo", "\xA79", "textures/items/echo_shard"),
-      new Team("team_light_blue", "Team Prismarine", "\xA73", "textures/items/prismarine_shard"),
-      new Team("team_cyan", "Team Diamond", "\xA7b", "textures/items/diamond"),
-      new Team("team_magenta", "Team Shulker", "\xA75", "textures/items/shulker_shell"),
-      new Team("team_purple", "Team Amethyst", "\xA7u", "textures/items/amethyst_shard"),
-      new Team("team_pink", "Team Petal", "\xA7d", "textures/items/pink_petals")
-    ];
-  }
-  spread_teams(radius) {
-    this.teams.forEach((team) => {
-      let r = radius * Math.sqrt(Math.random());
-      let theta = Math.random() * 2 * Math.PI;
-      let coordinates = { x: r * Math.cos(theta), y: 0, z: r * Math.sin(theta) };
-      let block = world.getDimension(MinecraftDimensionTypes.overworld).getTopmostBlock(
-        { x: coordinates.x, z: coordinates.z }
-      );
-      if (block) coordinates.y = block.y + 1;
-      team.players.forEach((player) => {
-        player.teleport(coordinates, { keepVelocity: false });
-      });
-    });
-  }
-  winner_check() {
-    let teams_alive = 0;
-    let winning_team = void 0;
-    this.teams.forEach((team) => {
-      if (team.players.length > 0) {
-        teams_alive++;
-        winning_team = team;
-      }
-    });
-    if (teams_alive === 1) {
-      return winning_team;
-    }
-  }
-  get_team(player) {
-    return this.teams.find((team) => team.players.includes(player));
-  }
-};
-
-// behaviour_pack/scripts-dev/messagebar.ts
-import { MinecraftDimensionTypes as MinecraftDimensionTypes2, world as world2 } from "@minecraft/server";
-var MessageManager = class {
-  set_bar(game_time, status, grace_period, end, deathmatch) {
-    if (status === "waiting") {
-      world2.getAllPlayers().forEach((player) => {
-        player.onScreenDisplay.setActionBar(`\xA76Game is starting soon`);
-      });
-    } else if (status === "starting") {
-      this.game_start_cycle(game_time);
-    } else if (status === "running") {
-      this.game_cycle(game_time, grace_period, end, deathmatch);
-    } else if (status === "finished") {
-      this.finished_cycle(game_time);
-    }
-  }
-  send_message(message, sound, player) {
-    if (player) {
-      if (sound) {
-        player.playSound(sound, { location: player.location, volume: 100 });
-      }
-      player.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
-    } else {
-      if (sound) {
-        world2.getDimension(MinecraftDimensionTypes2.overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 });
-      }
-      world2.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
-    }
-  }
-  game_start_cycle(game_time) {
-    const time_until_start = Math.abs(game_time);
-    if (time_until_start === 3) {
-      world2.getDimension(MinecraftDimensionTypes2.overworld).playSound("uhc.start", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
-    }
-    world2.getAllPlayers().forEach((player) => {
-      player.onScreenDisplay.setActionBar(`\xA76Game is starting in: \xA7h00:${time_until_start.toString().padStart(2, "0")}`);
-    });
-  }
-  game_cycle(game_time, grace_period, end, deathmatch) {
-    let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
-    let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
-    let message = `\xA7h${minutes}:${seconds}`;
-    if (game_time > (grace_period - 5) * 60 && game_time < grace_period * 60) {
-      let minutes2 = Math.floor((grace_period * 60 - game_time) / 60).toString().padStart(2, "0");
-      let seconds2 = Math.floor((grace_period * 60 - game_time) % 60).toString().padStart(2, "0");
-      message = `\xA76Grace period ends in \xA7h${minutes2}:${seconds2}`;
-    } else if (game_time > (grace_period + end - 5) * 60 && game_time < (grace_period + end) * 60) {
-      let minutes2 = Math.floor(((grace_period + end) * 60 - game_time) / 60).toString().padStart(2, "0");
-      let seconds2 = Math.floor(((grace_period + end) * 60 - game_time) % 60).toString().padStart(2, "0");
-      message = `${deathmatch ? "\xA7mDeathmatch starts" : "\xA76Game ends"} in \xA7h${minutes2}:${seconds2}`;
-    }
-    world2.getAllPlayers().forEach((player) => {
-      player.onScreenDisplay.setActionBar(message);
-    });
-  }
-  finished_cycle(game_time) {
-    let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
-    let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
-    let message = `Finished at \xA7h${minutes}:${seconds}`;
-    world2.getAllPlayers().forEach((player) => {
-      player.onScreenDisplay.setActionBar(message);
-    });
-  }
-};
+import { MinecraftDimensionTypes as MinecraftDimensionTypes2, TicksPerSecond, world } from "@minecraft/server";
 
 // node_modules/@minecraft/vanilla-data/lib/index.js
 var MinecraftBiomeTypes = ((MinecraftBiomeTypes2) => {
@@ -1500,12 +1345,12 @@ var MinecraftCooldownCategoryTypes = ((MinecraftCooldownCategoryTypes2) => {
   MinecraftCooldownCategoryTypes2["WindCharge"] = "minecraft:wind_charge";
   return MinecraftCooldownCategoryTypes2;
 })(MinecraftCooldownCategoryTypes || {});
-var MinecraftDimensionTypes3 = ((MinecraftDimensionTypes22) => {
+var MinecraftDimensionTypes = ((MinecraftDimensionTypes22) => {
   MinecraftDimensionTypes22["Nether"] = "minecraft:nether";
   MinecraftDimensionTypes22["Overworld"] = "minecraft:overworld";
   MinecraftDimensionTypes22["TheEnd"] = "minecraft:the_end";
   return MinecraftDimensionTypes22;
-})(MinecraftDimensionTypes3 || {});
+})(MinecraftDimensionTypes || {});
 var MinecraftEffectTypes = ((MinecraftEffectTypes2) => {
   MinecraftEffectTypes2["Absorption"] = "minecraft:absorption";
   MinecraftEffectTypes2["BadOmen"] = "minecraft:bad_omen";
@@ -1589,128 +1434,128 @@ var MinecraftEnchantmentTypes = ((MinecraftEnchantmentTypes2) => {
   MinecraftEnchantmentTypes2["WindBurst"] = "minecraft:wind_burst";
   return MinecraftEnchantmentTypes2;
 })(MinecraftEnchantmentTypes || {});
-var MinecraftEntityTypes = ((MinecraftEntityTypes22) => {
-  MinecraftEntityTypes22["Agent"] = "minecraft:agent";
-  MinecraftEntityTypes22["Allay"] = "minecraft:allay";
-  MinecraftEntityTypes22["AreaEffectCloud"] = "minecraft:area_effect_cloud";
-  MinecraftEntityTypes22["Armadillo"] = "minecraft:armadillo";
-  MinecraftEntityTypes22["ArmorStand"] = "minecraft:armor_stand";
-  MinecraftEntityTypes22["Arrow"] = "minecraft:arrow";
-  MinecraftEntityTypes22["Axolotl"] = "minecraft:axolotl";
-  MinecraftEntityTypes22["Bat"] = "minecraft:bat";
-  MinecraftEntityTypes22["Bee"] = "minecraft:bee";
-  MinecraftEntityTypes22["Blaze"] = "minecraft:blaze";
-  MinecraftEntityTypes22["Boat"] = "minecraft:boat";
-  MinecraftEntityTypes22["Bogged"] = "minecraft:bogged";
-  MinecraftEntityTypes22["Breeze"] = "minecraft:breeze";
-  MinecraftEntityTypes22["BreezeWindChargeProjectile"] = "minecraft:breeze_wind_charge_projectile";
-  MinecraftEntityTypes22["Camel"] = "minecraft:camel";
-  MinecraftEntityTypes22["Cat"] = "minecraft:cat";
-  MinecraftEntityTypes22["CaveSpider"] = "minecraft:cave_spider";
-  MinecraftEntityTypes22["ChestBoat"] = "minecraft:chest_boat";
-  MinecraftEntityTypes22["ChestMinecart"] = "minecraft:chest_minecart";
-  MinecraftEntityTypes22["Chicken"] = "minecraft:chicken";
-  MinecraftEntityTypes22["Cod"] = "minecraft:cod";
-  MinecraftEntityTypes22["CommandBlockMinecart"] = "minecraft:command_block_minecart";
-  MinecraftEntityTypes22["Cow"] = "minecraft:cow";
-  MinecraftEntityTypes22["Creeper"] = "minecraft:creeper";
-  MinecraftEntityTypes22["Dolphin"] = "minecraft:dolphin";
-  MinecraftEntityTypes22["Donkey"] = "minecraft:donkey";
-  MinecraftEntityTypes22["DragonFireball"] = "minecraft:dragon_fireball";
-  MinecraftEntityTypes22["Drowned"] = "minecraft:drowned";
-  MinecraftEntityTypes22["Egg"] = "minecraft:egg";
-  MinecraftEntityTypes22["ElderGuardian"] = "minecraft:elder_guardian";
-  MinecraftEntityTypes22["EnderCrystal"] = "minecraft:ender_crystal";
-  MinecraftEntityTypes22["EnderDragon"] = "minecraft:ender_dragon";
-  MinecraftEntityTypes22["EnderPearl"] = "minecraft:ender_pearl";
-  MinecraftEntityTypes22["Enderman"] = "minecraft:enderman";
-  MinecraftEntityTypes22["Endermite"] = "minecraft:endermite";
-  MinecraftEntityTypes22["EvocationIllager"] = "minecraft:evocation_illager";
-  MinecraftEntityTypes22["EyeOfEnderSignal"] = "minecraft:eye_of_ender_signal";
-  MinecraftEntityTypes22["Fireball"] = "minecraft:fireball";
-  MinecraftEntityTypes22["FireworksRocket"] = "minecraft:fireworks_rocket";
-  MinecraftEntityTypes22["FishingHook"] = "minecraft:fishing_hook";
-  MinecraftEntityTypes22["Fox"] = "minecraft:fox";
-  MinecraftEntityTypes22["Frog"] = "minecraft:frog";
-  MinecraftEntityTypes22["Ghast"] = "minecraft:ghast";
-  MinecraftEntityTypes22["GlowSquid"] = "minecraft:glow_squid";
-  MinecraftEntityTypes22["Goat"] = "minecraft:goat";
-  MinecraftEntityTypes22["Guardian"] = "minecraft:guardian";
-  MinecraftEntityTypes22["Hoglin"] = "minecraft:hoglin";
-  MinecraftEntityTypes22["HopperMinecart"] = "minecraft:hopper_minecart";
-  MinecraftEntityTypes22["Horse"] = "minecraft:horse";
-  MinecraftEntityTypes22["Husk"] = "minecraft:husk";
-  MinecraftEntityTypes22["IronGolem"] = "minecraft:iron_golem";
-  MinecraftEntityTypes22["LightningBolt"] = "minecraft:lightning_bolt";
-  MinecraftEntityTypes22["LingeringPotion"] = "minecraft:lingering_potion";
-  MinecraftEntityTypes22["Llama"] = "minecraft:llama";
-  MinecraftEntityTypes22["LlamaSpit"] = "minecraft:llama_spit";
-  MinecraftEntityTypes22["MagmaCube"] = "minecraft:magma_cube";
-  MinecraftEntityTypes22["Minecart"] = "minecraft:minecart";
-  MinecraftEntityTypes22["Mooshroom"] = "minecraft:mooshroom";
-  MinecraftEntityTypes22["Mule"] = "minecraft:mule";
-  MinecraftEntityTypes22["Npc"] = "minecraft:npc";
-  MinecraftEntityTypes22["Ocelot"] = "minecraft:ocelot";
-  MinecraftEntityTypes22["OminousItemSpawner"] = "minecraft:ominous_item_spawner";
-  MinecraftEntityTypes22["Panda"] = "minecraft:panda";
-  MinecraftEntityTypes22["Parrot"] = "minecraft:parrot";
-  MinecraftEntityTypes22["Phantom"] = "minecraft:phantom";
-  MinecraftEntityTypes22["Pig"] = "minecraft:pig";
-  MinecraftEntityTypes22["Piglin"] = "minecraft:piglin";
-  MinecraftEntityTypes22["PiglinBrute"] = "minecraft:piglin_brute";
-  MinecraftEntityTypes22["Pillager"] = "minecraft:pillager";
-  MinecraftEntityTypes22["Player"] = "minecraft:player";
-  MinecraftEntityTypes22["PolarBear"] = "minecraft:polar_bear";
-  MinecraftEntityTypes22["Pufferfish"] = "minecraft:pufferfish";
-  MinecraftEntityTypes22["Rabbit"] = "minecraft:rabbit";
-  MinecraftEntityTypes22["Ravager"] = "minecraft:ravager";
-  MinecraftEntityTypes22["Salmon"] = "minecraft:salmon";
-  MinecraftEntityTypes22["Sheep"] = "minecraft:sheep";
-  MinecraftEntityTypes22["Shulker"] = "minecraft:shulker";
-  MinecraftEntityTypes22["ShulkerBullet"] = "minecraft:shulker_bullet";
-  MinecraftEntityTypes22["Silverfish"] = "minecraft:silverfish";
-  MinecraftEntityTypes22["Skeleton"] = "minecraft:skeleton";
-  MinecraftEntityTypes22["SkeletonHorse"] = "minecraft:skeleton_horse";
-  MinecraftEntityTypes22["Slime"] = "minecraft:slime";
-  MinecraftEntityTypes22["SmallFireball"] = "minecraft:small_fireball";
-  MinecraftEntityTypes22["Sniffer"] = "minecraft:sniffer";
-  MinecraftEntityTypes22["SnowGolem"] = "minecraft:snow_golem";
-  MinecraftEntityTypes22["Snowball"] = "minecraft:snowball";
-  MinecraftEntityTypes22["Spider"] = "minecraft:spider";
-  MinecraftEntityTypes22["SplashPotion"] = "minecraft:splash_potion";
-  MinecraftEntityTypes22["Squid"] = "minecraft:squid";
-  MinecraftEntityTypes22["Stray"] = "minecraft:stray";
-  MinecraftEntityTypes22["Strider"] = "minecraft:strider";
-  MinecraftEntityTypes22["Tadpole"] = "minecraft:tadpole";
-  MinecraftEntityTypes22["ThrownTrident"] = "minecraft:thrown_trident";
-  MinecraftEntityTypes22["Tnt"] = "minecraft:tnt";
-  MinecraftEntityTypes22["TntMinecart"] = "minecraft:tnt_minecart";
-  MinecraftEntityTypes22["TraderLlama"] = "minecraft:trader_llama";
-  MinecraftEntityTypes22["TripodCamera"] = "minecraft:tripod_camera";
-  MinecraftEntityTypes22["Tropicalfish"] = "minecraft:tropicalfish";
-  MinecraftEntityTypes22["Turtle"] = "minecraft:turtle";
-  MinecraftEntityTypes22["Vex"] = "minecraft:vex";
-  MinecraftEntityTypes22["Villager"] = "minecraft:villager";
-  MinecraftEntityTypes22["VillagerV2"] = "minecraft:villager_v2";
-  MinecraftEntityTypes22["Vindicator"] = "minecraft:vindicator";
-  MinecraftEntityTypes22["WanderingTrader"] = "minecraft:wandering_trader";
-  MinecraftEntityTypes22["Warden"] = "minecraft:warden";
-  MinecraftEntityTypes22["WindChargeProjectile"] = "minecraft:wind_charge_projectile";
-  MinecraftEntityTypes22["Witch"] = "minecraft:witch";
-  MinecraftEntityTypes22["Wither"] = "minecraft:wither";
-  MinecraftEntityTypes22["WitherSkeleton"] = "minecraft:wither_skeleton";
-  MinecraftEntityTypes22["WitherSkull"] = "minecraft:wither_skull";
-  MinecraftEntityTypes22["WitherSkullDangerous"] = "minecraft:wither_skull_dangerous";
-  MinecraftEntityTypes22["Wolf"] = "minecraft:wolf";
-  MinecraftEntityTypes22["XpBottle"] = "minecraft:xp_bottle";
-  MinecraftEntityTypes22["XpOrb"] = "minecraft:xp_orb";
-  MinecraftEntityTypes22["Zoglin"] = "minecraft:zoglin";
-  MinecraftEntityTypes22["Zombie"] = "minecraft:zombie";
-  MinecraftEntityTypes22["ZombieHorse"] = "minecraft:zombie_horse";
-  MinecraftEntityTypes22["ZombiePigman"] = "minecraft:zombie_pigman";
-  MinecraftEntityTypes22["ZombieVillager"] = "minecraft:zombie_villager";
-  MinecraftEntityTypes22["ZombieVillagerV2"] = "minecraft:zombie_villager_v2";
-  return MinecraftEntityTypes22;
+var MinecraftEntityTypes = ((MinecraftEntityTypes2) => {
+  MinecraftEntityTypes2["Agent"] = "minecraft:agent";
+  MinecraftEntityTypes2["Allay"] = "minecraft:allay";
+  MinecraftEntityTypes2["AreaEffectCloud"] = "minecraft:area_effect_cloud";
+  MinecraftEntityTypes2["Armadillo"] = "minecraft:armadillo";
+  MinecraftEntityTypes2["ArmorStand"] = "minecraft:armor_stand";
+  MinecraftEntityTypes2["Arrow"] = "minecraft:arrow";
+  MinecraftEntityTypes2["Axolotl"] = "minecraft:axolotl";
+  MinecraftEntityTypes2["Bat"] = "minecraft:bat";
+  MinecraftEntityTypes2["Bee"] = "minecraft:bee";
+  MinecraftEntityTypes2["Blaze"] = "minecraft:blaze";
+  MinecraftEntityTypes2["Boat"] = "minecraft:boat";
+  MinecraftEntityTypes2["Bogged"] = "minecraft:bogged";
+  MinecraftEntityTypes2["Breeze"] = "minecraft:breeze";
+  MinecraftEntityTypes2["BreezeWindChargeProjectile"] = "minecraft:breeze_wind_charge_projectile";
+  MinecraftEntityTypes2["Camel"] = "minecraft:camel";
+  MinecraftEntityTypes2["Cat"] = "minecraft:cat";
+  MinecraftEntityTypes2["CaveSpider"] = "minecraft:cave_spider";
+  MinecraftEntityTypes2["ChestBoat"] = "minecraft:chest_boat";
+  MinecraftEntityTypes2["ChestMinecart"] = "minecraft:chest_minecart";
+  MinecraftEntityTypes2["Chicken"] = "minecraft:chicken";
+  MinecraftEntityTypes2["Cod"] = "minecraft:cod";
+  MinecraftEntityTypes2["CommandBlockMinecart"] = "minecraft:command_block_minecart";
+  MinecraftEntityTypes2["Cow"] = "minecraft:cow";
+  MinecraftEntityTypes2["Creeper"] = "minecraft:creeper";
+  MinecraftEntityTypes2["Dolphin"] = "minecraft:dolphin";
+  MinecraftEntityTypes2["Donkey"] = "minecraft:donkey";
+  MinecraftEntityTypes2["DragonFireball"] = "minecraft:dragon_fireball";
+  MinecraftEntityTypes2["Drowned"] = "minecraft:drowned";
+  MinecraftEntityTypes2["Egg"] = "minecraft:egg";
+  MinecraftEntityTypes2["ElderGuardian"] = "minecraft:elder_guardian";
+  MinecraftEntityTypes2["EnderCrystal"] = "minecraft:ender_crystal";
+  MinecraftEntityTypes2["EnderDragon"] = "minecraft:ender_dragon";
+  MinecraftEntityTypes2["EnderPearl"] = "minecraft:ender_pearl";
+  MinecraftEntityTypes2["Enderman"] = "minecraft:enderman";
+  MinecraftEntityTypes2["Endermite"] = "minecraft:endermite";
+  MinecraftEntityTypes2["EvocationIllager"] = "minecraft:evocation_illager";
+  MinecraftEntityTypes2["EyeOfEnderSignal"] = "minecraft:eye_of_ender_signal";
+  MinecraftEntityTypes2["Fireball"] = "minecraft:fireball";
+  MinecraftEntityTypes2["FireworksRocket"] = "minecraft:fireworks_rocket";
+  MinecraftEntityTypes2["FishingHook"] = "minecraft:fishing_hook";
+  MinecraftEntityTypes2["Fox"] = "minecraft:fox";
+  MinecraftEntityTypes2["Frog"] = "minecraft:frog";
+  MinecraftEntityTypes2["Ghast"] = "minecraft:ghast";
+  MinecraftEntityTypes2["GlowSquid"] = "minecraft:glow_squid";
+  MinecraftEntityTypes2["Goat"] = "minecraft:goat";
+  MinecraftEntityTypes2["Guardian"] = "minecraft:guardian";
+  MinecraftEntityTypes2["Hoglin"] = "minecraft:hoglin";
+  MinecraftEntityTypes2["HopperMinecart"] = "minecraft:hopper_minecart";
+  MinecraftEntityTypes2["Horse"] = "minecraft:horse";
+  MinecraftEntityTypes2["Husk"] = "minecraft:husk";
+  MinecraftEntityTypes2["IronGolem"] = "minecraft:iron_golem";
+  MinecraftEntityTypes2["LightningBolt"] = "minecraft:lightning_bolt";
+  MinecraftEntityTypes2["LingeringPotion"] = "minecraft:lingering_potion";
+  MinecraftEntityTypes2["Llama"] = "minecraft:llama";
+  MinecraftEntityTypes2["LlamaSpit"] = "minecraft:llama_spit";
+  MinecraftEntityTypes2["MagmaCube"] = "minecraft:magma_cube";
+  MinecraftEntityTypes2["Minecart"] = "minecraft:minecart";
+  MinecraftEntityTypes2["Mooshroom"] = "minecraft:mooshroom";
+  MinecraftEntityTypes2["Mule"] = "minecraft:mule";
+  MinecraftEntityTypes2["Npc"] = "minecraft:npc";
+  MinecraftEntityTypes2["Ocelot"] = "minecraft:ocelot";
+  MinecraftEntityTypes2["OminousItemSpawner"] = "minecraft:ominous_item_spawner";
+  MinecraftEntityTypes2["Panda"] = "minecraft:panda";
+  MinecraftEntityTypes2["Parrot"] = "minecraft:parrot";
+  MinecraftEntityTypes2["Phantom"] = "minecraft:phantom";
+  MinecraftEntityTypes2["Pig"] = "minecraft:pig";
+  MinecraftEntityTypes2["Piglin"] = "minecraft:piglin";
+  MinecraftEntityTypes2["PiglinBrute"] = "minecraft:piglin_brute";
+  MinecraftEntityTypes2["Pillager"] = "minecraft:pillager";
+  MinecraftEntityTypes2["Player"] = "minecraft:player";
+  MinecraftEntityTypes2["PolarBear"] = "minecraft:polar_bear";
+  MinecraftEntityTypes2["Pufferfish"] = "minecraft:pufferfish";
+  MinecraftEntityTypes2["Rabbit"] = "minecraft:rabbit";
+  MinecraftEntityTypes2["Ravager"] = "minecraft:ravager";
+  MinecraftEntityTypes2["Salmon"] = "minecraft:salmon";
+  MinecraftEntityTypes2["Sheep"] = "minecraft:sheep";
+  MinecraftEntityTypes2["Shulker"] = "minecraft:shulker";
+  MinecraftEntityTypes2["ShulkerBullet"] = "minecraft:shulker_bullet";
+  MinecraftEntityTypes2["Silverfish"] = "minecraft:silverfish";
+  MinecraftEntityTypes2["Skeleton"] = "minecraft:skeleton";
+  MinecraftEntityTypes2["SkeletonHorse"] = "minecraft:skeleton_horse";
+  MinecraftEntityTypes2["Slime"] = "minecraft:slime";
+  MinecraftEntityTypes2["SmallFireball"] = "minecraft:small_fireball";
+  MinecraftEntityTypes2["Sniffer"] = "minecraft:sniffer";
+  MinecraftEntityTypes2["SnowGolem"] = "minecraft:snow_golem";
+  MinecraftEntityTypes2["Snowball"] = "minecraft:snowball";
+  MinecraftEntityTypes2["Spider"] = "minecraft:spider";
+  MinecraftEntityTypes2["SplashPotion"] = "minecraft:splash_potion";
+  MinecraftEntityTypes2["Squid"] = "minecraft:squid";
+  MinecraftEntityTypes2["Stray"] = "minecraft:stray";
+  MinecraftEntityTypes2["Strider"] = "minecraft:strider";
+  MinecraftEntityTypes2["Tadpole"] = "minecraft:tadpole";
+  MinecraftEntityTypes2["ThrownTrident"] = "minecraft:thrown_trident";
+  MinecraftEntityTypes2["Tnt"] = "minecraft:tnt";
+  MinecraftEntityTypes2["TntMinecart"] = "minecraft:tnt_minecart";
+  MinecraftEntityTypes2["TraderLlama"] = "minecraft:trader_llama";
+  MinecraftEntityTypes2["TripodCamera"] = "minecraft:tripod_camera";
+  MinecraftEntityTypes2["Tropicalfish"] = "minecraft:tropicalfish";
+  MinecraftEntityTypes2["Turtle"] = "minecraft:turtle";
+  MinecraftEntityTypes2["Vex"] = "minecraft:vex";
+  MinecraftEntityTypes2["Villager"] = "minecraft:villager";
+  MinecraftEntityTypes2["VillagerV2"] = "minecraft:villager_v2";
+  MinecraftEntityTypes2["Vindicator"] = "minecraft:vindicator";
+  MinecraftEntityTypes2["WanderingTrader"] = "minecraft:wandering_trader";
+  MinecraftEntityTypes2["Warden"] = "minecraft:warden";
+  MinecraftEntityTypes2["WindChargeProjectile"] = "minecraft:wind_charge_projectile";
+  MinecraftEntityTypes2["Witch"] = "minecraft:witch";
+  MinecraftEntityTypes2["Wither"] = "minecraft:wither";
+  MinecraftEntityTypes2["WitherSkeleton"] = "minecraft:wither_skeleton";
+  MinecraftEntityTypes2["WitherSkull"] = "minecraft:wither_skull";
+  MinecraftEntityTypes2["WitherSkullDangerous"] = "minecraft:wither_skull_dangerous";
+  MinecraftEntityTypes2["Wolf"] = "minecraft:wolf";
+  MinecraftEntityTypes2["XpBottle"] = "minecraft:xp_bottle";
+  MinecraftEntityTypes2["XpOrb"] = "minecraft:xp_orb";
+  MinecraftEntityTypes2["Zoglin"] = "minecraft:zoglin";
+  MinecraftEntityTypes2["Zombie"] = "minecraft:zombie";
+  MinecraftEntityTypes2["ZombieHorse"] = "minecraft:zombie_horse";
+  MinecraftEntityTypes2["ZombiePigman"] = "minecraft:zombie_pigman";
+  MinecraftEntityTypes2["ZombieVillager"] = "minecraft:zombie_villager";
+  MinecraftEntityTypes2["ZombieVillagerV2"] = "minecraft:zombie_villager_v2";
+  return MinecraftEntityTypes2;
 })(MinecraftEntityTypes || {});
 var MinecraftFeatureTypes = ((MinecraftFeatureTypes2) => {
   MinecraftFeatureTypes2["AncientCity"] = "minecraft:ancient_city";
@@ -3106,6 +2951,164 @@ var MinecraftPotionModifierTypes = ((MinecraftPotionModifierTypes2) => {
   return MinecraftPotionModifierTypes2;
 })(MinecraftPotionModifierTypes || {});
 
+// behaviour_pack/scripts-dev/teams.ts
+var Team = class {
+  constructor(string_id, name, colour, icon) {
+    this.players = [];
+    this.string_id = string_id;
+    this.name = name;
+    this.colour = colour;
+    this.icon = icon;
+    this.players = [];
+    world.scoreboard.getObjective("uhc:teams")?.setScore(this.get_team_name(), this.players.length);
+  }
+  get_team_name() {
+    return `${this.colour}${this.name}\xA7r`;
+  }
+  update() {
+    this.players = world.getPlayers({ tags: [`uhc:${this.string_id}`] });
+    world.scoreboard.getObjective("uhc:teams")?.setScore(this.get_team_name(), this.players.length);
+    this.players.forEach((player) => {
+      player.nameTag = `${this.colour}${player.name}\xA7r`;
+    });
+  }
+  add_player(player, message_manager) {
+    let player_team_tags = player.getTags().filter((tag) => tag.startsWith("uhc:"));
+    if (player_team_tags.length > 0) {
+      player_team_tags.forEach((tag) => player.removeTag(tag));
+    }
+    player.addTag(`uhc:${this.string_id}`);
+    player.nameTag = `${this.colour}${player.name}\xA7r`;
+    message_manager.send_message(`${player.name} has joined ${this.get_team_name()}!`, "uhc.team.join");
+  }
+  remove_player(player, message_manager) {
+    player.removeTag(`uhc:${this.string_id}`);
+    player.nameTag = player.name;
+    if (this.players.length === 1) {
+      message_manager.send_message(`${this.get_team_name()} has been eliminated!`, "uhc.team.death");
+    } else {
+      player.dimension.playSound("uhc.team.death.global", player.location, { volume: 1e4 });
+      this.players.forEach((player2) => {
+        player2.playSound("uhc.team.death", { volume: 100 });
+      });
+    }
+  }
+};
+var TeamsManager = class {
+  constructor() {
+    this.teams = [];
+    this.teams = [
+      new Team("team_red", "Team Redstone", "\xA7m", "textures/items/redstone_dust"),
+      new Team("team_orange", "Team Resin", "\xA76", "textures/items/resin_clump"),
+      new Team("team_yellow", "Team Honeycomb", "\xA7g", "textures/items/honeycomb"),
+      new Team("team_green", "Team Turtle", "\xA7q", "textures/items/turtle_shell_piece"),
+      new Team("team_lime", "Team Emerald", "\xA7a", "textures/items/emerald"),
+      new Team("team_blue", "Team Echo", "\xA79", "textures/items/echo_shard"),
+      new Team("team_light_blue", "Team Prismarine", "\xA73", "textures/items/prismarine_shard"),
+      new Team("team_cyan", "Team Diamond", "\xA7b", "textures/items/diamond"),
+      new Team("team_magenta", "Team Shulker", "\xA75", "textures/items/shulker_shell"),
+      new Team("team_purple", "Team Amethyst", "\xA7u", "textures/items/amethyst_shard"),
+      new Team("team_pink", "Team Petal", "\xA7d", "textures/items/pink_petals")
+    ];
+  }
+  spread_teams(radius) {
+    this.teams.forEach((team) => {
+      let r = radius * Math.sqrt(Math.random());
+      let theta = Math.random() * 2 * Math.PI;
+      let coordinates = { x: r * Math.cos(theta), y: 0, z: r * Math.sin(theta) };
+      let block = world.getDimension(MinecraftDimensionTypes2.overworld).getTopmostBlock(
+        { x: coordinates.x, z: coordinates.z }
+      );
+      if (block) coordinates.y = block.y + 1;
+      team.players.forEach((player) => {
+        player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond * 60, { amplifier: 100 });
+        player.teleport(coordinates, { keepVelocity: false });
+      });
+    });
+  }
+  winner_check() {
+    let teams_alive = 0;
+    let winning_team = void 0;
+    this.teams.forEach((team) => {
+      if (team.players.length > 0) {
+        teams_alive++;
+        winning_team = team;
+      }
+    });
+    if (teams_alive === 1) {
+      return winning_team;
+    }
+  }
+  get_team(player) {
+    return this.teams.find((team) => team.players.includes(player));
+  }
+};
+
+// behaviour_pack/scripts-dev/messagebar.ts
+import { MinecraftDimensionTypes as MinecraftDimensionTypes3, world as world2 } from "@minecraft/server";
+var MessageManager = class {
+  set_bar(game_time, status, grace_period, end, deathmatch) {
+    if (status === "waiting") {
+      world2.getAllPlayers().forEach((player) => {
+        player.onScreenDisplay.setActionBar(`\xA76Game is starting soon`);
+      });
+    } else if (status === "starting") {
+      this.game_start_cycle(game_time);
+    } else if (status === "running") {
+      this.game_cycle(game_time, grace_period, end, deathmatch);
+    } else if (status === "finished") {
+      this.finished_cycle(game_time);
+    }
+  }
+  send_message(message, sound, player) {
+    if (player) {
+      if (sound) {
+        player.playSound(sound, { location: player.location, volume: 100 });
+      }
+      player.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
+    } else {
+      if (sound) {
+        world2.getDimension(MinecraftDimensionTypes3.overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+      }
+      world2.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
+    }
+  }
+  game_start_cycle(game_time) {
+    const time_until_start = Math.abs(game_time);
+    if (time_until_start === 3) {
+      world2.getDimension(MinecraftDimensionTypes3.overworld).playSound("uhc.start", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+    }
+    world2.getAllPlayers().forEach((player) => {
+      player.onScreenDisplay.setActionBar(`\xA76Game is starting in: \xA7h00:${time_until_start.toString().padStart(2, "0")}`);
+    });
+  }
+  game_cycle(game_time, grace_period, end, deathmatch) {
+    let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
+    let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
+    let message = `\xA7h${minutes}:${seconds}`;
+    if (game_time > (grace_period - 5) * 60 && game_time < grace_period * 60) {
+      let minutes2 = Math.floor((grace_period * 60 - game_time) / 60).toString().padStart(2, "0");
+      let seconds2 = Math.floor((grace_period * 60 - game_time) % 60).toString().padStart(2, "0");
+      message = `\xA76Grace period ends in \xA7h${minutes2}:${seconds2}`;
+    } else if (game_time > (grace_period + end - 5) * 60 && game_time < (grace_period + end) * 60) {
+      let minutes2 = Math.floor(((grace_period + end) * 60 - game_time) / 60).toString().padStart(2, "0");
+      let seconds2 = Math.floor(((grace_period + end) * 60 - game_time) % 60).toString().padStart(2, "0");
+      message = `${deathmatch ? "\xA7mDeathmatch starts" : "\xA76Game ends"} in \xA7h${minutes2}:${seconds2}`;
+    }
+    world2.getAllPlayers().forEach((player) => {
+      player.onScreenDisplay.setActionBar(message);
+    });
+  }
+  finished_cycle(game_time) {
+    let minutes = Math.floor(game_time / 60).toString().padStart(2, "0");
+    let seconds = Math.floor(game_time % 60).toString().padStart(2, "0");
+    let message = `Finished at \xA7h${minutes}:${seconds}`;
+    world2.getAllPlayers().forEach((player) => {
+      player.onScreenDisplay.setActionBar(message);
+    });
+  }
+};
+
 // behaviour_pack/scripts-dev/game.ts
 var Settings = class {
   constructor(initialized) {
@@ -3197,6 +3200,12 @@ var GameManager = class _GameManager {
       `The game is about to start! Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
       "uhc.start.before"
     );
+    system.runTimeout(() => {
+      this.message_manager.send_message(
+        `You might be teleported into the sky, do not worry! You will have resistance to save your fall.`,
+        "random.toast"
+      );
+    }, TicksPerSecond2 * 5);
     world3.stopMusic();
     this.game_status = "starting";
     this.game_time = -16;
@@ -3239,7 +3248,6 @@ var GameManager = class _GameManager {
       });
       player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll();
       player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef);
-      player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond * 60, { amplifier: 100 });
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.survival);
     });
@@ -3260,6 +3268,11 @@ var GameManager = class _GameManager {
   deathmatch() {
     world3.stopMusic();
     world3.playMusic("uhc.music.deathmatch", { volume: 0.6, loop: true });
+    this.settings.border_radius = 100;
+    this.teams_manager.spread_teams(100);
+    world3.getPlayers({ gameMode: GameMode.spectator }).forEach((player) => {
+      player.teleport({ x: 0, y: 100, z: 0 });
+    });
   }
   game_loop() {
     if (this.game_status === "starting") {
@@ -3287,6 +3300,10 @@ var GameManager = class _GameManager {
           halftime_message = `${halftime_message} Each team has been granted regeneration for 30 seconds.`;
         }
         this.message_manager.send_message(halftime_message);
+      } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60 - 5 * 60 && this.settings.deathmatch_enabled) {
+        this.message_manager.send_message(
+          "Deathmatch will commence in 3 minutes. The border will shrink to 100 blocks and all teams will be teleported to the centre and granted Resistance for 60 seconds."
+        );
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60 - 3) {
         world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60) {
@@ -3427,21 +3444,21 @@ world4.afterEvents.playerSpawn.subscribe((event) => {
         "random.toast",
         event.player
       );
-    }, TicksPerSecond2 * 5);
+    }, TicksPerSecond3 * 5);
     system2.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Select your team by pressing :_input_key.use: or \uE018 on mobile`,
         "random.toast",
         event.player
       );
-    }, TicksPerSecond2 * 8);
+    }, TicksPerSecond3 * 8);
     system2.runTimeout(() => {
       game_manager.message_manager.send_message(
         `For admins: To start the game or edit settings, do /give @p paper and right click it`,
         "random.toast",
         event.player
       );
-    }, TicksPerSecond2 * 18);
+    }, TicksPerSecond3 * 18);
   } else if (game_manager.game_status === "running") {
     event.player.setGameMode(GameMode2.spectator);
     event.player.teleport(event.player.getDynamicProperty("uhc:death_location"));

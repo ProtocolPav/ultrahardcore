@@ -1,18 +1,19 @@
 import {
+    DisplaySlotId,
     Effect,
     EntityComponentTypes,
     GameMode,
-    ItemStack, MinecraftDimensionTypes,
+    ItemStack,
+    MinecraftDimensionTypes,
     Player,
     system,
     TicksPerSecond,
     TimeOfDay,
-    world,
-    DisplaySlotId
+    world
 } from "@minecraft/server";
 import {TeamsManager} from "./teams";
 import {MessageManager} from "./messagebar";
-import {MinecraftEffectTypes, MinecraftEntityTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
+import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
 
 class Settings {
     border_radius: number;
@@ -142,6 +143,14 @@ export class GameManager {
             `Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
             'uhc.start.before'
             )
+
+        system.runTimeout(() => {
+            this.message_manager.send_message(
+                `You might be teleported into the sky, do not worry! You will have resistance to save your fall.`,
+                'random.toast'
+            )
+        }, TicksPerSecond*5)
+
         world.stopMusic()
         this.game_status = 'starting'
         this.game_time = -16
@@ -191,7 +200,6 @@ export class GameManager {
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
-            player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond*60, {amplifier: 100})
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
             player.setGameMode(GameMode.survival)
         })
@@ -217,6 +225,14 @@ export class GameManager {
     private deathmatch() {
         world.stopMusic()
         world.playMusic('uhc.music.deathmatch', {volume: 0.6, loop: true})
+
+        this.settings.border_radius = 100
+
+        this.teams_manager.spread_teams(100)
+
+        world.getPlayers({gameMode: GameMode.spectator}).forEach((player: Player) => {
+            player.teleport({x: 0, y: 100, z: 0})
+        })
     }
 
     private game_loop() {
@@ -260,6 +276,13 @@ export class GameManager {
             }
 
             // Deathmatch
+            else if (this.game_time === (this.settings.grace_period_mins+this.settings.main_period_mins)*60 - 5*60
+                && this.settings.deathmatch_enabled) {
+                this.message_manager.send_message(
+                    'Deathmatch will commence in 3 minutes. The border will shrink to 100 blocks and ' +
+                    'all teams will be teleported to the centre and granted Resistance for 60 seconds.'
+                )
+            }
             else if (this.game_time === (this.settings.grace_period_mins+this.settings.main_period_mins)*60 - 3) {
                 world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
