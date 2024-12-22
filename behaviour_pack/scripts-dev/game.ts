@@ -270,6 +270,9 @@ export class GameManager {
                 let halftime_message = "Congratulations on making it through half of the game!"
                 if (this.settings.halftime_regeneration) {
                     halftime_message = `${halftime_message} Each team has been granted regeneration for 30 seconds.`
+                    world.getAllPlayers().forEach((player: Player) => {
+                        player.addEffect(MinecraftEffectTypes.Regeneration, TicksPerSecond*30)
+                    })
                 }
 
                 this.message_manager.send_message(halftime_message)

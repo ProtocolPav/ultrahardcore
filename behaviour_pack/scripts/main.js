@@ -3298,6 +3298,9 @@ var GameManager = class _GameManager {
         let halftime_message = "Congratulations on making it through half of the game!";
         if (this.settings.halftime_regeneration) {
           halftime_message = `${halftime_message} Each team has been granted regeneration for 30 seconds.`;
+          world3.getAllPlayers().forEach((player) => {
+            player.addEffect(MinecraftEffectTypes.Regeneration, TicksPerSecond2 * 30);
+          });
         }
         this.message_manager.send_message(halftime_message);
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60 - 5 * 60 && this.settings.deathmatch_enabled) {
