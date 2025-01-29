@@ -55,8 +55,8 @@ function confirm_start_form(game_manager: GameManager, player: Player) {
 function settings_form(game_manager: GameManager, player: Player) {
     const form = new ModalFormData()
     form.title('UHC Settings')
-    form.slider('Border Circular Radius', 500, 4000, 500, game_manager.settings.border_radius)
-    form.slider('Max players per team', 1, 10, 1, game_manager.settings.players_per_team)
+    form.slider('Border Circular Radius', 500, 3800, 150, game_manager.settings.border_radius)
+    form.slider('Max players per team', 1, 8, 1, game_manager.settings.players_per_team)
     // form.toggle('Enable random loot chests to spawn', game_manager.settings.loot_chests_enabled)
     // form.toggle('Enable centre loot chests', game_manager.settings.centre_chests_enabled)
     form.slider('Grace Period length (minutes)', 5, 60, 5, game_manager.settings.grace_period_mins)
