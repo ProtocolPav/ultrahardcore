@@ -3228,6 +3228,8 @@ var GameManager = class _GameManager {
           y: player.location.y,
           z: (this.settings.border_radius - 1) * Math.sin(angle)
         };
+        let block = player.dimension.getTopmostBlock({ x: tp_location.x, z: tp_location.z });
+        tp_location.y = block ? block?.y + 1 : player.location.y;
         this.message_manager.send_message("Stay within the border", "uhc.team.death.global", player);
         player.teleport(tp_location);
       }
@@ -3287,6 +3289,7 @@ var GameManager = class _GameManager {
       if (team) {
         this.finish_game(team);
       }
+      world3.getDimension(MinecraftDimensionTypes4.overworld).runCommand("clear @a map");
       if (this.game_time === this.settings.grace_period_mins * 60 - 3) {
         world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === this.settings.grace_period_mins * 60) {
@@ -3401,10 +3404,8 @@ function settings_form(game_manager2, player) {
   form.title("UHC Settings");
   form.slider("Border Circular Radius", 500, 4e3, 500, game_manager2.settings.border_radius);
   form.slider("Max players per team", 1, 10, 1, game_manager2.settings.players_per_team);
-  form.toggle("Enable random loot chests to spawn", game_manager2.settings.loot_chests_enabled);
-  form.toggle("Enable centre loot chests", game_manager2.settings.centre_chests_enabled);
-  form.slider("Grace Period length (minutes)", 1, 60, 5, game_manager2.settings.grace_period_mins);
-  form.slider("Main Game length (After Grace Period)", 1.5, 120, 10, game_manager2.settings.main_period_mins);
+  form.slider("Grace Period length (minutes)", 5, 60, 5, game_manager2.settings.grace_period_mins);
+  form.slider("Main Game length (After Grace Period)", 20, 120, 10, game_manager2.settings.main_period_mins);
   form.toggle("Enable Deathmatch", game_manager2.settings.deathmatch_enabled);
   form.toggle("Enable Regeneration at halftime", game_manager2.settings.halftime_regeneration);
   form.submitButton("Confirm Changes");
@@ -3414,12 +3415,10 @@ function settings_form(game_manager2, player) {
       let values = r.formValues;
       game_manager2.settings.border_radius = Number(values[0]);
       game_manager2.settings.players_per_team = Number(values[1]);
-      game_manager2.settings.loot_chests_enabled = Boolean(values[2]);
-      game_manager2.settings.centre_chests_enabled = Boolean(values[3]);
-      game_manager2.settings.grace_period_mins = Number(values[4]);
-      game_manager2.settings.main_period_mins = Number(values[5]);
-      game_manager2.settings.deathmatch_enabled = Boolean(values[6]);
-      game_manager2.settings.halftime_regeneration = Boolean(values[7]);
+      game_manager2.settings.grace_period_mins = Number(values[2]);
+      game_manager2.settings.main_period_mins = Number(values[3]);
+      game_manager2.settings.deathmatch_enabled = Boolean(values[4]);
+      game_manager2.settings.halftime_regeneration = Boolean(values[5]);
       game_manager2.settings.update_settings();
     }
   });

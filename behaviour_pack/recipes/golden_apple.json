@@ -1,0 +1,25 @@
+{
+  "format_version": "1.21.0",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "minecraft:golden_apple"
+    },
+    "tags": ["crafting_table"],
+    "pattern": [
+      "GGG",
+      "GAG",
+      "GGG"
+    ],
+    "key": {
+      "G": "minecraft:gold_nugget",
+      "A": "minecraft:apple"
+    },
+    "unlock": [
+      {
+        "item": "minecraft:apple",
+        "data": 1
+      }
+    ],
+    "result": "minecraft:golden_apple"
+  }
+}

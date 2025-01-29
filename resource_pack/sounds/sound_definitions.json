@@ -31,18 +31,22 @@
     },
     "uhc.music": {
       "category": "music",
-      "sounds": ["sounds/uhc/music"]
+      "sounds": ["sounds/uhc/music"],
+      "stream": true
     },
     "uhc.music.win": {
       "category": "music",
-      "sounds": ["sounds/uhc/victory"]
+      "sounds": ["sounds/uhc/victory"],
+      "interruptible": false,
+      "stream": true
     },
     "uhc.music.deathmatch": {
       "category": "music",
       "sounds": [
         "sounds/uhc/deathmatch_1",
         "sounds/uhc/deathmatch_4"
-      ]
+      ],
+      "stream": true
     }
   }
 }

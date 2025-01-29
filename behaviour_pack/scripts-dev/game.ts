@@ -177,6 +177,10 @@ export class GameManager {
                     z: (this.settings.border_radius-1) * Math.sin(angle)
                 }
 
+                let block = player.dimension.getTopmostBlock({x: tp_location.x, z: tp_location.z})
+
+                tp_location.y = block ? block?.y + 1 : player.location.y
+
                 this.message_manager.send_message("Stay within the border", 'uhc.team.death.global', player)
                 player.teleport(tp_location)
             }
@@ -252,6 +256,9 @@ export class GameManager {
             if (team) {
                 this.finish_game(team)
             }
+
+            // Clear maps from players
+            world.getDimension(MinecraftDimensionTypes.overworld).runCommand('clear @a map')
 
             // Grace Period Ends
             if (this.game_time === this.settings.grace_period_mins*60 - 3) {
