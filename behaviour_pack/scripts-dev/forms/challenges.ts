@@ -19,7 +19,7 @@ export function challenges_form(game_manager: GameManager, player: Player) {
     // @ts-ignore
     form.show(player).then(r => {
         // This will stop the code when the player closes the form
-        if (r.canceled || !r.selection) return;
+        if (r.canceled || r.selection === undefined) return;
 
         let response = r.selection;
         info_form(button_indexes[response], game_manager, player)
@@ -43,9 +43,9 @@ function info_form(challenge_id: string, game_manager: GameManager, player: Play
     }
     form.title(challenge.name)
     form.body(
-        `${challenge.description}\n\nReward: ${challenge.reward} (On Everthorn Server)\n\n${challenge_info}`
+        `§e${challenge.description}§r\n\nReward: ${challenge.reward} (On Everthorn Server)\n\n§8${challenge_info}§r`
     )
-    form.button2("Go Back")
+    form.button1("Go Back")
 
     //@ts-ignore
     form.show(player).then(r => {
