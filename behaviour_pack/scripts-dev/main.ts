@@ -1,8 +1,9 @@
 import {EntityComponentTypes, GameMode, ItemStack, Player, system, TicksPerSecond, world} from "@minecraft/server";
 import {GameManager} from "./game";
-import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
+import {MinecraftEffectTypes} from "@minecraft/vanilla-data";
 import {team_form} from "./forms/team";
 import {admin_form} from "./forms/admin";
+import {challenges_form} from "./forms/challenges";
 
 let game_manager: GameManager
 
@@ -12,14 +13,18 @@ world.afterEvents.worldInitialize.subscribe(event => {
 
 world.afterEvents.playerSpawn.subscribe(event => {
     if (game_manager.game_status !== 'running' && event.initialSpawn) {
-        let team_book = new ItemStack(MinecraftItemTypes.Book, 1)
-        team_book.setLore(['Select your UHC Team'])
-        team_book.nameTag = '§r§fTeam Selector | §l§8[§r§bUse§l§8]§r'
+        let team_book = new ItemStack('uhc:teams_book', 1)
+        let challenge_book = new ItemStack('uhc:challenge_book', 1)
         event.player.playMusic('uhc.music', {loop: true, volume: 0.5})
         event.player.getComponent(EntityComponentTypes.Inventory)
             ?.container
             ?.addItem(
                 team_book
+            )
+        event.player.getComponent(EntityComponentTypes.Inventory)
+            ?.container
+            ?.addItem(
+                challenge_book
             )
 
         event.player.setGameMode(GameMode.adventure)
@@ -41,7 +46,7 @@ world.afterEvents.playerSpawn.subscribe(event => {
         }, TicksPerSecond*8)
         system.runTimeout(() => {
             game_manager.message_manager.send_message(
-                `For admins: To start the game or edit settings, do /give @p paper and right click it`,
+                `For admins: §e/give @p uhc:admin_book§r to edit settings and start the game`,
                 'random.toast',
                 event.player
             )
@@ -55,12 +60,16 @@ world.afterEvents.playerSpawn.subscribe(event => {
 })
 
 world.afterEvents.itemUse.subscribe(event => {
-    if (event.itemStack.typeId === MinecraftItemTypes.Book && game_manager.game_status !== 'running') {
+    if (event.itemStack.typeId === 'uhc:teams_book' && game_manager.game_status !== 'running') {
         team_form(game_manager, event.source)
     }
 
-    else if (event.itemStack.typeId === MinecraftItemTypes.Paper && game_manager.game_status !== 'running') {
+    else if (event.itemStack.typeId === 'uhc:admin_book' && game_manager.game_status !== 'running') {
         admin_form(game_manager, event.source)
+    }
+
+    else if (event.itemStack.typeId === 'uhc:challenge_book') {
+        challenges_form(game_manager, event.source)
     }
 })
 

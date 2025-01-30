@@ -14,6 +14,7 @@ import {
 import {TeamsManager} from "./teams";
 import {MessageManager} from "./messagebar";
 import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
+import {game_challenges} from "./challenge";
 
 class Settings {
     border_radius: number;
@@ -69,6 +70,7 @@ export class GameManager {
     game_status: 'waiting' | 'starting' | 'running' | 'finished'
     initialized: boolean
     items: ItemStack[]
+    challenges: typeof game_challenges
 
     private constructor(
         teams_manager: TeamsManager,
@@ -86,7 +88,7 @@ export class GameManager {
         this.settings = settings
         this.items = [
             new ItemStack(MinecraftItemTypes.Redstone, 1),
-            new ItemStack('minecraft:resin_clump', 1),
+            new ItemStack(MinecraftItemTypes.ResinClump, 1),
             new ItemStack(MinecraftItemTypes.Honeycomb, 1),
             new ItemStack(MinecraftItemTypes.TurtleScute, 1),
             new ItemStack(MinecraftItemTypes.Emerald, 1),
@@ -97,6 +99,8 @@ export class GameManager {
             new ItemStack(MinecraftItemTypes.AmethystShard, 1),
             new ItemStack(MinecraftItemTypes.PinkPetals, 1)
         ]
+
+        this.challenges = game_challenges
 
         system.runInterval(() => this.game_loop(), 20)
     }
