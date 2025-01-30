@@ -155,6 +155,10 @@ export class GameManager {
             )
         }, TicksPerSecond*5)
 
+        world.getAllPlayers().forEach((player: Player) => {
+            player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
+        })
+
         world.stopMusic()
         this.game_status = 'starting'
         this.game_time = -16
@@ -191,6 +195,7 @@ export class GameManager {
         this.game_status = 'running'
 
         const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10)
+        const challenges = new ItemStack('uhc:challenge_book', 1)
         world.gameRules.pvp = false
         world.gameRules.naturalRegeneration = false
         world.gameRules.doInsomnia = false
@@ -204,6 +209,7 @@ export class GameManager {
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
+            player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges)
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
             player.setGameMode(GameMode.survival)
         })
@@ -212,8 +218,8 @@ export class GameManager {
     }
 
     private finish_game(team: any) {
-        this.message_manager.send_message(`${team.get_team_name()} has won the UHC!`, 'uhc.team.win')
         world.stopMusic()
+        this.message_manager.send_message(`${team.get_team_name()} has won the UHC!`, 'uhc.team.win')
         world.playMusic('uhc.music.win', {volume: 2})
         this.game_status = 'finished'
 

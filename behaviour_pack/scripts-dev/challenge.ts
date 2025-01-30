@@ -91,65 +91,65 @@ export class Challenge {
 
 export const game_challenges: {[index: string]: Challenge} = {
     travel_challenge: new Challenge(
-        'Iron Challenge: Traveler',
+        'Traveler',
         'Are you a true traveler? Prove it by traveling 500 blocks in this world!',
-        'textures/items/iron_boots.png',
+        'textures/items/iron_ingot.png',
         '1 Nug',
         'player',
         500
     ),
     build_challenge: new Challenge(
-        'Iron Challenge: High High High',
+        'High High High',
         'I hear that getting the high ground can help a lot. Build up to build height (y320)',
-        'textures/blocks/ladder.png',
+        'textures/items/iron_ingot.png',
         '384 Blocks',
         'player',
         1
     ),
     lectern_challenge: new Challenge(
-        'Iron Challenge: Book Reader',
+        'Book Reader',
         'A simple one, really. Craft a Lectern',
-        'textures/items/book_normal.png',
+        'textures/items/iron_ingot.png',
         'Enchantment Book',
         'player',
         1
     ),
     visit_challenge: new Challenge(
-        'Iron Challenge: Centrist',
+        'Centrist',
         'Your journey will surely not be easy. Visit the centre of the world, at [0, 0]',
-        'textures/items/compass_item.png',
+        'textures/items/iron_ingot.png',
         'Enchanted Diamond Sword',
         'player',
         1
     ),
     jump_challenge: new Challenge(
-        'Gold Challenge: Icarus',
+        'Icarus',
         'Icarus once tried the impossible - flying. That ended well! You should try it too. Jump from y320 down to y-50',
-        'textures/items/broken_elytra.png',
+        'textures/items/gold_ingot.png',
         '640 Blocks',
         'team',
         1
     ),
     halftime_challenge: new Challenge(
-        'Gold Challenge: Halftime',
+        'Halftime',
         'If you really think you are a master of the UHC, try surviving until halftime',
-        'textures/items/clock_item.png',
+        'textures/items/gold_ingot.png',
         '10 of each Mineral Block',
         'team',
         1
     ),
     skeleton_challenge: new Challenge(
-        'Gold Challenge: Die, Undead',
+        'Die, Undead',
         'Kill the undead. Simple. Kill 15 Skeletons',
-        'textures/items/bone.png',
+        'textures/items/gold_ingot.png',
         '+40XP Levels',
         'team',
         15
     ),
     blaze_challenge: new Challenge(
-        'Gold Challenge: Blazing Through',
+        'Blazing Through',
         'This challenge requires you going to the nether. Can you obtain a single Blaze Rod?',
-        'textures/items/blaze_rod.png',
+        'textures/items/gold_ingot.png',
         '3 Nugs',
         'team',
         1
@@ -173,7 +173,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     mining_challenge: new Challenge(
         'Miners Delight',
         'This one needs some real focus. Mine 128 different ores. Valid ores: Gold, Diamond, Iron, Emerald, Redstone, Ancient Debris.',
-        'textures/items/shears.png',
+        'textures/items/netherite_pickaxe.png',
         '64 of each Ore',
         'first_team',
         128

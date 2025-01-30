@@ -1,5 +1,13 @@
 // behaviour_pack/scripts-dev/main.ts
-import { EntityComponentTypes as EntityComponentTypes2, GameMode as GameMode2, ItemStack as ItemStack2, Player as Player4, system as system2, TicksPerSecond as TicksPerSecond3, world as world4 } from "@minecraft/server";
+import {
+  EntityComponentTypes as EntityComponentTypes2,
+  GameMode as GameMode2,
+  ItemStack as ItemStack2,
+  Player as Player4,
+  system as system2,
+  TicksPerSecond as TicksPerSecond3,
+  world as world4
+} from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/game.ts
 import {
@@ -3222,65 +3230,65 @@ var Challenge = class {
 };
 var game_challenges = {
   travel_challenge: new Challenge(
-    "Iron Challenge: Traveler",
+    "Traveler",
     "Are you a true traveler? Prove it by traveling 500 blocks in this world!",
-    "textures/items/iron_boots.png",
+    "textures/items/iron_ingot.png",
     "1 Nug",
     "player",
     500
   ),
   build_challenge: new Challenge(
-    "Iron Challenge: High High High",
+    "High High High",
     "I hear that getting the high ground can help a lot. Build up to build height (y320)",
-    "textures/blocks/ladder.png",
+    "textures/items/iron_ingot.png",
     "384 Blocks",
     "player",
     1
   ),
   lectern_challenge: new Challenge(
-    "Iron Challenge: Book Reader",
+    "Book Reader",
     "A simple one, really. Craft a Lectern",
-    "textures/items/book_normal.png",
+    "textures/items/iron_ingot.png",
     "Enchantment Book",
     "player",
     1
   ),
   visit_challenge: new Challenge(
-    "Iron Challenge: Centrist",
+    "Centrist",
     "Your journey will surely not be easy. Visit the centre of the world, at [0, 0]",
-    "textures/items/compass_item.png",
+    "textures/items/iron_ingot.png",
     "Enchanted Diamond Sword",
     "player",
     1
   ),
   jump_challenge: new Challenge(
-    "Gold Challenge: Icarus",
+    "Icarus",
     "Icarus once tried the impossible - flying. That ended well! You should try it too. Jump from y320 down to y-50",
-    "textures/items/broken_elytra.png",
+    "textures/items/gold_ingot.png",
     "640 Blocks",
     "team",
     1
   ),
   halftime_challenge: new Challenge(
-    "Gold Challenge: Halftime",
+    "Halftime",
     "If you really think you are a master of the UHC, try surviving until halftime",
-    "textures/items/clock_item.png",
+    "textures/items/gold_ingot.png",
     "10 of each Mineral Block",
     "team",
     1
   ),
   skeleton_challenge: new Challenge(
-    "Gold Challenge: Die, Undead",
+    "Die, Undead",
     "Kill the undead. Simple. Kill 15 Skeletons",
-    "textures/items/bone.png",
+    "textures/items/gold_ingot.png",
     "+40XP Levels",
     "team",
     15
   ),
   blaze_challenge: new Challenge(
-    "Gold Challenge: Blazing Through",
+    "Blazing Through",
     "This challenge requires you going to the nether. Can you obtain a single Blaze Rod?",
-    "textures/items/blaze_rod.png",
+    "textures/items/gold_ingot.png",
     "3 Nugs",
     "team",
     1
@@ -3304,7 +3312,7 @@ var game_challenges = {
   mining_challenge: new Challenge(
     "Miners Delight",
     "This one needs some real focus. Mine 128 different ores. Valid ores: Gold, Diamond, Iron, Emerald, Redstone, Ancient Debris.",
-    "textures/items/shears.png",
+    "textures/items/netherite_pickaxe.png",
     "64 of each Ore",
     "first_team",
     128
@@ -3417,6 +3425,9 @@ var GameManager = class _GameManager {
         "random.toast"
       );
     }, TicksPerSecond2 * 5);
+    world3.getAllPlayers().forEach((player) => {
+      player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll();
+    });
     world3.stopMusic();
     this.game_status = "starting";
     this.game_time = -16;
@@ -3447,6 +3458,7 @@ var GameManager = class _GameManager {
   start_game() {
     this.game_status = "running";
     const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10);
+    const challenges = new ItemStack("uhc:challenge_book", 1);
     world3.gameRules.pvp = false;
     world3.gameRules.naturalRegeneration = false;
     world3.gameRules.doInsomnia = false;
@@ -3459,6 +3471,7 @@ var GameManager = class _GameManager {
       });
       player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll();
       player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef);
+      player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges);
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.survival);
     });
@@ -3647,7 +3660,7 @@ function challenges_form(game_manager2, player) {
     }
   }
   form.show(player).then((r) => {
-    if (r.canceled || !r.selection) return;
+    if (r.canceled || r.selection === void 0) return;
     let response = r.selection;
     info_form(button_indexes[response], game_manager2, player);
   }).catch((e) => {
@@ -3667,17 +3680,18 @@ function info_form(challenge_id, game_manager2, player) {
   }
   form.title(challenge.name);
   form.body(
-    `${challenge.description}
-
+    `\xA7e${challenge.description}\xA7r
 Reward: ${challenge.reward} (On Everthorn Server)
 
-${challenge_info}`
+\xA78${challenge_info}\xA7r`
   );
-  form.button2("Go Back");
+  form.button1("Go Back");
+  form.button2("Exit");
   form.show(player).then((r) => {
-    if (r.canceled || r.selection == 0) {
-      challenges_form(game_manager2, player);
+    if (r.canceled || r.selection == 1) {
+      return;
     }
+    challenges_form(game_manager2, player);
   });
 }
 
@@ -3688,6 +3702,7 @@ world4.afterEvents.worldInitialize.subscribe((event) => {
 });
 world4.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
+    event.player.getComponent(EntityComponentTypes2.Inventory)?.container?.clearAll();
     let team_book = new ItemStack2("uhc:teams_book", 1);
     let challenge_book = new ItemStack2("uhc:challenge_book", 1);
     event.player.playMusic("uhc.music", { loop: true, volume: 0.5 });

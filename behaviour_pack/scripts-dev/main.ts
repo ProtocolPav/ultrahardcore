@@ -1,4 +1,13 @@
-import {EntityComponentTypes, GameMode, ItemStack, Player, system, TicksPerSecond, world} from "@minecraft/server";
+import {
+    EntityComponentTypes,
+    GameMode,
+    ItemStack,
+    MinecraftDimensionTypes,
+    Player,
+    system,
+    TicksPerSecond,
+    world
+} from "@minecraft/server";
 import {GameManager} from "./game";
 import {MinecraftEffectTypes} from "@minecraft/vanilla-data";
 import {team_form} from "./forms/team";
@@ -13,6 +22,7 @@ world.afterEvents.worldInitialize.subscribe(event => {
 
 world.afterEvents.playerSpawn.subscribe(event => {
     if (game_manager.game_status !== 'running' && event.initialSpawn) {
+        event.player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
         let team_book = new ItemStack('uhc:teams_book', 1)
         let challenge_book = new ItemStack('uhc:challenge_book', 1)
         event.player.playMusic('uhc.music', {loop: true, volume: 0.5})

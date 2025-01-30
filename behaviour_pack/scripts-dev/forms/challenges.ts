@@ -43,14 +43,17 @@ function info_form(challenge_id: string, game_manager: GameManager, player: Play
     }
     form.title(challenge.name)
     form.body(
-        `§e${challenge.description}§r\n\nReward: ${challenge.reward} (On Everthorn Server)\n\n§8${challenge_info}§r`
+        `§e${challenge.description}§r\nReward: ${challenge.reward} (On Everthorn Server)\n\n§8${challenge_info}§r`
     )
     form.button1("Go Back")
+    form.button2("Exit")
 
     //@ts-ignore
     form.show(player).then(r => {
-        if (r.canceled || r.selection == 0){
-            challenges_form(game_manager, player)
+        if (r.canceled || r.selection == 1){
+            return
         }
+
+        challenges_form(game_manager, player)
     })
 }
