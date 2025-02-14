@@ -1,25 +1,25 @@
 // behaviour_pack/scripts-dev/main.ts
 import {
-  EntityComponentTypes as EntityComponentTypes2,
+  EntityComponentTypes as EntityComponentTypes3,
   GameMode as GameMode2,
   ItemStack as ItemStack2,
-  Player as Player4,
+  Player as Player6,
   system as system2,
   TicksPerSecond as TicksPerSecond3,
-  world as world4
+  world as world5
 } from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/game.ts
 import {
   DisplaySlotId,
-  EntityComponentTypes,
+  EntityComponentTypes as EntityComponentTypes2,
   GameMode,
   ItemStack,
   MinecraftDimensionTypes as MinecraftDimensionTypes4,
   system,
   TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
-  world as world3
+  world as world4
 } from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/teams.ts
@@ -3327,6 +3327,59 @@ var game_challenges = {
   )
 };
 
+// behaviour_pack/scripts-dev/challenge_scripts/travel_challenge.ts
+var travel_dict = {};
+function check_travel_challenge(message_manager, challenge, player) {
+  if (!travel_dict[player.name]) {
+    travel_dict[player.name] = [];
+  }
+  const player_location = { x: Math.round(player.location.x), z: Math.round(player.location.z) };
+  const coord = travel_dict[player.name].find(
+    (coordinate) => coordinate.x === player_location.x && coordinate.z === player_location.z
+  );
+  if (!coord) {
+    travel_dict[player.name].push(player_location);
+    if (challenge.progress_challenge(player)) {
+      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/build_challenge.ts
+import { world as world3 } from "@minecraft/server";
+function check_build_challenge(message_manager, challenge, player) {
+  if (world3.getDimension("minecraft:overworld").heightRange.max === Math.round(player.location.y)) {
+    if (challenge.progress_challenge(player)) {
+      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/utils/check_player_has_item.ts
+import { EntityComponentTypes } from "@minecraft/server";
+function player_has_item(player, item_id) {
+  const inventory = player.getComponent(EntityComponentTypes.Inventory);
+  if (inventory?.container) {
+    const inventory_size = inventory.inventorySize;
+    const inventory_container = inventory.container;
+    for (let i = 0; i <= inventory_size; i++) {
+      if (inventory_container.getItem(i)?.typeId === item_id) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/lectern_challenge.ts
+function check_lectern_challenge(message_manager, challenge, player) {
+  if (player_has_item(player, MinecraftItemTypes.Lectern)) {
+    if (challenge.progress_challenge(player)) {
+      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
 // behaviour_pack/scripts-dev/game.ts
 var Settings = class {
   constructor(initialized) {
@@ -3341,25 +3394,25 @@ var Settings = class {
       this.halftime_regeneration = true;
       this.update_settings();
     } else {
-      this.border_radius = Number(world3.getDynamicProperty("uhc:border"));
-      this.players_per_team = Number(world3.getDynamicProperty("uhc:players_per_team"));
-      this.loot_chests_enabled = Boolean(world3.getDynamicProperty("uhc:loot_chests_enabled"));
-      this.centre_chests_enabled = Boolean(world3.getDynamicProperty("uhc:centre_chests_enabled"));
-      this.grace_period_mins = Number(world3.getDynamicProperty("uhc:grace_period_mins"));
-      this.main_period_mins = Number(world3.getDynamicProperty("uhc:main_period_mins"));
-      this.deathmatch_enabled = Boolean(world3.getDynamicProperty("uhc:deathmatch_enabled"));
-      this.halftime_regeneration = Boolean(world3.getDynamicProperty("uhc:halftime_regeneration"));
+      this.border_radius = Number(world4.getDynamicProperty("uhc:border"));
+      this.players_per_team = Number(world4.getDynamicProperty("uhc:players_per_team"));
+      this.loot_chests_enabled = Boolean(world4.getDynamicProperty("uhc:loot_chests_enabled"));
+      this.centre_chests_enabled = Boolean(world4.getDynamicProperty("uhc:centre_chests_enabled"));
+      this.grace_period_mins = Number(world4.getDynamicProperty("uhc:grace_period_mins"));
+      this.main_period_mins = Number(world4.getDynamicProperty("uhc:main_period_mins"));
+      this.deathmatch_enabled = Boolean(world4.getDynamicProperty("uhc:deathmatch_enabled"));
+      this.halftime_regeneration = Boolean(world4.getDynamicProperty("uhc:halftime_regeneration"));
     }
   }
   update_settings() {
-    world3.setDynamicProperty("uhc:border", this.border_radius);
-    world3.setDynamicProperty("uhc:players_per_team", this.players_per_team);
-    world3.setDynamicProperty("uhc:loot_chests_enabled", this.loot_chests_enabled);
-    world3.setDynamicProperty("uhc:centre_chests_enabled", this.centre_chests_enabled);
-    world3.setDynamicProperty("uhc:grace_period_mins", this.grace_period_mins);
-    world3.setDynamicProperty("uhc:main_period_mins", this.main_period_mins);
-    world3.setDynamicProperty("uhc:deathmatch_enabled", this.deathmatch_enabled);
-    world3.setDynamicProperty("uhc:halftime_regeneration", this.halftime_regeneration);
+    world4.setDynamicProperty("uhc:border", this.border_radius);
+    world4.setDynamicProperty("uhc:players_per_team", this.players_per_team);
+    world4.setDynamicProperty("uhc:loot_chests_enabled", this.loot_chests_enabled);
+    world4.setDynamicProperty("uhc:centre_chests_enabled", this.centre_chests_enabled);
+    world4.setDynamicProperty("uhc:grace_period_mins", this.grace_period_mins);
+    world4.setDynamicProperty("uhc:main_period_mins", this.main_period_mins);
+    world4.setDynamicProperty("uhc:deathmatch_enabled", this.deathmatch_enabled);
+    world4.setDynamicProperty("uhc:halftime_regeneration", this.halftime_regeneration);
   }
 };
 var GameManager = class _GameManager {
@@ -3385,12 +3438,13 @@ var GameManager = class _GameManager {
     ];
     this.challenges = game_challenges;
     system.runInterval(() => this.game_loop(), 20);
+    system.runInterval(() => this.challenge_loop(), 1);
   }
   static initialize() {
-    let initialized = Boolean(world3.getDynamicProperty("uhc:initialized"));
-    let scoreboard_objective = world3.scoreboard.getObjective("uhc:teams");
+    let initialized = Boolean(world4.getDynamicProperty("uhc:initialized"));
+    let scoreboard_objective = world4.scoreboard.getObjective("uhc:teams");
     if (!scoreboard_objective) {
-      world3.scoreboard.addObjective("uhc:teams", "Teams");
+      world4.scoreboard.addObjective("uhc:teams", "Teams");
     }
     const teams_manager = new TeamsManager();
     const messageBarManager = new MessageManager();
@@ -3399,16 +3453,16 @@ var GameManager = class _GameManager {
       const game_time = 0;
       const game_status = "waiting";
       initialized = true;
-      world3.setDynamicProperty("uhc:game_time", game_time);
-      world3.setDynamicProperty("uhc:game_status", game_status);
-      world3.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, { objective: world3.scoreboard.getObjective("uhc:teams") });
-      world3.setDynamicProperty("uhc:initialized", initialized);
+      world4.setDynamicProperty("uhc:game_time", game_time);
+      world4.setDynamicProperty("uhc:game_status", game_status);
+      world4.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, { objective: world4.scoreboard.getObjective("uhc:teams") });
+      world4.setDynamicProperty("uhc:initialized", initialized);
     }
     return new _GameManager(
       teams_manager,
       // @ts-ignore
-      String(world3.getDynamicProperty("uhc:game_status")),
-      Number(world3.getDynamicProperty("uhc:game_time")),
+      String(world4.getDynamicProperty("uhc:game_status")),
+      Number(world4.getDynamicProperty("uhc:game_time")),
       initialized,
       messageBarManager,
       settings
@@ -3425,22 +3479,30 @@ var GameManager = class _GameManager {
         "random.toast"
       );
     }, TicksPerSecond2 * 5);
-    world3.getAllPlayers().forEach((player) => {
-      player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll();
+    world4.getAllPlayers().forEach((player) => {
+      player.getComponent(EntityComponentTypes2.Inventory)?.container?.clearAll();
     });
-    world3.stopMusic();
+    world4.stopMusic();
     this.game_status = "starting";
     this.game_time = -16;
   }
+  challenge_loop() {
+    if (this.game_status !== "running") return;
+    world4.getAllPlayers().forEach((player) => {
+      check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player);
+      check_build_challenge(this.message_manager, this.challenges.build_challenge, player);
+      check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player);
+    });
+  }
   update_dynamic_properties() {
-    world3.setDynamicProperty("uhc:game_time", this.game_time);
-    world3.setDynamicProperty("uhc:game_status", this.game_status);
+    world4.setDynamicProperty("uhc:game_time", this.game_time);
+    world4.setDynamicProperty("uhc:game_status", this.game_status);
     this.teams_manager.teams.forEach((team) => {
       team.update();
     });
   }
   border() {
-    const players = world3.getAllPlayers();
+    const players = world4.getAllPlayers();
     players.forEach((player) => {
       let distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
       if (distance > this.settings.border_radius) {
@@ -3459,42 +3521,42 @@ var GameManager = class _GameManager {
     this.game_status = "running";
     const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10);
     const challenges = new ItemStack("uhc:challenge_book", 1);
-    world3.gameRules.pvp = false;
-    world3.gameRules.naturalRegeneration = false;
-    world3.gameRules.doInsomnia = false;
-    world3.gameRules.showCoordinates = true;
-    world3.gameRules.doImmediateRespawn = true;
-    world3.setTimeOfDay(TimeOfDay.Day);
-    world3.getAllPlayers().forEach((player) => {
+    world4.gameRules.pvp = false;
+    world4.gameRules.naturalRegeneration = false;
+    world4.gameRules.doInsomnia = false;
+    world4.gameRules.showCoordinates = true;
+    world4.gameRules.doImmediateRespawn = true;
+    world4.setTimeOfDay(TimeOfDay.Day);
+    world4.getAllPlayers().forEach((player) => {
       player.getEffects().forEach((effect) => {
         player.removeEffect(effect.typeId);
       });
-      player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll();
-      player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef);
-      player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges);
+      player.getComponent(EntityComponentTypes2.Inventory)?.container?.clearAll();
+      player.getComponent(EntityComponentTypes2.Inventory)?.container?.addItem(beef);
+      player.getComponent(EntityComponentTypes2.Inventory)?.container?.addItem(challenges);
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.survival);
     });
     this.teams_manager.spread_teams(this.settings.border_radius);
   }
   finish_game(team) {
+    world4.stopMusic();
     this.message_manager.send_message(`${team.get_team_name()} has won the UHC!`, "uhc.team.win");
-    world3.stopMusic();
-    world3.playMusic("uhc.music.win", { volume: 2 });
+    world4.playMusic("uhc.music.win", { volume: 2 });
     this.game_status = "finished";
-    const winning_player = world3.getPlayers({ name: team.players[0].name })[0];
-    world3.getAllPlayers().forEach((player) => {
+    const winning_player = world4.getPlayers({ name: team.players[0].name })[0];
+    world4.getAllPlayers().forEach((player) => {
       player.teleport(winning_player.location);
       player.setGameMode(GameMode.survival);
       player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { amplifier: 100 });
     });
   }
   deathmatch() {
-    world3.stopMusic();
-    world3.playMusic("uhc.music.deathmatch", { volume: 0.6, loop: true });
+    world4.stopMusic();
+    world4.playMusic("uhc.music.deathmatch", { volume: 0.6, loop: true });
     this.settings.border_radius = 100;
     this.teams_manager.spread_teams(100);
-    world3.getPlayers({ gameMode: GameMode.spectator }).forEach((player) => {
+    world4.getPlayers({ gameMode: GameMode.spectator }).forEach((player) => {
       player.teleport({ x: 0, y: 100, z: 0 });
     });
   }
@@ -3511,19 +3573,19 @@ var GameManager = class _GameManager {
       if (team) {
         this.finish_game(team);
       }
-      world3.getDimension(MinecraftDimensionTypes4.overworld).runCommand("clear @a map");
+      world4.getDimension(MinecraftDimensionTypes4.overworld).runCommand("clear @a map");
       if (this.game_time === this.settings.grace_period_mins * 60 - 3) {
-        world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world4.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === this.settings.grace_period_mins * 60) {
-        world3.gameRules.pvp = true;
+        world4.gameRules.pvp = true;
         this.message_manager.send_message("Grace Period has ended. PVP is now enabled. Good luck.");
       } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2 - 3) {
-        world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world4.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2) {
         let halftime_message = "Congratulations on making it through half of the game!";
         if (this.settings.halftime_regeneration) {
           halftime_message = `${halftime_message} Each team has been granted regeneration for 30 seconds.`;
-          world3.getAllPlayers().forEach((player) => {
+          world4.getAllPlayers().forEach((player) => {
             player.addEffect(MinecraftEffectTypes.Regeneration, TicksPerSecond2 * 30);
           });
         }
@@ -3533,7 +3595,7 @@ var GameManager = class _GameManager {
           "Deathmatch will commence in 3 minutes. The border will shrink to 100 blocks and all teams will be teleported to the centre and granted Resistance for 60 seconds."
         );
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60 - 3) {
-        world3.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world4.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60) {
         if (this.settings.deathmatch_enabled) {
           this.deathmatch();
@@ -3543,7 +3605,7 @@ var GameManager = class _GameManager {
         }
       }
     } else if (this.game_status === "finished") {
-      world3.getAllPlayers().forEach((player) => {
+      world4.getAllPlayers().forEach((player) => {
         player.dimension.spawnItem(
           this.items[Math.floor(Math.random() * this.items.length)],
           {
@@ -3697,19 +3759,19 @@ Reward: ${challenge.reward} (On Everthorn Server)
 
 // behaviour_pack/scripts-dev/main.ts
 var game_manager;
-world4.afterEvents.worldInitialize.subscribe((event) => {
+world5.afterEvents.worldInitialize.subscribe((event) => {
   game_manager = GameManager.initialize();
 });
-world4.afterEvents.playerSpawn.subscribe((event) => {
+world5.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
-    event.player.getComponent(EntityComponentTypes2.Inventory)?.container?.clearAll();
+    event.player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
     let team_book = new ItemStack2("uhc:teams_book", 1);
     let challenge_book = new ItemStack2("uhc:challenge_book", 1);
     event.player.playMusic("uhc.music", { loop: true, volume: 0.5 });
-    event.player.getComponent(EntityComponentTypes2.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(
       team_book
     );
-    event.player.getComponent(EntityComponentTypes2.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(
       challenge_book
     );
     event.player.setGameMode(GameMode2.adventure);
@@ -3740,7 +3802,7 @@ world4.afterEvents.playerSpawn.subscribe((event) => {
     event.player.teleport(event.player.getDynamicProperty("uhc:death_location"));
   }
 });
-world4.afterEvents.itemUse.subscribe((event) => {
+world5.afterEvents.itemUse.subscribe((event) => {
   if (event.itemStack.typeId === "uhc:teams_book" && game_manager.game_status !== "running") {
     team_form(game_manager, event.source);
   } else if (event.itemStack.typeId === "uhc:admin_book" && game_manager.game_status !== "running") {
@@ -3749,8 +3811,8 @@ world4.afterEvents.itemUse.subscribe((event) => {
     challenges_form(game_manager, event.source);
   }
 });
-world4.afterEvents.entityDie.subscribe((event) => {
-  if (event.deadEntity instanceof Player4) {
+world5.afterEvents.entityDie.subscribe((event) => {
+  if (event.deadEntity instanceof Player6) {
     const team = game_manager.teams_manager.get_team(event.deadEntity);
     if (team) {
       team.remove_player(event.deadEntity, game_manager.message_manager);

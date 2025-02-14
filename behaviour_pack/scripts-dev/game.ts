@@ -15,6 +15,9 @@ import {TeamsManager} from "./teams";
 import {MessageManager} from "./messagebar";
 import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
 import {game_challenges} from "./challenge";
+import check_travel_challenge from "./challenge_scripts/travel_challenge";
+import check_build_challenge from "./challenge_scripts/build_challenge";
+import check_lectern_challenge from "./challenge_scripts/lectern_challenge";
 
 class Settings {
     border_radius: number;
@@ -103,6 +106,7 @@ export class GameManager {
         this.challenges = game_challenges
 
         system.runInterval(() => this.game_loop(), 20)
+        system.runInterval(() => this.challenge_loop(), 1)
     }
 
     static initialize(): GameManager {
@@ -162,6 +166,16 @@ export class GameManager {
         world.stopMusic()
         this.game_status = 'starting'
         this.game_time = -16
+    }
+
+    private challenge_loop() {
+        if (this.game_status !== 'running') return;
+
+        world.getAllPlayers().forEach((player: Player) => {
+            check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player)
+            check_build_challenge(this.message_manager, this.challenges.build_challenge, player)
+            check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player)
+        })
     }
 
     private update_dynamic_properties() {
