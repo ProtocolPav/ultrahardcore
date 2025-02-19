@@ -18,6 +18,8 @@ import {game_challenges} from "./challenge";
 import check_travel_challenge from "./challenge_scripts/travel_challenge";
 import check_build_challenge from "./challenge_scripts/build_challenge";
 import check_lectern_challenge from "./challenge_scripts/lectern_challenge";
+import check_visit_challenge from "./challenge_scripts/visit_challenge";
+import check_jump_challenge from "./challenge_scripts/jump_challenge";
 
 class Settings {
     border_radius: number;
@@ -175,6 +177,8 @@ export class GameManager {
             check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player)
             check_build_challenge(this.message_manager, this.challenges.build_challenge, player)
             check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player)
+            check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player)
+            check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player)
         })
     }
 
