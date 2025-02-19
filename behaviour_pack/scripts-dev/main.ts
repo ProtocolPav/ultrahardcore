@@ -63,9 +63,11 @@ world.afterEvents.playerSpawn.subscribe(event => {
         }, TicksPerSecond*18)
     }
     else if (game_manager.game_status === 'running') {
-        event.player.setGameMode(GameMode.spectator)
-        // @ts-ignore
-        event.player.teleport(event.player.getDynamicProperty('uhc:death_location'))
+        if (!game_manager.teams_manager.get_team(event.player)) {
+            event.player.setGameMode(GameMode.spectator)
+            // @ts-ignore
+            event.player.teleport(event.player.getDynamicProperty('uhc:death_location'))
+        }
     }
 })
 

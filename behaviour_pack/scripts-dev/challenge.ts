@@ -134,7 +134,7 @@ export const game_challenges: {[index: string]: Challenge} = {
         'Halftime',
         'If you really think you are a master of the UHC, try surviving until halftime',
         'textures/items/gold_ingot.png',
-        '10 of each Mineral Block',
+        '15 of each Mineral Block',
         'team',
         1
     ),
@@ -142,7 +142,7 @@ export const game_challenges: {[index: string]: Challenge} = {
         'Die, Undead',
         'Kill the undead. Simple. Kill 15 Skeletons',
         'textures/items/gold_ingot.png',
-        '+40XP Levels',
+        '+140XP Levels',
         'team',
         15
     ),
@@ -150,21 +150,21 @@ export const game_challenges: {[index: string]: Challenge} = {
         'Blazing Through',
         'This challenge requires you going to the nether. Can you obtain a single Blaze Rod?',
         'textures/items/gold_ingot.png',
-        '3 Nugs',
+        '6 Nugs',
         'team',
         1
     ),
     wool_challenge: new Challenge(
         'Wool Collection',
-        'A collectors dream... or nightmare? I dont know. Just collect all 16 colours of wool.',
+        'A collectors dream... or nightmare? I dont know. Just collect all 16 colours of wool. One member of your team should hold all 16 colours at once to successfully complete this challenge.',
         'textures/items/shears.png',
         'Shulker Box',
         'first_team',
-        16
+        1
     ),
     eliminate_challenge: new Challenge(
         'Back To The Lobby',
-        'Send them back to the lobby! Eliminate an entire team.',
+        'Send them back to the lobby! Eliminate another team.',
         'textures/items/netherite_sword.png',
         'Steve Head',
         'first_team',

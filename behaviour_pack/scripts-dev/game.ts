@@ -20,6 +20,10 @@ import check_build_challenge from "./challenge_scripts/build_challenge";
 import check_lectern_challenge from "./challenge_scripts/lectern_challenge";
 import check_visit_challenge from "./challenge_scripts/visit_challenge";
 import check_jump_challenge from "./challenge_scripts/jump_challenge";
+import check_blaze_challenge from "./challenge_scripts/blaze_challenge";
+import check_halftime_challenge from "./challenge_scripts/halftime_challenge";
+import check_trial_challenge from "./challenge_scripts/trial_challenge";
+import check_wool_challenge from "./challenge_scripts/wool_challenge";
 
 class Settings {
     border_radius: number;
@@ -173,12 +177,20 @@ export class GameManager {
     private challenge_loop() {
         if (this.game_status !== 'running') return;
 
+        const total_time = this.settings.grace_period_mins + this.settings.main_period_mins
+
         world.getAllPlayers().forEach((player: Player) => {
-            check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player)
-            check_build_challenge(this.message_manager, this.challenges.build_challenge, player)
-            check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player)
-            check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player)
-            check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager)
+            if (this.teams_manager.get_team(player)) {
+                check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player)
+                check_build_challenge(this.message_manager, this.challenges.build_challenge, player)
+                check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player)
+                check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player)
+                check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager)
+                check_blaze_challenge(this.message_manager, this.challenges.blaze_challenge, player, this.teams_manager)
+                check_halftime_challenge(this.message_manager, this.challenges.halftime_challenge, player, this.teams_manager, this.game_time, total_time/2)
+                check_trial_challenge(this.message_manager, this.challenges.trial_challenge, player, this.teams_manager)
+                check_wool_challenge(this.message_manager, this.challenges.wool_challenge, player, this.teams_manager)
+            }
         })
     }
 

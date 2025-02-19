@@ -3,7 +3,7 @@ import {MessageManager} from "./messagebar";
 import {MinecraftEffectTypes} from "@minecraft/vanilla-data";
 
 class Team {
-    private readonly string_id: string
+    readonly string_id: string
     private readonly name: string
     private readonly colour: string
     readonly icon: string
