@@ -1,9 +1,9 @@
 // behaviour_pack/scripts-dev/main.ts
 import {
-  EntityComponentTypes as EntityComponentTypes3,
+  EntityComponentTypes as EntityComponentTypes4,
   GameMode as GameMode2,
   ItemStack as ItemStack2,
-  Player as Player7,
+  Player as Player8,
   system as system2,
   TicksPerSecond as TicksPerSecond3,
   world as world6
@@ -12,7 +12,7 @@ import {
 // behaviour_pack/scripts-dev/game.ts
 import {
   DisplaySlotId,
-  EntityComponentTypes as EntityComponentTypes2,
+  EntityComponentTypes as EntityComponentTypes3,
   GameMode,
   ItemStack,
   MinecraftDimensionTypes as MinecraftDimensionTypes4,
@@ -3273,7 +3273,7 @@ var game_challenges = {
     "Halftime",
     "If you really think you are a master of the UHC, try surviving until halftime",
     "textures/items/gold_ingot.png",
-    "10 of each Mineral Block",
+    "15 of each Mineral Block",
     "team",
     1
   ),
@@ -3281,7 +3281,7 @@ var game_challenges = {
     "Die, Undead",
     "Kill the undead. Simple. Kill 15 Skeletons",
     "textures/items/gold_ingot.png",
-    "+40XP Levels",
+    "+140XP Levels",
     "team",
     15
   ),
@@ -3289,21 +3289,21 @@ var game_challenges = {
     "Blazing Through",
     "This challenge requires you going to the nether. Can you obtain a single Blaze Rod?",
     "textures/items/gold_ingot.png",
-    "3 Nugs",
+    "6 Nugs",
     "team",
     1
   ),
   wool_challenge: new Challenge(
     "Wool Collection",
-    "A collectors dream... or nightmare? I dont know. Just collect all 16 colours of wool.",
+    "A collectors dream... or nightmare? I dont know. Just collect all 16 colours of wool. One member of your team should hold all 16 colours at once to successfully complete this challenge.",
     "textures/items/shears.png",
     "Shulker Box",
     "first_team",
-    16
+    1
   ),
   eliminate_challenge: new Challenge(
     "Back To The Lobby",
-    "Send them back to the lobby! Eliminate an entire team.",
+    "Send them back to the lobby! Eliminate another team.",
     "textures/items/netherite_sword.png",
     "Steve Head",
     "first_team",
@@ -3412,6 +3412,68 @@ function check_jump_challenge(message_manager, challenge, player, teams_manager)
   }
 }
 
+// behaviour_pack/scripts-dev/challenge_scripts/blaze_challenge.ts
+function check_blaze_challenge(message_manager, challenge, player, teams_manager) {
+  if (player_has_item(player, MinecraftItemTypes.BlazeRod)) {
+    if (challenge.progress_challenge(player)) {
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/halftime_challenge.ts
+function check_halftime_challenge(message_manager, challenge, player, teams_manager, time, halftime) {
+  if (time >= halftime && time <= halftime + 2) {
+    if (challenge.progress_challenge(player)) {
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/trial_challenge.ts
+function check_trial_challenge(message_manager, challenge, player, teams_manager) {
+  if (player_has_item(player, MinecraftItemTypes.OminousTrialKey)) {
+    if (challenge.progress_challenge(player)) {
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/utils/player_has_similar_item.ts
+import { EntityComponentTypes as EntityComponentTypes2 } from "@minecraft/server";
+function player_has_item_like(player, item_like) {
+  const inventory = player.getComponent(EntityComponentTypes2.Inventory);
+  const matches = [];
+  if (inventory?.container) {
+    const regex = new RegExp(item_like, "i");
+    const container = inventory.container;
+    for (let i = 0; i < inventory.inventorySize; i++) {
+      const item = container.getItem(i);
+      if (item && regex.test(item.typeId) && !matches.includes(item.typeId)) {
+        matches.push(item.typeId);
+      }
+    }
+  }
+  return matches;
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/wool_challenge.ts
+function check_wool_challenge(message_manager, challenge, player, teams_manager) {
+  const team = teams_manager.get_team(player);
+  if (team) {
+    const wools_present = player_has_item_like(player, "^minecraft:[a-z_]+_wool$");
+    if (wools_present.length === 16) {
+      if (challenge.progress_challenge(player)) {
+        const team2 = teams_manager.get_team(player);
+        message_manager.send_message(`${team2?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+      }
+    }
+  }
+}
+
 // behaviour_pack/scripts-dev/game.ts
 var Settings = class {
   constructor(initialized) {
@@ -3512,7 +3574,7 @@ var GameManager = class _GameManager {
       );
     }, TicksPerSecond2 * 5);
     world5.getAllPlayers().forEach((player) => {
-      player.getComponent(EntityComponentTypes2.Inventory)?.container?.clearAll();
+      player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
     });
     world5.stopMusic();
     this.game_status = "starting";
@@ -3520,12 +3582,19 @@ var GameManager = class _GameManager {
   }
   challenge_loop() {
     if (this.game_status !== "running") return;
+    const total_time = this.settings.grace_period_mins * 60 + this.settings.main_period_mins * 60;
     world5.getAllPlayers().forEach((player) => {
-      check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player);
-      check_build_challenge(this.message_manager, this.challenges.build_challenge, player);
-      check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player);
-      check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player);
-      check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager);
+      if (this.teams_manager.get_team(player)) {
+        check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player);
+        check_build_challenge(this.message_manager, this.challenges.build_challenge, player);
+        check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player);
+        check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player);
+        check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager);
+        check_blaze_challenge(this.message_manager, this.challenges.blaze_challenge, player, this.teams_manager);
+        check_halftime_challenge(this.message_manager, this.challenges.halftime_challenge, player, this.teams_manager, this.game_time, total_time / 2);
+        check_trial_challenge(this.message_manager, this.challenges.trial_challenge, player, this.teams_manager);
+        check_wool_challenge(this.message_manager, this.challenges.wool_challenge, player, this.teams_manager);
+      }
     });
   }
   update_dynamic_properties() {
@@ -3565,9 +3634,9 @@ var GameManager = class _GameManager {
       player.getEffects().forEach((effect) => {
         player.removeEffect(effect.typeId);
       });
-      player.getComponent(EntityComponentTypes2.Inventory)?.container?.clearAll();
-      player.getComponent(EntityComponentTypes2.Inventory)?.container?.addItem(beef);
-      player.getComponent(EntityComponentTypes2.Inventory)?.container?.addItem(challenges);
+      player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
+      player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(beef);
+      player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(challenges);
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.survival);
     });
@@ -3798,14 +3867,14 @@ world6.afterEvents.worldInitialize.subscribe((event) => {
 });
 world6.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
-    event.player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
+    event.player.getComponent(EntityComponentTypes4.Inventory)?.container?.clearAll();
     let team_book = new ItemStack2("uhc:teams_book", 1);
     let challenge_book = new ItemStack2("uhc:challenge_book", 1);
     event.player.playMusic("uhc.music", { loop: true, volume: 0.5 });
-    event.player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(
       team_book
     );
-    event.player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(
       challenge_book
     );
     event.player.setGameMode(GameMode2.adventure);
@@ -3832,8 +3901,10 @@ world6.afterEvents.playerSpawn.subscribe((event) => {
       );
     }, TicksPerSecond3 * 18);
   } else if (game_manager.game_status === "running") {
-    event.player.setGameMode(GameMode2.spectator);
-    event.player.teleport(event.player.getDynamicProperty("uhc:death_location"));
+    if (!game_manager.teams_manager.get_team(event.player)) {
+      event.player.setGameMode(GameMode2.spectator);
+      event.player.teleport(event.player.getDynamicProperty("uhc:death_location"));
+    }
   }
 });
 world6.afterEvents.itemUse.subscribe((event) => {
@@ -3846,7 +3917,7 @@ world6.afterEvents.itemUse.subscribe((event) => {
   }
 });
 world6.afterEvents.entityDie.subscribe((event) => {
-  if (event.deadEntity instanceof Player7) {
+  if (event.deadEntity instanceof Player8) {
     const team = game_manager.teams_manager.get_team(event.deadEntity);
     if (team) {
       team.remove_player(event.deadEntity, game_manager.message_manager);

@@ -13,7 +13,7 @@ export default function check_wool_challenge(
     const team = teams_manager.get_team(player)
 
     if (team) {
-        const wools_present = player_has_item_like(player, '^minecraft:[a-z]+_wool$')
+        const wools_present = player_has_item_like(player, '^minecraft:[a-z_]+_wool$')
 
         if (wools_present.length === 16) {
             if (challenge.progress_challenge(player)) {

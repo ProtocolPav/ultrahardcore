@@ -177,7 +177,7 @@ export class GameManager {
     private challenge_loop() {
         if (this.game_status !== 'running') return;
 
-        const total_time = this.settings.grace_period_mins + this.settings.main_period_mins
+        const total_time = this.settings.grace_period_mins*60 + this.settings.main_period_mins*60
 
         world.getAllPlayers().forEach((player: Player) => {
             if (this.teams_manager.get_team(player)) {
