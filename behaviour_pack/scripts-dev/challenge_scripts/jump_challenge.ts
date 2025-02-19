@@ -1,10 +1,11 @@
 import {Challenge} from "../challenge";
 import {Player, world} from "@minecraft/server";
 import {MessageManager} from "../messagebar";
+import {TeamsManager} from "../teams";
 
 let jump_dict: {[p: string]: {x: number, y: number, z: number, time: Date}} = {}
 
-export default function check_jump_challenge(message_manager: MessageManager, challenge: Challenge, player: Player) {
+export default function check_jump_challenge(message_manager: MessageManager, challenge: Challenge, player: Player, teams_manager: TeamsManager) {
     const current_time = new Date()
 
     if (world.getDimension("minecraft:overworld").heightRange.max === Math.round(player.location.y)) {
@@ -22,7 +23,8 @@ export default function check_jump_challenge(message_manager: MessageManager, ch
         && current_time.getTime() - jump_dict[player.name].time.getTime() < 10*1000 // 10s to ms
     ) {
         if (challenge.progress_challenge(player)) {
-            message_manager.send_message(`${player.name} has completed ${challenge.name}!`, 'uhc.team.win')
+            const team = teams_manager.get_team(player)
+            message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, 'uhc.team.win')
         }
     }
 

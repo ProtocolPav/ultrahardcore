@@ -3383,7 +3383,6 @@ function check_lectern_challenge(message_manager, challenge, player) {
 // behaviour_pack/scripts-dev/challenge_scripts/visit_challenge.ts
 function check_visit_challenge(message_manager, challenge, player) {
   const player_location = { x: Math.round(player.location.x), z: Math.round(player.location.z) };
-  console.log(Math.sqrt(Math.pow(player_location.x, 2) + Math.pow(player_location.z, 2)));
   if (Math.sqrt(Math.pow(player_location.x, 2) + Math.pow(player_location.z, 2)) <= 20) {
     if (challenge.progress_challenge(player)) {
       message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
@@ -3394,7 +3393,7 @@ function check_visit_challenge(message_manager, challenge, player) {
 // behaviour_pack/scripts-dev/challenge_scripts/jump_challenge.ts
 import { world as world4 } from "@minecraft/server";
 var jump_dict = {};
-function check_jump_challenge(message_manager, challenge, player) {
+function check_jump_challenge(message_manager, challenge, player, teams_manager) {
   const current_time = /* @__PURE__ */ new Date();
   if (world4.getDimension("minecraft:overworld").heightRange.max === Math.round(player.location.y)) {
     jump_dict[player.name] = {
@@ -3405,7 +3404,8 @@ function check_jump_challenge(message_manager, challenge, player) {
     };
   } else if (jump_dict[player.name] && world4.getDimension("minecraft:overworld").heightRange.min + 20 >= Math.round(player.location.y) && current_time.getTime() - jump_dict[player.name].time.getTime() < 10 * 1e3) {
     if (challenge.progress_challenge(player)) {
-      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
     }
   } else if (jump_dict[player.name] && current_time.getTime() - jump_dict[player.name].time.getTime() >= 10 * 1e3) {
     delete jump_dict[player.name];
@@ -3525,7 +3525,7 @@ var GameManager = class _GameManager {
       check_build_challenge(this.message_manager, this.challenges.build_challenge, player);
       check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player);
       check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player);
-      check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player);
+      check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager);
     });
   }
   update_dynamic_properties() {

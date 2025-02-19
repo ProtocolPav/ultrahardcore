@@ -178,7 +178,7 @@ export class GameManager {
             check_build_challenge(this.message_manager, this.challenges.build_challenge, player)
             check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player)
             check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player)
-            check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player)
+            check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager)
         })
     }
 
