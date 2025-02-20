@@ -23,6 +23,10 @@ class Team {
         return `${this.colour}${this.name}§r`;
     }
 
+    get_team_colour() {
+        return `${this.colour}`;
+    }
+
     update() {
         this.players = world.getPlayers({tags: [`uhc:${this.string_id}`]})
 

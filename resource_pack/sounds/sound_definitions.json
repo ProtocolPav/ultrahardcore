@@ -36,7 +36,7 @@
     },
     "uhc.music.win": {
       "category": "music",
-      "sounds": ["sounds/uhc/victory"],
+      "sounds": ["sounds/uhc/victory_2"],
       "interruptible": false,
       "stream": true
     },

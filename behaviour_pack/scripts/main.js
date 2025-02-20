@@ -3030,6 +3030,9 @@ var Team = class {
   get_team_name() {
     return `${this.colour}${this.name}\xA7r`;
   }
+  get_team_colour() {
+    return `${this.colour}`;
+  }
   update() {
     this.players = world.getPlayers({ tags: [`uhc:${this.string_id}`] });
     world.scoreboard.getObjective("uhc:teams")?.setScore(this.get_team_name(), this.players.length);
@@ -3819,8 +3822,13 @@ function challenges_form(game_manager2, player) {
   form.title("UHC Challenges");
   for (let challenge in game_manager2.challenges) {
     let game_challenge = game_manager2.challenges[challenge];
-    if (game_challenge.available) {
-      form.button(game_challenge.name, game_challenge.icon);
+    let player_challenge = game_challenge.get_progress(player);
+    let colour = game_manager2.teams_manager.get_team(player)?.get_team_colour();
+    if (game_challenge.available && player_challenge.progress <= player_challenge.max_progress) {
+      form.button(
+        `${game_challenge.name} ${colour}${player_challenge.progress}/${player_challenge.max_progress}`,
+        game_challenge.icon
+      );
       button_indexes.push(challenge);
     }
   }
@@ -3835,6 +3843,8 @@ function challenges_form(game_manager2, player) {
 function info_form(challenge_id, game_manager2, player) {
   const form = new MessageFormData2();
   const challenge = game_manager2.challenges[challenge_id];
+  let player_challenge = challenge.get_progress(player);
+  let colour = game_manager2.teams_manager.get_team(player)?.get_team_colour();
   let challenge_info = "";
   if (challenge.type === "player") {
     challenge_info = "This challenge must be completed individually. Rewards will only be given to you, on the Everthorn Server.";
@@ -3843,7 +3853,7 @@ function info_form(challenge_id, game_manager2, player) {
   } else if (challenge.type === "first_team") {
     challenge_info = "Teammates must work together to complete this challenge. If one player completes it, the entire team receives the reward on the Everthorn Server. Only the first team to complete will receive the reward.";
   }
-  form.title(challenge.name);
+  form.title(`${challenge.name} ${colour}${player_challenge.progress}/${player_challenge.max_progress}`);
   form.body(
     `\xA7e${challenge.description}\xA7r
 Reward: ${challenge.reward} (On Everthorn Server)
@@ -3888,7 +3898,7 @@ world6.afterEvents.playerSpawn.subscribe((event) => {
     }, TicksPerSecond3 * 5);
     system2.runTimeout(() => {
       game_manager.message_manager.send_message(
-        `Select your team by pressing :_input_key.use: or \uE018 on mobile`,
+        `Select your team by pressing :_input_key.use:`,
         "random.toast",
         event.player
       );
@@ -3922,6 +3932,55 @@ world6.afterEvents.entityDie.subscribe((event) => {
     if (team) {
       team.remove_player(event.deadEntity, game_manager.message_manager);
       event.deadEntity.setDynamicProperty("uhc:death_location", event.deadEntity.location);
+    }
+  }
+});
+world6.afterEvents.entityDie.subscribe((event) => {
+  if (game_manager.game_status === "running") {
+    const this_challenge = game_manager.challenges.eliminate_challenge;
+    if (event.deadEntity instanceof Player8 && event.damageSource.damagingEntity instanceof Player8) {
+      const dead_team = game_manager.teams_manager.get_team(event.deadEntity);
+      const killing_team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
+      if (dead_team?.string_id !== killing_team?.string_id && dead_team?.players.length === 1) {
+        if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
+          game_manager.message_manager.send_message(`${killing_team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
+        }
+      }
+    }
+  }
+});
+var valid_blocks = [
+  MinecraftBlockTypes.GoldOre,
+  MinecraftBlockTypes.DeepslateGoldOre,
+  MinecraftBlockTypes.DiamondOre,
+  MinecraftBlockTypes.DeepslateDiamondOre,
+  MinecraftBlockTypes.IronOre,
+  MinecraftBlockTypes.DeepslateIronOre,
+  MinecraftBlockTypes.EmeraldOre,
+  MinecraftBlockTypes.DeepslateEmeraldOre,
+  MinecraftBlockTypes.RedstoneOre,
+  MinecraftBlockTypes.DeepslateRedstoneOre,
+  MinecraftBlockTypes.AncientDebris
+];
+world6.afterEvents.playerBreakBlock.subscribe((event) => {
+  if (game_manager.game_status === "running") {
+    const this_challenge = game_manager.challenges.mining_challenge;
+    if (valid_blocks.includes(event.block.typeId)) {
+      const team = game_manager.teams_manager.get_team(event.player);
+      if (this_challenge.progress_challenge(event.player)) {
+        game_manager.message_manager.send_message(`${team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
+      }
+    }
+  }
+});
+world6.afterEvents.entityDie.subscribe((event) => {
+  if (game_manager.game_status === "running") {
+    const this_challenge = game_manager.challenges.skeleton_challenge;
+    if (event.deadEntity.typeId === MinecraftEntityTypes.Skeleton && event.damageSource.damagingEntity instanceof Player8) {
+      const team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
+      if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
+        game_manager.message_manager.send_message(`${team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
+      }
     }
   }
 });
