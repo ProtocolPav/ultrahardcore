@@ -14,7 +14,7 @@ export function challenges_form(game_manager: GameManager, player: Player) {
 
         if (game_challenge.available && player_challenge.progress <= player_challenge.max_progress) {
             form.button(
-                `${game_challenge.name} ${colour}${player_challenge.progress}/${player_challenge.max_progress}`,
+                `${game_challenge.name} ${colour ? colour : '§l'}${player_challenge.progress}/${player_challenge.max_progress}`,
                 game_challenge.icon
             )
             button_indexes.push(challenge);
@@ -48,7 +48,7 @@ function info_form(challenge_id: string, game_manager: GameManager, player: Play
     } else if (challenge.type === 'first_team') {
         challenge_info = 'Teammates must work together to complete this challenge. If one player completes it, the entire team receives the reward on the Everthorn Server. Only the first team to complete will receive the reward.'
     }
-    form.title(`${challenge.name} ${colour}${player_challenge.progress}/${player_challenge.max_progress}`)
+    form.title(`${challenge.name} ${colour ? colour : '§l'}${player_challenge.progress}/${player_challenge.max_progress}`)
     form.body(
         `§e${challenge.description}§r\nReward: ${challenge.reward} (On Everthorn Server)\n\n§8${challenge_info}§r`
     )

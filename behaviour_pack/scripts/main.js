@@ -3584,7 +3584,7 @@ var GameManager = class _GameManager {
     this.game_time = -16;
   }
   challenge_loop() {
-    if (this.game_status !== "running") return;
+    if (this.game_status !== "running" || this.game_time < 10) return;
     const total_time = this.settings.grace_period_mins * 60 + this.settings.main_period_mins * 60;
     world5.getAllPlayers().forEach((player) => {
       if (this.teams_manager.get_team(player)) {
@@ -3759,6 +3759,7 @@ function admin_form(game_manager2, player) {
   form.title("UHC Manager");
   form.button("Start Game", "textures/ui/dressing_room_skins");
   form.button("Settings", "textures/ui/icon_setting");
+  form.button("Challenge Logs", "textures/ui/icon_best3");
   form.show(player).then((r) => {
     if (r.canceled) return;
     let response = r.selection;
@@ -3778,7 +3779,7 @@ function confirm_start_form(game_manager2, player) {
   const form = new MessageFormData();
   form.title("Are you sure?");
   form.body(
-    "Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\nOnce the game starts, you \xA7l\xA74can't\xA7r:\n- Stop the game\n- Have any new players join the game\n- Change any settings"
+    "Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\nOnce the game starts, you \xA74can't\xA7r:\n- Stop the game\n- Have any new players join the game\n"
   );
   form.button1("I'm Sure");
   form.button2("Cancel");
@@ -3826,7 +3827,7 @@ function challenges_form(game_manager2, player) {
     let colour = game_manager2.teams_manager.get_team(player)?.get_team_colour();
     if (game_challenge.available && player_challenge.progress <= player_challenge.max_progress) {
       form.button(
-        `${game_challenge.name} ${colour}${player_challenge.progress}/${player_challenge.max_progress}`,
+        `${game_challenge.name} ${colour ? colour : "\xA7l"}${player_challenge.progress}/${player_challenge.max_progress}`,
         game_challenge.icon
       );
       button_indexes.push(challenge);
@@ -3853,7 +3854,7 @@ function info_form(challenge_id, game_manager2, player) {
   } else if (challenge.type === "first_team") {
     challenge_info = "Teammates must work together to complete this challenge. If one player completes it, the entire team receives the reward on the Everthorn Server. Only the first team to complete will receive the reward.";
   }
-  form.title(`${challenge.name} ${colour}${player_challenge.progress}/${player_challenge.max_progress}`);
+  form.title(`${challenge.name} ${colour ? colour : "\xA7l"}${player_challenge.progress}/${player_challenge.max_progress}`);
   form.body(
     `\xA7e${challenge.description}\xA7r
 Reward: ${challenge.reward} (On Everthorn Server)
@@ -3920,7 +3921,7 @@ world6.afterEvents.playerSpawn.subscribe((event) => {
 world6.afterEvents.itemUse.subscribe((event) => {
   if (event.itemStack.typeId === "uhc:teams_book" && game_manager.game_status !== "running") {
     team_form(game_manager, event.source);
-  } else if (event.itemStack.typeId === "uhc:admin_book" && game_manager.game_status !== "running") {
+  } else if (event.itemStack.typeId === "uhc:admin_book") {
     admin_form(game_manager, event.source);
   } else if (event.itemStack.typeId === "uhc:challenge_book") {
     challenges_form(game_manager, event.source);

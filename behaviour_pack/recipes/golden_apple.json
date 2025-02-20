@@ -16,8 +16,7 @@
     },
     "unlock": [
       {
-        "item": "minecraft:apple",
-        "data": 1
+        "item": "minecraft:apple"
       }
     ],
     "result": "minecraft:golden_apple"

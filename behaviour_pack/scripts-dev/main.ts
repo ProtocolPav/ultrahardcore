@@ -76,7 +76,7 @@ world.afterEvents.itemUse.subscribe(event => {
         team_form(game_manager, event.source)
     }
 
-    else if (event.itemStack.typeId === 'uhc:admin_book' && game_manager.game_status !== 'running') {
+    else if (event.itemStack.typeId === 'uhc:admin_book') {
         admin_form(game_manager, event.source)
     }
 

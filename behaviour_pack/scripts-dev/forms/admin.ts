@@ -7,6 +7,7 @@ export function admin_form(game_manager: GameManager, player: Player) {
     form.title('UHC Manager')
     form.button('Start Game', 'textures/ui/dressing_room_skins')
     form.button('Settings', 'textures/ui/icon_setting')
+    form.button('Challenge Logs', 'textures/ui/icon_best3')
 
 // @ts-ignore
     form.show(player).then(r => {
@@ -35,10 +36,10 @@ function confirm_start_form(game_manager: GameManager, player: Player) {
     form.body(
         'Pressing start will begin a 15 second countdown, ' +
         'after which each team will be teleported and the UHC begins.\n\n' +
-        "Once the game starts, you §l§4can't§r:\n" +
+        "Once the game starts, you §4can't§r:\n" +
         "- Stop the game\n" +
-        "- Have any new players join the game\n" +
-        "- Change any settings")
+        "- Have any new players join the game\n"
+    )
     form.button1("I'm Sure")
     form.button2("Cancel")
 
@@ -82,6 +83,35 @@ function settings_form(game_manager: GameManager, player: Player) {
             game_manager.settings.halftime_regeneration = Boolean(values[5])
 
             game_manager.settings.update_settings()
+        }
+    })
+}
+
+function challenge_logs_form(game_manager: GameManager, player: Player) {
+    let body = ''
+    for (let challengesKey in game_manager.challenges) {
+        let challenge = game_manager.challenges[challengesKey]
+        body = `${body}\n§e${challenge.name}§r\n`
+        challenge.progress.sort((a, b) => a.progress - b.progress).forEach((progress) => {
+            if (progress.player) {
+                body = `${body}\n- ${progress.player} | ${progress.progress}/${progress.max_progress}`
+            }
+            else if (!progress.player) {
+                body = `${body}\n- ${progress.team} | ${progress.progress}/${progress.max_progress}`
+            }
+        })
+    }
+
+    const form = new MessageFormData()
+    form.title('Challenge Logs')
+    form.body(body)
+    form.button1("Exit")
+    form.button2("Cancel")
+
+    //@ts-ignore
+    form.show(player).then(r => {
+        if (r.canceled || r.selection == 1){
+            return
         }
     })
 }
