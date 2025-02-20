@@ -11,7 +11,7 @@ export default function check_halftime_challenge(
     time: number,
     halftime: number
 ) {
-    if (time >= halftime && time <= halftime + 2) {
+    if (time >= halftime + 10 && time <= halftime + 12) {
         if (challenge.progress_challenge(player)) {
             const team = teams_manager.get_team(player)
             message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, 'uhc.team.win')

@@ -12,7 +12,7 @@ export function challenges_form(game_manager: GameManager, player: Player) {
         let player_challenge = game_challenge.get_progress(player)
         let colour = game_manager.teams_manager.get_team(player)?.get_team_colour()
 
-        if (game_challenge.available && player_challenge.progress <= player_challenge.max_progress) {
+        if (game_challenge.available && player_challenge.progress < player_challenge.max_progress) {
             form.button(
                 `${game_challenge.name} ${colour ? colour : '§l'}${player_challenge.progress}/${player_challenge.max_progress}`,
                 game_challenge.icon

@@ -23,6 +23,10 @@ export function admin_form(game_manager: GameManager, player: Player) {
             case 1:
                 settings_form(game_manager, player);
                 break;
+
+            case 2:
+                challenge_logs_form(game_manager, player);
+                break;
         }
 
     }).catch(e => {

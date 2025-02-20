@@ -3427,7 +3427,7 @@ function check_blaze_challenge(message_manager, challenge, player, teams_manager
 
 // behaviour_pack/scripts-dev/challenge_scripts/halftime_challenge.ts
 function check_halftime_challenge(message_manager, challenge, player, teams_manager, time, halftime) {
-  if (time >= halftime && time <= halftime + 2) {
+  if (time >= halftime + 10 && time <= halftime + 12) {
     if (challenge.progress_challenge(player)) {
       const team = teams_manager.get_team(player);
       message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
@@ -3770,6 +3770,9 @@ function admin_form(game_manager2, player) {
       case 1:
         settings_form(game_manager2, player);
         break;
+      case 2:
+        challenge_logs_form(game_manager2, player);
+        break;
     }
   }).catch((e) => {
     console.error(e, e.stack);
@@ -3814,6 +3817,34 @@ function settings_form(game_manager2, player) {
     }
   });
 }
+function challenge_logs_form(game_manager2, player) {
+  let body = "";
+  for (let challengesKey in game_manager2.challenges) {
+    let challenge = game_manager2.challenges[challengesKey];
+    body = `${body}
+\xA7e${challenge.name}\xA7r
+`;
+    challenge.progress.sort((a, b) => a.progress - b.progress).forEach((progress) => {
+      if (progress.player) {
+        body = `${body}
+- ${progress.player} | ${progress.progress}/${progress.max_progress}`;
+      } else if (!progress.player) {
+        body = `${body}
+- ${progress.team} | ${progress.progress}/${progress.max_progress}`;
+      }
+    });
+  }
+  const form = new MessageFormData();
+  form.title("Challenge Logs");
+  form.body(body);
+  form.button1("Exit");
+  form.button2("Cancel");
+  form.show(player).then((r) => {
+    if (r.canceled || r.selection == 1) {
+      return;
+    }
+  });
+}
 
 // behaviour_pack/scripts-dev/forms/challenges.ts
 import { ActionFormData as ActionFormData3, MessageFormData as MessageFormData2 } from "@minecraft/server-ui";
@@ -3825,7 +3856,7 @@ function challenges_form(game_manager2, player) {
     let game_challenge = game_manager2.challenges[challenge];
     let player_challenge = game_challenge.get_progress(player);
     let colour = game_manager2.teams_manager.get_team(player)?.get_team_colour();
-    if (game_challenge.available && player_challenge.progress <= player_challenge.max_progress) {
+    if (game_challenge.available && player_challenge.progress < player_challenge.max_progress) {
       form.button(
         `${game_challenge.name} ${colour ? colour : "\xA7l"}${player_challenge.progress}/${player_challenge.max_progress}`,
         game_challenge.icon
@@ -3963,7 +3994,7 @@ var valid_blocks = [
   MinecraftBlockTypes.DeepslateRedstoneOre,
   MinecraftBlockTypes.AncientDebris
 ];
-world6.afterEvents.playerBreakBlock.subscribe((event) => {
+world6.beforeEvents.playerBreakBlock.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const this_challenge = game_manager.challenges.mining_challenge;
     if (valid_blocks.includes(event.block.typeId)) {

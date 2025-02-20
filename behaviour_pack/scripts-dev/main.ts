@@ -125,7 +125,7 @@ const valid_blocks: string[] = [
     MinecraftBlockTypes.AncientDebris
 ]
 
-world.afterEvents.playerBreakBlock.subscribe(event => {
+world.beforeEvents.playerBreakBlock.subscribe(event => {
     if (game_manager.game_status === 'running') {
         const this_challenge = game_manager.challenges.mining_challenge
         if (valid_blocks.includes(event.block.typeId)) {
