@@ -98,7 +98,7 @@ function challenge_logs_form(game_manager: GameManager, player: Player) {
         body = `${body}\n§e${challenge.name}§r\n`
         challenge.progress.sort((a, b) => a.progress - b.progress).forEach((progress) => {
             if (progress.player) {
-                body = `${body}\n- ${progress.player} | ${progress.progress}/${progress.max_progress}`
+                body = `${body}\n- ${progress.player.name} | ${progress.progress}/${progress.max_progress}`
             }
             else if (!progress.player) {
                 body = `${body}\n- ${progress.team} | ${progress.progress}/${progress.max_progress}`

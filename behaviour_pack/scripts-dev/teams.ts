@@ -70,17 +70,17 @@ export class TeamsManager {
 
     constructor() {
         this.teams = [
-            new Team('team_red', "Team Redstone", "§m", "textures/items/redstone_dust"),
-            new Team('team_orange', "Team Resin", "§6", "textures/items/resin_clump"),
-            new Team('team_yellow', "Team Honeycomb", "§g", "textures/items/honeycomb"),
-            new Team('team_green', "Team Turtle", "§q", "textures/items/turtle_shell_piece"),
-            new Team('team_lime', "Team Emerald", "§a", "textures/items/emerald"),
-            new Team('team_blue', "Team Echo", "§9", "textures/items/echo_shard"),
-            new Team('team_light_blue', "Team Prismarine", "§3", "textures/items/prismarine_shard"),
-            new Team('team_cyan', "Team Diamond", "§b", "textures/items/diamond"),
-            new Team('team_magenta', "Team Shulker", "§5", "textures/items/shulker_shell"),
-            new Team('team_purple', "Team Amethyst", "§u", "textures/items/amethyst_shard"),
-            new Team('team_pink', "Team Petal", "§d", "textures/items/pink_petals"),
+            new Team('team_redstone', "Team Redstone", "§m", "textures/items/redstone_dust"),
+            new Team('team_resin', "Team Resin", "§6", "textures/items/resin_clump"),
+            new Team('team_honeycomb', "Team Honeycomb", "§g", "textures/items/honeycomb"),
+            new Team('team_turtle', "Team Turtle", "§q", "textures/items/turtle_shell_piece"),
+            new Team('team_emerald', "Team Emerald", "§a", "textures/items/emerald"),
+            new Team('team_echo', "Team Echo", "§9", "textures/items/echo_shard"),
+            new Team('team_prismarine', "Team Prismarine", "§3", "textures/items/prismarine_shard"),
+            new Team('team_diamond', "Team Diamond", "§b", "textures/items/diamond"),
+            new Team('team_shulker', "Team Shulker", "§5", "textures/items/shulker_shell"),
+            new Team('team_amethyst', "Team Amethyst", "§u", "textures/items/amethyst_shard"),
+            new Team('team_petal', "Team Petal", "§d", "textures/items/pink_petals"),
         ]
     }
 

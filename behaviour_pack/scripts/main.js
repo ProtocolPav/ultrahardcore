@@ -3066,17 +3066,17 @@ var TeamsManager = class {
   constructor() {
     this.teams = [];
     this.teams = [
-      new Team("team_red", "Team Redstone", "\xA7m", "textures/items/redstone_dust"),
-      new Team("team_orange", "Team Resin", "\xA76", "textures/items/resin_clump"),
-      new Team("team_yellow", "Team Honeycomb", "\xA7g", "textures/items/honeycomb"),
-      new Team("team_green", "Team Turtle", "\xA7q", "textures/items/turtle_shell_piece"),
-      new Team("team_lime", "Team Emerald", "\xA7a", "textures/items/emerald"),
-      new Team("team_blue", "Team Echo", "\xA79", "textures/items/echo_shard"),
-      new Team("team_light_blue", "Team Prismarine", "\xA73", "textures/items/prismarine_shard"),
-      new Team("team_cyan", "Team Diamond", "\xA7b", "textures/items/diamond"),
-      new Team("team_magenta", "Team Shulker", "\xA75", "textures/items/shulker_shell"),
-      new Team("team_purple", "Team Amethyst", "\xA7u", "textures/items/amethyst_shard"),
-      new Team("team_pink", "Team Petal", "\xA7d", "textures/items/pink_petals")
+      new Team("team_redstone", "Team Redstone", "\xA7m", "textures/items/redstone_dust"),
+      new Team("team_resin", "Team Resin", "\xA76", "textures/items/resin_clump"),
+      new Team("team_honeycomb", "Team Honeycomb", "\xA7g", "textures/items/honeycomb"),
+      new Team("team_turtle", "Team Turtle", "\xA7q", "textures/items/turtle_shell_piece"),
+      new Team("team_emerald", "Team Emerald", "\xA7a", "textures/items/emerald"),
+      new Team("team_echo", "Team Echo", "\xA79", "textures/items/echo_shard"),
+      new Team("team_prismarine", "Team Prismarine", "\xA73", "textures/items/prismarine_shard"),
+      new Team("team_diamond", "Team Diamond", "\xA7b", "textures/items/diamond"),
+      new Team("team_shulker", "Team Shulker", "\xA75", "textures/items/shulker_shell"),
+      new Team("team_amethyst", "Team Amethyst", "\xA7u", "textures/items/amethyst_shard"),
+      new Team("team_petal", "Team Petal", "\xA7d", "textures/items/pink_petals")
     ];
   }
   spread_teams(radius) {
@@ -3827,7 +3827,7 @@ function challenge_logs_form(game_manager2, player) {
     challenge.progress.sort((a, b) => a.progress - b.progress).forEach((progress) => {
       if (progress.player) {
         body = `${body}
-- ${progress.player} | ${progress.progress}/${progress.max_progress}`;
+- ${progress.player.name} | ${progress.progress}/${progress.max_progress}`;
       } else if (!progress.player) {
         body = `${body}
 - ${progress.team} | ${progress.progress}/${progress.max_progress}`;
