@@ -10,7 +10,7 @@
 		"description": "An addon that allows you to run a UHC event in your world!",
 		"min_engine_version": [ 1, 21, 40 ],
 		"uuid": "d5ac8107-8ae9-498e-b78a-13816098a43f",
-		"version": [ 2, 0, 0 ]
+		"version": [ 2, 0, 1 ]
 	},
 	"modules": [
 		{
@@ -24,7 +24,7 @@
 	"dependencies": [
 		{
 			"uuid": "27f809f2-8c53-49d8-b9e0-08e8dc26dd72",
-			"version": [ 2, 0, 0 ]
+			"version": [ 2, 0, 1 ]
 		},
 		{
 			"module_name": "@minecraft/server",
