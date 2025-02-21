@@ -3632,12 +3632,16 @@ var GameManager = class _GameManager {
     world5.gameRules.doInsomnia = false;
     world5.gameRules.showCoordinates = true;
     world5.gameRules.doImmediateRespawn = true;
+    world5.gameRules.doMobSpawning = true;
+    world5.gameRules.mobGriefing = true;
+    world5.gameRules.doMobLoot = true;
     world5.setTimeOfDay(TimeOfDay.Day);
     world5.getAllPlayers().forEach((player) => {
       player.getEffects().forEach((effect) => {
         player.removeEffect(effect.typeId);
       });
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
+      player.runCommand("clear @a");
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(beef);
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(challenges);
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
