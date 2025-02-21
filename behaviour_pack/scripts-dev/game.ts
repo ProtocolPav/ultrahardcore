@@ -231,6 +231,9 @@ export class GameManager {
         world.gameRules.doInsomnia = false
         world.gameRules.showCoordinates = true
         world.gameRules.doImmediateRespawn = true
+        world.gameRules.doMobSpawning = true
+        world.gameRules.mobGriefing = true
+        world.gameRules.doMobLoot = true
         world.setTimeOfDay(TimeOfDay.Day)
 
         world.getAllPlayers().forEach((player: Player) => {
@@ -238,6 +241,7 @@ export class GameManager {
                 player.removeEffect(effect.typeId)
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
+            player.runCommand('clear @a')
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges)
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
