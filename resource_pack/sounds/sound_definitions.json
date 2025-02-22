@@ -31,7 +31,7 @@
     },
     "uhc.music": {
       "category": "music",
-      "sounds": ["sounds/uhc/music", "sounds/uhc/victory_2"],
+      "sounds": ["sounds/uhc/music"],
       "stream": true
     },
     "uhc.music.win": {
