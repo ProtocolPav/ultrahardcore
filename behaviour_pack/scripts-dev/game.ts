@@ -1,4 +1,5 @@
 import {
+    Dimension,
     DisplaySlotId,
     Effect,
     EntityComponentTypes,
@@ -7,7 +8,7 @@ import {
     Player,
     system,
     TicksPerSecond,
-    TimeOfDay,
+    TimeOfDay, Vector3,
     world
 } from "@minecraft/server";
 import {TeamsManager} from "./teams";
@@ -23,6 +24,7 @@ import check_blaze_challenge from "./challenge_scripts/blaze_challenge";
 import check_halftime_challenge from "./challenge_scripts/halftime_challenge";
 import check_trial_challenge from "./challenge_scripts/trial_challenge";
 import check_wool_challenge from "./challenge_scripts/wool_challenge";
+import {BorderManager} from "./border";
 
 class Settings {
     border_radius: number;
@@ -79,6 +81,7 @@ export class GameManager {
     initialized: boolean
     items: ItemStack[]
     challenges: typeof game_challenges
+    borderManager: BorderManager;
 
     private constructor(
         teams_manager: TeamsManager,
@@ -109,6 +112,8 @@ export class GameManager {
         ]
 
         this.challenges = game_challenges
+
+        this.borderManager = new BorderManager(message_manager, settings.border_radius);
 
         system.runInterval(() => this.game_loop(), 20)
         system.runInterval(() => this.challenge_loop(), 1)
@@ -202,22 +207,8 @@ export class GameManager {
     }
 
     private border() {
-        const players = world.getAllPlayers()
-
-        players.forEach((player) => {
-            let distance = Math.sqrt(player.location.x**2 + player.location.z**2)
-            if (distance > this.settings.border_radius) {
-                let angle = Math.atan2(player.location.z, player.location.x)
-                let tp_location = {
-                    x: (this.settings.border_radius-1) * Math.cos(angle),
-                    y: player.location.y,
-                    z: (this.settings.border_radius-1) * Math.sin(angle)
-                }
-
-                this.message_manager.send_message("Stay within the border", 'uhc.team.death.global', player)
-                player.teleport(tp_location)
-            }
-        })
+        const players = world.getAllPlayers();
+        this.borderManager.enforceBorder(players);
     }
 
     private start_game() {
@@ -270,6 +261,7 @@ export class GameManager {
         world.playMusic('uhc.music.deathmatch', {volume: 0.6, loop: true})
 
         this.settings.border_radius = 100
+        this.borderManager.updateRadius(100);
 
         this.teams_manager.spread_teams(100)
 

@@ -3,8 +3,8 @@ import {
   EntityComponentTypes as EntityComponentTypes4,
   GameMode as GameMode2,
   ItemStack as ItemStack2,
-  Player as Player8,
-  system as system2,
+  Player as Player9,
+  system as system3,
   TicksPerSecond as TicksPerSecond3,
   world as world6
 } from "@minecraft/server";
@@ -15,7 +15,7 @@ import {
   EntityComponentTypes as EntityComponentTypes3,
   GameMode,
   ItemStack,
-  system,
+  system as system2,
   TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
   world as world5
@@ -3476,6 +3476,68 @@ function check_wool_challenge(message_manager, challenge, player, teams_manager)
   }
 }
 
+// behaviour_pack/scripts-dev/border.ts
+import { system } from "@minecraft/server";
+var BorderManager = class {
+  // Blocks to scan around player
+  constructor(messageManager, initialRadius = 1500) {
+    this.borderBlocks = /* @__PURE__ */ new Set();
+    this.scanRange = 64;
+    this.messageManager = messageManager;
+    this.borderRadius = initialRadius;
+  }
+  enforceBorder(players) {
+    players.forEach((player) => {
+      const distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
+      if (distance > this.borderRadius - this.scanRange) {
+        this.placeBorderBlocks(player);
+      }
+      if (distance > this.borderRadius) {
+        const angle = Math.atan2(player.location.z, player.location.x);
+        player.teleport({
+          x: (this.borderRadius - 1) * Math.cos(angle),
+          y: player.location.y,
+          z: (this.borderRadius - 1) * Math.sin(angle)
+        });
+        this.messageManager.send_message("Stay within the border", "uhc.team.death.global", player);
+      }
+    });
+  }
+  updateRadius(newRadius) {
+    this.borderRadius = newRadius;
+    this.borderBlocks.clear();
+  }
+  placeBorderBlocks(player) {
+    system.runJob(this.placeBorderJob(player));
+  }
+  *placeBorderJob(player) {
+    const playerX = Math.floor(player.location.x);
+    const playerZ = Math.floor(player.location.z);
+    let processed = 0;
+    for (let x = playerX - this.scanRange; x <= playerX + this.scanRange; x++) {
+      for (let z = playerZ - this.scanRange; z <= playerZ + this.scanRange; z++) {
+        const distance = Math.sqrt(x * x + z * z);
+        if (Math.round(distance) === this.borderRadius) {
+          const blockKey = `${x},${z}`;
+          if (!this.borderBlocks.has(blockKey)) {
+            for (let y = -64; y <= 128; y++) {
+              try {
+                player.dimension.setBlockType({ x, y, z }, "minecraft:glass");
+              } catch (error) {
+              }
+            }
+            this.borderBlocks.add(blockKey);
+          }
+        }
+        processed++;
+        if (processed % 10 === 0) {
+          yield;
+        }
+      }
+    }
+  }
+};
+
 // behaviour_pack/scripts-dev/game.ts
 var Settings = class {
   constructor(initialized) {
@@ -3513,7 +3575,6 @@ var Settings = class {
 };
 var GameManager = class _GameManager {
   constructor(teams_manager, game_status, game_time, initialized, message_manager, settings) {
-    this.borderBlocks = /* @__PURE__ */ new Set();
     this.teams_manager = teams_manager;
     this.game_status = game_status;
     this.game_time = game_time;
@@ -3534,8 +3595,9 @@ var GameManager = class _GameManager {
       new ItemStack(MinecraftItemTypes.PinkPetals, 1)
     ];
     this.challenges = game_challenges;
-    system.runInterval(() => this.game_loop(), 20);
-    system.runInterval(() => this.challenge_loop(), 1);
+    this.borderManager = new BorderManager(message_manager, settings.border_radius);
+    system2.runInterval(() => this.game_loop(), 20);
+    system2.runInterval(() => this.challenge_loop(), 1);
   }
   static initialize() {
     let initialized = Boolean(world5.getDynamicProperty("uhc:initialized"));
@@ -3570,7 +3632,7 @@ var GameManager = class _GameManager {
       `The game is about to start! Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
       "uhc.start.before"
     );
-    system.runTimeout(() => {
+    system2.runTimeout(() => {
       this.message_manager.send_message(
         `You might be teleported into the sky, do not worry! You will have resistance to save your fall.`,
         "random.toast"
@@ -3609,79 +3671,7 @@ var GameManager = class _GameManager {
   }
   border() {
     const players = world5.getAllPlayers();
-    players.forEach((player) => {
-      let distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
-      const detectionRange = 32;
-      if (distance > this.settings.border_radius - detectionRange) {
-        this.placeBorderBlocksNearPlayer(player);
-      }
-      if (distance > this.settings.border_radius) {
-        let angle = Math.atan2(player.location.z, player.location.x);
-        let tp_location = {
-          x: (this.settings.border_radius - 1) * Math.cos(angle),
-          y: player.location.y,
-          z: (this.settings.border_radius - 1) * Math.sin(angle)
-        };
-        this.message_manager.send_message("Stay within the border", "uhc.team.death.global", player);
-        player.teleport(tp_location);
-      }
-    });
-  }
-  isLocationLoaded(dimension, location) {
-    try {
-      const block = dimension.getBlock(location);
-      return block !== void 0;
-    } catch (error) {
-      return false;
-    }
-  }
-  placeBorderBlock(dimension, location, blockType = "minecraft:barrier") {
-    try {
-      const block = dimension.getBlock(location);
-      if (block && block.typeId !== blockType) {
-        dimension.setBlockType(location, blockType);
-        return true;
-      }
-    } catch (error) {
-      return false;
-    }
-    return false;
-  }
-  placeBorderBlocksNearPlayer(player) {
-    const dimension = player.dimension;
-    const playerChunkX = Math.floor(player.location.x / 16);
-    const playerChunkZ = Math.floor(player.location.z / 16);
-    for (let chunkOffsetX = -2; chunkOffsetX <= 2; chunkOffsetX++) {
-      for (let chunkOffsetZ = -2; chunkOffsetZ <= 2; chunkOffsetZ++) {
-        const chunkX = playerChunkX + chunkOffsetX;
-        const chunkZ = playerChunkZ + chunkOffsetZ;
-        this.placeBorderBlocksInChunk(dimension, chunkX, chunkZ);
-      }
-    }
-  }
-  placeBorderBlocksInChunk(dimension, chunkX, chunkZ) {
-    const testX = chunkX * 16 + 8;
-    const testZ = chunkZ * 16 + 8;
-    const testY = 64;
-    if (!this.isLocationLoaded(dimension, { x: testX, y: testY, z: testZ })) {
-      return;
-    }
-    for (let x = chunkX * 16; x < (chunkX + 1) * 16; x++) {
-      for (let z = chunkZ * 16; z < (chunkZ + 1) * 16; z++) {
-        const distance = Math.sqrt(x * x + z * z);
-        if (Math.abs(distance - this.settings.border_radius) < 1) {
-          const blockKey = `${x},${z}`;
-          if (!this.borderBlocks.has(blockKey)) {
-            for (let y = 0; y <= 128; y += 16) {
-              const location = { x, y, z };
-              if (this.placeBorderBlock(dimension, location, "minecraft:glass")) {
-                this.borderBlocks.add(blockKey);
-              }
-            }
-          }
-        }
-      }
-    }
+    this.borderManager.enforceBorder(players);
   }
   start_game() {
     this.game_status = "running";
@@ -3725,6 +3715,7 @@ var GameManager = class _GameManager {
     world5.stopMusic();
     world5.playMusic("uhc.music.deathmatch", { volume: 0.6, loop: true });
     this.settings.border_radius = 100;
+    this.borderManager.updateRadius(100);
     this.teams_manager.spread_teams(100);
     world5.getPlayers({ gameMode: GameMode.Spectator }).forEach((player) => {
       player.teleport({ x: 0, y: 100, z: 0 });
@@ -3968,8 +3959,8 @@ Reward: ${challenge.reward} (On Everthorn Server)
 
 // behaviour_pack/scripts-dev/main.ts
 var game_manager;
-system2.beforeEvents.startup.subscribe((event) => {
-  system2.run(() => {
+system3.beforeEvents.startup.subscribe((event) => {
+  system3.run(() => {
     game_manager = GameManager.initialize();
   });
 });
@@ -3987,21 +3978,21 @@ world6.afterEvents.playerSpawn.subscribe((event) => {
     );
     event.player.setGameMode(GameMode2.Adventure);
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
-    system2.runTimeout(() => {
+    system3.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l4\xA7r! The game is about to start. Sit back, relax, and good luck!`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 5);
-    system2.runTimeout(() => {
+    system3.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Select your team by pressing :_input_key.use:`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 8);
-    system2.runTimeout(() => {
+    system3.runTimeout(() => {
       game_manager.message_manager.send_message(
         `For admins: \xA7e/give @p uhc:admin_book\xA7r to edit settings and start the game`,
         "random.toast",
@@ -4025,7 +4016,7 @@ world6.afterEvents.itemUse.subscribe((event) => {
   }
 });
 world6.afterEvents.entityDie.subscribe((event) => {
-  if (event.deadEntity instanceof Player8) {
+  if (event.deadEntity instanceof Player9) {
     const team = game_manager.teams_manager.get_team(event.deadEntity);
     if (team) {
       team.remove_player(event.deadEntity, game_manager.message_manager);
@@ -4036,7 +4027,7 @@ world6.afterEvents.entityDie.subscribe((event) => {
 world6.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const this_challenge = game_manager.challenges.eliminate_challenge;
-    if (event.deadEntity instanceof Player8 && event.damageSource.damagingEntity instanceof Player8) {
+    if (event.deadEntity instanceof Player9 && event.damageSource.damagingEntity instanceof Player9) {
       const dead_team = game_manager.teams_manager.get_team(event.deadEntity);
       const killing_team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
       if (dead_team?.string_id !== killing_team?.string_id && dead_team?.players.length === 1) {
@@ -4074,7 +4065,7 @@ world6.beforeEvents.playerBreakBlock.subscribe((event) => {
 world6.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const this_challenge = game_manager.challenges.skeleton_challenge;
-    if (event.deadEntity.typeId === MinecraftEntityTypes.Skeleton && event.damageSource.damagingEntity instanceof Player8) {
+    if (event.deadEntity.typeId === MinecraftEntityTypes.Skeleton && event.damageSource.damagingEntity instanceof Player9) {
       const team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
       if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
         game_manager.message_manager.send_message(`${team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
