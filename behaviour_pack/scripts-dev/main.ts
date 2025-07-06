@@ -2,7 +2,6 @@ import {
     EntityComponentTypes,
     GameMode,
     ItemStack,
-    MinecraftDimensionTypes,
     Player,
     system,
     TicksPerSecond,
@@ -16,7 +15,7 @@ import {challenges_form} from "./forms/challenges";
 
 let game_manager: GameManager
 
-world.afterEvents.worldInitialize.subscribe(event => {
+system.beforeEvents.startup.subscribe(event => {
     game_manager = GameManager.initialize()
 })
 
@@ -37,7 +36,7 @@ world.afterEvents.playerSpawn.subscribe(event => {
                 challenge_book
             )
 
-        event.player.setGameMode(GameMode.adventure)
+        event.player.setGameMode(GameMode.Adventure)
         event.player.addEffect(MinecraftEffectTypes.Resistance, 20000000, {showParticles: false, amplifier: 100})
 
         system.runTimeout(() => {
@@ -64,7 +63,7 @@ world.afterEvents.playerSpawn.subscribe(event => {
     }
     else if (game_manager.game_status === 'running') {
         if (!game_manager.teams_manager.get_team(event.player)) {
-            event.player.setGameMode(GameMode.spectator)
+            event.player.setGameMode(GameMode.Spectator)
             // @ts-ignore
             event.player.teleport(event.player.getDynamicProperty('uhc:death_location'))
         }
