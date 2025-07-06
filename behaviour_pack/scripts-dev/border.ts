@@ -77,10 +77,10 @@ export class BorderManager {
                         const blockKey = `${x},${z}`;
 
                         if (!this.borderBlocks.has(blockKey)) {
-                            // Place full height wall from bedrock to y128
-                            for (let y = -64; y <= 128; y++) {
+                            // Place full height wall from bedrock to y256
+                            for (let y = -64; y <= 256; y++) {
                                 try {
-                                    player.dimension.setBlockType({ x, y, z }, 'minecraft:glass');
+                                    player.dimension.setBlockType({ x, y, z }, 'uhc:barrier_glass');
                                 } catch (error) {
                                     // Ignore errors for unloaded chunks
                                 }

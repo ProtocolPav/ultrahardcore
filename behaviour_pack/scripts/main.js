@@ -3535,7 +3535,7 @@ var BorderManager = class {
             if (!this.borderBlocks.has(blockKey)) {
               for (let y = -64; y <= 128; y++) {
                 try {
-                  player.dimension.setBlockType({ x, y, z }, "minecraft:glass");
+                  player.dimension.setBlockType({ x, y, z }, "uhc:barrier_glass");
                 } catch (error) {
                 }
               }

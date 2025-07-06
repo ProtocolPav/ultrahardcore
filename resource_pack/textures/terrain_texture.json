@@ -1,0 +1,11 @@
+{
+  "resource_pack_name": "custom_blocks",
+  "texture_name": "atlas.terrain",
+  "padding": 8,
+  "num_mip_levels": 4,
+  "texture_data": {
+    "barrier_glass": {
+      "textures": "textures/blocks/barrier_glass"
+    }
+  }
+}

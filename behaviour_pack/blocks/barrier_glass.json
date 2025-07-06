@@ -1,0 +1,33 @@
+{
+  "format_version": "1.21.90",
+  "minecraft:block": {
+    "description": {
+      "identifier": "uhc:barrier_glass",
+      "menu_category": {
+        "category": "construction",
+        "group": "minecraft:itemGroup.name.glass"
+      }
+    },
+    "components": {
+      "minecraft:display_name": "Barrier Glass",
+      "minecraft:light_dampening": 0,
+      "minecraft:light_emission": 0,
+      "minecraft:destructible_by_mining": false,
+      "minecraft:destructible_by_explosion": false,
+      "minecraft:friction": 0.6,
+      "minecraft:loot": "loot_tables/empty.json",
+      "minecraft:geometry": {
+        "identifier": "geometry.barrier_glass",
+        "culling": "uhc:culling.barrier_glass"
+      },
+      "minecraft:material_instances": {
+        "*": {
+          "texture": "barrier_glass",
+          "render_method": "blend",
+          "ambient_occlusion": true,
+          "face_dimming": true
+        }
+      }
+    }
+  }
+}
