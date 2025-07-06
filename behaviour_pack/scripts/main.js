@@ -15,7 +15,6 @@ import {
   EntityComponentTypes as EntityComponentTypes3,
   GameMode,
   ItemStack,
-  MinecraftDimensionTypes as MinecraftDimensionTypes4,
   system,
   TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
@@ -23,7 +22,7 @@ import {
 } from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/teams.ts
-import { MinecraftDimensionTypes as MinecraftDimensionTypes2, TicksPerSecond, world } from "@minecraft/server";
+import { TicksPerSecond, world } from "@minecraft/server";
 
 // node_modules/@minecraft/vanilla-data/lib/index.js
 var MinecraftBiomeTypes = ((MinecraftBiomeTypes2) => {
@@ -1375,11 +1374,11 @@ var MinecraftCooldownCategoryTypes = ((MinecraftCooldownCategoryTypes2) => {
   MinecraftCooldownCategoryTypes2["WindCharge"] = "minecraft:wind_charge";
   return MinecraftCooldownCategoryTypes2;
 })(MinecraftCooldownCategoryTypes || {});
-var MinecraftDimensionTypes = ((MinecraftDimensionTypes22) => {
-  MinecraftDimensionTypes22["Nether"] = "minecraft:nether";
-  MinecraftDimensionTypes22["Overworld"] = "minecraft:overworld";
-  MinecraftDimensionTypes22["TheEnd"] = "minecraft:the_end";
-  return MinecraftDimensionTypes22;
+var MinecraftDimensionTypes = ((MinecraftDimensionTypes2) => {
+  MinecraftDimensionTypes2["Nether"] = "minecraft:nether";
+  MinecraftDimensionTypes2["Overworld"] = "minecraft:overworld";
+  MinecraftDimensionTypes2["TheEnd"] = "minecraft:the_end";
+  return MinecraftDimensionTypes2;
 })(MinecraftDimensionTypes || {});
 var MinecraftEffectTypes = ((MinecraftEffectTypes2) => {
   MinecraftEffectTypes2["Absorption"] = "minecraft:absorption";
@@ -3084,7 +3083,7 @@ var TeamsManager = class {
       let r = radius * Math.sqrt(Math.random());
       let theta = Math.random() * 2 * Math.PI;
       let coordinates = { x: r * Math.cos(theta), y: 0, z: r * Math.sin(theta) };
-      let block = world.getDimension(MinecraftDimensionTypes2.overworld).getTopmostBlock(
+      let block = world.getDimension(MinecraftDimensionTypes.Overworld).getTopmostBlock(
         { x: coordinates.x, z: coordinates.z }
       );
       if (block) coordinates.y = block.y + 1;
@@ -3113,7 +3112,7 @@ var TeamsManager = class {
 };
 
 // behaviour_pack/scripts-dev/messagebar.ts
-import { MinecraftDimensionTypes as MinecraftDimensionTypes3, world as world2 } from "@minecraft/server";
+import { world as world2 } from "@minecraft/server";
 var MessageManager = class {
   set_bar(game_time, status, grace_period, end, deathmatch) {
     if (status === "waiting") {
@@ -3136,7 +3135,7 @@ var MessageManager = class {
       player.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
     } else {
       if (sound) {
-        world2.getDimension(MinecraftDimensionTypes3.overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world2.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       }
       world2.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
     }
@@ -3144,7 +3143,7 @@ var MessageManager = class {
   game_start_cycle(game_time) {
     const time_until_start = Math.abs(game_time);
     if (time_until_start === 3) {
-      world2.getDimension(MinecraftDimensionTypes3.overworld).playSound("uhc.start", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+      world2.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.start", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
     }
     world2.getAllPlayers().forEach((player) => {
       player.onScreenDisplay.setActionBar(`\xA76Game is starting in: \xA7h00:${time_until_start.toString().padStart(2, "0")}`);
@@ -3514,6 +3513,7 @@ var Settings = class {
 };
 var GameManager = class _GameManager {
   constructor(teams_manager, game_status, game_time, initialized, message_manager, settings) {
+    this.borderBlocks = /* @__PURE__ */ new Set();
     this.teams_manager = teams_manager;
     this.game_status = game_status;
     this.game_time = game_time;
@@ -3611,6 +3611,10 @@ var GameManager = class _GameManager {
     const players = world5.getAllPlayers();
     players.forEach((player) => {
       let distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
+      const detectionRange = 32;
+      if (distance > this.settings.border_radius - detectionRange) {
+        this.placeBorderBlocksNearPlayer(player);
+      }
       if (distance > this.settings.border_radius) {
         let angle = Math.atan2(player.location.z, player.location.x);
         let tp_location = {
@@ -3622,6 +3626,62 @@ var GameManager = class _GameManager {
         player.teleport(tp_location);
       }
     });
+  }
+  isLocationLoaded(dimension, location) {
+    try {
+      const block = dimension.getBlock(location);
+      return block !== void 0;
+    } catch (error) {
+      return false;
+    }
+  }
+  placeBorderBlock(dimension, location, blockType = "minecraft:barrier") {
+    try {
+      const block = dimension.getBlock(location);
+      if (block && block.typeId !== blockType) {
+        dimension.setBlockType(location, blockType);
+        return true;
+      }
+    } catch (error) {
+      return false;
+    }
+    return false;
+  }
+  placeBorderBlocksNearPlayer(player) {
+    const dimension = player.dimension;
+    const playerChunkX = Math.floor(player.location.x / 16);
+    const playerChunkZ = Math.floor(player.location.z / 16);
+    for (let chunkOffsetX = -2; chunkOffsetX <= 2; chunkOffsetX++) {
+      for (let chunkOffsetZ = -2; chunkOffsetZ <= 2; chunkOffsetZ++) {
+        const chunkX = playerChunkX + chunkOffsetX;
+        const chunkZ = playerChunkZ + chunkOffsetZ;
+        this.placeBorderBlocksInChunk(dimension, chunkX, chunkZ);
+      }
+    }
+  }
+  placeBorderBlocksInChunk(dimension, chunkX, chunkZ) {
+    const testX = chunkX * 16 + 8;
+    const testZ = chunkZ * 16 + 8;
+    const testY = 64;
+    if (!this.isLocationLoaded(dimension, { x: testX, y: testY, z: testZ })) {
+      return;
+    }
+    for (let x = chunkX * 16; x < (chunkX + 1) * 16; x++) {
+      for (let z = chunkZ * 16; z < (chunkZ + 1) * 16; z++) {
+        const distance = Math.sqrt(x * x + z * z);
+        if (Math.abs(distance - this.settings.border_radius) < 1) {
+          const blockKey = `${x},${z}`;
+          if (!this.borderBlocks.has(blockKey)) {
+            for (let y = 0; y <= 128; y += 16) {
+              const location = { x, y, z };
+              if (this.placeBorderBlock(dimension, location, "minecraft:glass")) {
+                this.borderBlocks.add(blockKey);
+              }
+            }
+          }
+        }
+      }
+    }
   }
   start_game() {
     this.game_status = "running";
@@ -3645,7 +3705,7 @@ var GameManager = class _GameManager {
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(beef);
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(challenges);
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
-      player.setGameMode(GameMode.survival);
+      player.setGameMode(GameMode.Survival);
     });
     this.teams_manager.spread_teams(this.settings.border_radius);
   }
@@ -3657,7 +3717,7 @@ var GameManager = class _GameManager {
     const winning_player = world5.getPlayers({ name: team.players[0].name })[0];
     world5.getAllPlayers().forEach((player) => {
       player.teleport(winning_player.location);
-      player.setGameMode(GameMode.survival);
+      player.setGameMode(GameMode.Survival);
       player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { amplifier: 100 });
     });
   }
@@ -3666,7 +3726,7 @@ var GameManager = class _GameManager {
     world5.playMusic("uhc.music.deathmatch", { volume: 0.6, loop: true });
     this.settings.border_radius = 100;
     this.teams_manager.spread_teams(100);
-    world5.getPlayers({ gameMode: GameMode.spectator }).forEach((player) => {
+    world5.getPlayers({ gameMode: GameMode.Spectator }).forEach((player) => {
       player.teleport({ x: 0, y: 100, z: 0 });
     });
   }
@@ -3683,14 +3743,14 @@ var GameManager = class _GameManager {
       if (team) {
         this.finish_game(team);
       }
-      world5.getDimension(MinecraftDimensionTypes4.overworld).runCommand("clear @a map");
+      world5.getDimension(MinecraftDimensionTypes.Overworld).runCommand("clear @a map");
       if (this.game_time === this.settings.grace_period_mins * 60 - 3) {
-        world5.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world5.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === this.settings.grace_period_mins * 60) {
         world5.gameRules.pvp = true;
         this.message_manager.send_message("Grace Period has ended. PVP is now enabled. Good luck.");
       } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2 - 3) {
-        world5.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world5.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2) {
         let halftime_message = "Congratulations on making it through half of the game!";
         if (this.settings.halftime_regeneration) {
@@ -3705,7 +3765,7 @@ var GameManager = class _GameManager {
           "Deathmatch will commence in 3 minutes. The border will shrink to 100 blocks and all teams will be teleported to the centre and granted Resistance for 60 seconds."
         );
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60 - 3) {
-        world5.getDimension(MinecraftDimensionTypes4.overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world5.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60) {
         if (this.settings.deathmatch_enabled) {
           this.deathmatch();
@@ -3908,8 +3968,10 @@ Reward: ${challenge.reward} (On Everthorn Server)
 
 // behaviour_pack/scripts-dev/main.ts
 var game_manager;
-world6.afterEvents.worldInitialize.subscribe((event) => {
-  game_manager = GameManager.initialize();
+system2.beforeEvents.startup.subscribe((event) => {
+  system2.run(() => {
+    game_manager = GameManager.initialize();
+  });
 });
 world6.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
@@ -3923,7 +3985,7 @@ world6.afterEvents.playerSpawn.subscribe((event) => {
     event.player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(
       challenge_book
     );
-    event.player.setGameMode(GameMode2.adventure);
+    event.player.setGameMode(GameMode2.Adventure);
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
     system2.runTimeout(() => {
       game_manager.message_manager.send_message(
@@ -3948,7 +4010,7 @@ world6.afterEvents.playerSpawn.subscribe((event) => {
     }, TicksPerSecond3 * 18);
   } else if (game_manager.game_status === "running") {
     if (!game_manager.teams_manager.get_team(event.player)) {
-      event.player.setGameMode(GameMode2.spectator);
+      event.player.setGameMode(GameMode2.Spectator);
       event.player.teleport(event.player.getDynamicProperty("uhc:death_location"));
     }
   }
