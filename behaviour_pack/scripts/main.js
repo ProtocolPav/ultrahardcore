@@ -3479,17 +3479,17 @@ function check_wool_challenge(message_manager, challenge, player, teams_manager)
 // behaviour_pack/scripts-dev/border.ts
 import { system } from "@minecraft/server";
 var BorderManager = class {
-  // Blocks to scan around player
+  // Prevent duplicate jobs
   constructor(messageManager, initialRadius = 1500) {
     this.borderBlocks = /* @__PURE__ */ new Set();
-    this.scanRange = 64;
+    this.activeJobs = /* @__PURE__ */ new Set();
     this.messageManager = messageManager;
     this.borderRadius = initialRadius;
   }
   enforceBorder(players) {
     players.forEach((player) => {
       const distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
-      if (distance > this.borderRadius - this.scanRange) {
+      if (distance > this.borderRadius - 32) {
         this.placeBorderBlocks(player);
       }
       if (distance > this.borderRadius) {
@@ -3506,34 +3506,50 @@ var BorderManager = class {
   updateRadius(newRadius) {
     this.borderRadius = newRadius;
     this.borderBlocks.clear();
+    this.activeJobs.clear();
   }
   placeBorderBlocks(player) {
-    system.runJob(this.placeBorderJob(player));
+    const playerKey = `${Math.floor(player.location.x / 32)},${Math.floor(player.location.z / 32)}`;
+    if (this.activeJobs.has(playerKey)) {
+      return;
+    }
+    this.activeJobs.add(playerKey);
+    system.runJob(this.placeBorderJob(player, playerKey));
   }
-  *placeBorderJob(player) {
+  *placeBorderJob(player, playerKey) {
     const playerX = Math.floor(player.location.x);
     const playerZ = Math.floor(player.location.z);
     let processed = 0;
-    for (let x = playerX - this.scanRange; x <= playerX + this.scanRange; x++) {
-      for (let z = playerZ - this.scanRange; z <= playerZ + this.scanRange; z++) {
-        const distance = Math.sqrt(x * x + z * z);
-        if (Math.round(distance) === this.borderRadius) {
-          const blockKey = `${x},${z}`;
-          if (!this.borderBlocks.has(blockKey)) {
-            for (let y = -64; y <= 128; y++) {
-              try {
-                player.dimension.setBlockType({ x, y, z }, "minecraft:glass");
-              } catch (error) {
+    try {
+      const minRadius = this.borderRadius - 0.5;
+      const maxRadius = this.borderRadius + 0.5;
+      const scanMin = Math.max(-this.borderRadius - 1, playerX - 32);
+      const scanMax = Math.min(this.borderRadius + 1, playerX + 32);
+      const scanMinZ = Math.max(-this.borderRadius - 1, playerZ - 32);
+      const scanMaxZ = Math.min(this.borderRadius + 1, playerZ + 32);
+      for (let x = scanMin; x <= scanMax; x++) {
+        for (let z = scanMinZ; z <= scanMaxZ; z++) {
+          const distance = Math.sqrt(x * x + z * z);
+          if (distance >= minRadius && distance <= maxRadius) {
+            const blockKey = `${x},${z}`;
+            if (!this.borderBlocks.has(blockKey)) {
+              for (let y = -64; y <= 128; y++) {
+                try {
+                  player.dimension.setBlockType({ x, y, z }, "minecraft:glass");
+                } catch (error) {
+                }
               }
+              this.borderBlocks.add(blockKey);
             }
-            this.borderBlocks.add(blockKey);
+          }
+          processed++;
+          if (processed % 20 === 0) {
+            yield;
           }
         }
-        processed++;
-        if (processed % 10 === 0) {
-          yield;
-        }
       }
+    } finally {
+      this.activeJobs.delete(playerKey);
     }
   }
 };

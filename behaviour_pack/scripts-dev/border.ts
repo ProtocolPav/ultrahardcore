@@ -5,6 +5,7 @@ export class BorderManager {
     private borderBlocks: Set<string> = new Set();
     private messageManager: MessageManager;
     private borderRadius: number;
+    private activeJobs: Set<string> = new Set(); // Prevent duplicate jobs
 
     constructor(messageManager: MessageManager, initialRadius: number = 1500) {
         this.messageManager = messageManager;
@@ -15,7 +16,7 @@ export class BorderManager {
         players.forEach((player) => {
             const distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
 
-            // Place border blocks when players get close (large range so they see it from far away)
+            // Place border blocks when players get close
             if (distance > this.borderRadius - 32) {
                 this.placeBorderBlocks(player);
             }
@@ -36,45 +37,68 @@ export class BorderManager {
     public updateRadius(newRadius: number): void {
         this.borderRadius = newRadius;
         this.borderBlocks.clear();
+        this.activeJobs.clear(); // Clear jobs when radius changes
     }
 
     private placeBorderBlocks(player: Player): void {
-        system.runJob(this.placeBorderJob(player));
+        const playerKey = `${Math.floor(player.location.x / 32)},${Math.floor(player.location.z / 32)}`;
+
+        // Prevent multiple jobs for the same area
+        if (this.activeJobs.has(playerKey)) {
+            return;
+        }
+
+        this.activeJobs.add(playerKey);
+        system.runJob(this.placeBorderJob(player, playerKey));
     }
 
-    private *placeBorderJob(player: Player): Generator<void, void, void> {
+    private *placeBorderJob(player: Player, playerKey: string): Generator<void, void, void> {
         const playerX = Math.floor(player.location.x);
         const playerZ = Math.floor(player.location.z);
         let processed = 0;
 
-        // Check blocks around player
-        for (let x = playerX - 32; x <= playerX + 32; x++) {
-            for (let z = playerZ - 32; z <= playerZ + 32; z++) {
-                const distance = Math.sqrt(x * x + z * z);
+        try {
+            // Pre-calculate border bounds for efficiency
+            const minRadius = this.borderRadius - 0.5;
+            const maxRadius = this.borderRadius + 0.5;
 
-                // Place blocks exactly at border radius (1 block thick)
-                if (Math.round(distance) === this.borderRadius) {
-                    const blockKey = `${x},${z}`;
+            // Only scan coordinates that could contain border blocks
+            const scanMin = Math.max(-this.borderRadius - 1, playerX - 32);
+            const scanMax = Math.min(this.borderRadius + 1, playerX + 32);
+            const scanMinZ = Math.max(-this.borderRadius - 1, playerZ - 32);
+            const scanMaxZ = Math.min(this.borderRadius + 1, playerZ + 32);
 
-                    if (!this.borderBlocks.has(blockKey)) {
-                        // Place full height wall from bedrock to y128
-                        for (let y = -64; y <= 128; y++) {
-                            try {
-                                player.dimension.setBlockType({ x, y, z }, 'minecraft:glass');
-                            } catch (error) {
-                                // Ignore errors for unloaded chunks
+            for (let x = scanMin; x <= scanMax; x++) {
+                for (let z = scanMinZ; z <= scanMaxZ; z++) {
+                    const distance = Math.sqrt(x * x + z * z);
+
+                    // More precise border check - within 0.5 blocks of exact radius
+                    if (distance >= minRadius && distance <= maxRadius) {
+                        const blockKey = `${x},${z}`;
+
+                        if (!this.borderBlocks.has(blockKey)) {
+                            // Place full height wall from bedrock to y128
+                            for (let y = -64; y <= 128; y++) {
+                                try {
+                                    player.dimension.setBlockType({ x, y, z }, 'minecraft:glass');
+                                } catch (error) {
+                                    // Ignore errors for unloaded chunks
+                                }
                             }
+                            this.borderBlocks.add(blockKey);
                         }
-                        this.borderBlocks.add(blockKey);
+                    }
+
+                    processed++;
+                    // Yield every 20 blocks for better performance
+                    if (processed % 20 === 0) {
+                        yield;
                     }
                 }
-
-                processed++;
-                // Yield every 10 blocks to prevent watchdog
-                if (processed % 10 === 0) {
-                    yield;
-                }
             }
+        } finally {
+            // Always clean up the job tracking
+            this.activeJobs.delete(playerKey);
         }
     }
 }
