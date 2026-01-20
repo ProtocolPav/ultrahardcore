@@ -3,14 +3,15 @@
 	"metadata": {
 		"authors": [
 			"ProtocolPav"
-		]
+		],
+        "product_type": "addon"
 	},
 	"header": {
 		"name": "Ultra Hardcore",
 		"description": "An addon that allows you to run a UHC event in your world!",
 		"min_engine_version": [ 1, 21, 40 ],
 		"uuid": "d5ac8107-8ae9-498e-b78a-13816098a43f",
-		"version": [ 2, 0, 1 ]
+		"version": "2.0.1"
 	},
 	"modules": [
 		{
@@ -18,13 +19,13 @@
 			"language": "javascript",
 			"uuid": "3d62ed11-55c4-4998-9eea-16dcf2ba918b",
 			"entry": "scripts/main.js",
-			"version": [ 1, 0, 0 ]
+			"version": "2.0.1"
 		}
 	],
 	"dependencies": [
 		{
 			"uuid": "27f809f2-8c53-49d8-b9e0-08e8dc26dd72",
-			"version": [ 2, 0, 1 ]
+			"version": "2.0.1"
 		},
 		{
 			"module_name": "@minecraft/server",
