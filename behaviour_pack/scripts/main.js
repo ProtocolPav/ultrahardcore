@@ -3533,7 +3533,7 @@ var BorderManager = class {
           if (distance >= minRadius && distance <= maxRadius) {
             const blockKey = `${x},${z}`;
             if (!this.borderBlocks.has(blockKey)) {
-              for (let y = -64; y <= 128; y++) {
+              for (let y = -64; y <= 256; y++) {
                 try {
                   player.dimension.setBlockType({ x, y, z }, "uhc:barrier_glass");
                 } catch (error) {
