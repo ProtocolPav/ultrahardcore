@@ -15,8 +15,8 @@ const TELEPORT_OVERSHOOT_THRESHOLD = 5;
 
 // Ticks of fall-damage immunity granted after a knockback or forced teleport.
 // Knockback arcs the player upward; teleport may land them mid-air.
-const NO_FALL_TICKS_KNOCKBACK  = 30;  // ~1.5 s
-const NO_FALL_TICKS_TELEPORT   = 60;  // ~3 s
+const NO_FALL_TICKS_KNOCKBACK = 30;  // ~1.5 s
+const NO_FALL_TICKS_TELEPORT  = 60;  // ~3 s
 
 // Knockback strengths. Horizontal drives the player back toward centre;
 // vertical gives a small arc so they don't slide along the wall.
@@ -27,13 +27,20 @@ const KNOCKBACK_VERTICAL   = 0.35;
 const WARNING_DISTANCE = 15;
 
 // Particles: shown when the player is within this distance of any wall face.
-const PARTICLE_VISIBILITY = 20;   // blocks
-const PARTICLE_SEGMENT     = 30;   // blocks either side of player along the wall
-const PARTICLE_STEP        = 4;    // horizontal spacing between emitters
-const PARTICLE_Y_BELOW     = 2;    // blocks below player Y
-const PARTICLE_Y_ABOVE     = 10;   // blocks above player Y
-const PARTICLE_Y_STEP      = 2;    // vertical spacing between emitters
-const PARTICLE_ID          = "minecraft:endrod_particle";
+const PARTICLE_VISIBILITY = 20;  // blocks
+const PARTICLE_SEGMENT    = 30;  // blocks either side of player along the wall
+const PARTICLE_STEP       = 4;   // horizontal spacing between emitters
+const PARTICLE_Y_BELOW    = 2;   // blocks below player Y
+const PARTICLE_Y_ABOVE    = 10;  // blocks above player Y
+const PARTICLE_Y_STEP     = 2;   // vertical spacing between emitters
+
+// worldborder:worldborder faces N/S (fixed X axis, custom_direction [1,0,0]).
+// worldborder:worldborder_ew faces E/W (fixed Z axis, custom_direction [0,0,1]).
+const PARTICLE_NS = "worldborder:worldborder";
+const PARTICLE_EW = "worldborder:worldborder_ew";
+
+// Border colour: red tint, full opacity.
+const PARTICLE_COLOR = { red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0 };
 
 export class BorderManager {
     private readonly settings: Settings;
@@ -177,26 +184,34 @@ export class BorderManager {
 
     private renderParticlesForPlayer(player: Player, half: number): void {
         const { x, y, z } = player.location;
+
+        // Build the MolangVariableMap once per player per frame.
+        // variable.color is consumed by the particle_appearance_tinting component.
         const molang = new MolangVariableMap();
+        molang.setColorRGBA("variable.color", PARTICLE_COLOR);
 
-        // Distance to each of the four wall faces (positive = player is inside).
-        const distEast  = half - x;
-        const distWest  = half + x;
-        const distSouth = half - z;
-        const distNorth = half + z;
+        // Distance to each wall face from the player (positive = player inside).
+        const distToEast  = half - x;   // East wall at x = +half
+        const distToWest  = half + x;   // West wall at x = -half
+        const distToSouth = half - z;   // South wall at z = +half
+        const distToNorth = half + z;   // North wall at z = -half
 
-        if (distEast  <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y,  half, z,  "xFixed", molang);
-        if (distWest  <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, z,  "xFixed", molang);
-        if (distSouth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y,  half, x,  "zFixed", molang);
-        if (distNorth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, x,  "zFixed", molang);
+        // N/S walls run parallel to the Z axis → use worldborder:worldborder (custom_direction [1,0,0])
+        if (distToEast  <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y,  half, z, "xFixed", PARTICLE_NS, molang);
+        if (distToWest  <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, z, "xFixed", PARTICLE_NS, molang);
+
+        // E/W walls run parallel to the X axis → use worldborder:worldborder_ew (custom_direction [0,0,1])
+        if (distToSouth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y,  half, x, "zFixed", PARTICLE_EW, molang);
+        if (distToNorth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, x, "zFixed", PARTICLE_EW, molang);
     }
 
     /**
      * Spawns a vertical slice of particles along one wall face.
      *
-     * @param wallFixed   The fixed coordinate of this wall face (e.g. +half or -half).
-     * @param playerAlong The player's coordinate along the wall's parallel axis.
-     * @param axis        "xFixed" → wall runs N/S (fixed X), "zFixed" → wall runs E/W (fixed Z).
+     * @param wallFixed   Fixed coordinate of this wall face (+half or -half).
+     * @param playerAlong Player’s coordinate along the wall’s parallel axis.
+     * @param axis        "xFixed" → N/S wall (fixed X), "zFixed" → E/W wall (fixed Z).
+     * @param particleId  Particle to use — NS or EW variant.
      */
     private spawnWallSegment(
         player: Player,
@@ -204,6 +219,7 @@ export class BorderManager {
         wallFixed: number,
         playerAlong: number,
         axis: "xFixed" | "zFixed",
+        particleId: string,
         molang: MolangVariableMap
     ): void {
         const minAlong = playerAlong - PARTICLE_SEGMENT;
@@ -218,7 +234,7 @@ export class BorderManager {
                     : { x: along,     y: py, z: wallFixed };
 
                 try {
-                    player.spawnParticle(PARTICLE_ID, pos, molang);
+                    player.spawnParticle(particleId, pos, molang);
                 } catch {
                     // Chunk not loaded; skip silently.
                 }
