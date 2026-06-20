@@ -5,7 +5,7 @@ import {
     MolangVariableMap,
     Player,
     system,
-    Vector3,
+    Vector3, VectorXZ,
     world
 } from "@minecraft/server";
 
@@ -131,8 +131,10 @@ export class BorderManager {
         const dirX = magnitude > 0 ? -x / magnitude : 0;
         const dirZ = magnitude > 0 ? -z / magnitude : -1;
 
+        const vectorXZ: VectorXZ = { x: dirX, z: dirZ };
+
         try {
-            player.applyKnockback(dirX, dirZ, KNOCKBACK_HORIZONTAL, KNOCKBACK_VERTICAL);
+            player.applyKnockback(vectorXZ, KNOCKBACK_VERTICAL);
             this.grantNoFall(player.id, NO_FALL_TICKS_KNOCKBACK);
         } catch {
             // Player may be in an invalid state (e.g. dead); silently ignore.
