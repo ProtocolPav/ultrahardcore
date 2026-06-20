@@ -10,7 +10,7 @@
     "description": "Resources needed for the UHC Pack",
     "min_engine_version": [ 1, 21, 40 ],
     "uuid": "27f809f2-8c53-49d8-b9e0-08e8dc26dd72",
-    "version": [ 2, 0, 1 ]
+    "version": "2.1.0-beta.1"
   },
   "modules": [
     {
