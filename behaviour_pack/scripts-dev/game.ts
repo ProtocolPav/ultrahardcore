@@ -4,7 +4,6 @@ import {
     EntityComponentTypes,
     GameMode,
     ItemStack,
-    MinecraftDimensionTypes,
     Player,
     system,
     TicksPerSecond,
@@ -13,7 +12,7 @@ import {
 } from "@minecraft/server";
 import {TeamsManager} from "./teams";
 import {MessageManager} from "./messagebar";
-import {MinecraftEffectTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
+import {MinecraftEffectTypes, MinecraftItemTypes, MinecraftDimensionTypes} from "@minecraft/vanilla-data";
 import {game_challenges} from "./challenge";
 import check_travel_challenge from "./challenge_scripts/travel_challenge";
 import check_build_challenge from "./challenge_scripts/build_challenge";
@@ -245,7 +244,7 @@ export class GameManager {
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges)
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
-            player.setGameMode(GameMode.survival)
+            player.setGameMode(GameMode.Survival)
         })
 
         this.teams_manager.spread_teams(this.settings.border_radius)
@@ -261,7 +260,7 @@ export class GameManager {
 
         world.getAllPlayers().forEach((player: Player) => {
             player.teleport(winning_player.location)
-            player.setGameMode(GameMode.survival)
+            player.setGameMode(GameMode.Survival)
             player.addEffect(MinecraftEffectTypes.Resistance, 20000000, {amplifier: 100})
         })
     }
@@ -274,7 +273,7 @@ export class GameManager {
 
         this.teams_manager.spread_teams(100)
 
-        world.getPlayers({gameMode: GameMode.spectator}).forEach((player: Player) => {
+        world.getPlayers({gameMode: GameMode.Spectator}).forEach((player: Player) => {
             player.teleport({x: 0, y: 100, z: 0})
         })
     }
@@ -298,11 +297,11 @@ export class GameManager {
             }
 
             // Clear maps from players
-            world.getDimension(MinecraftDimensionTypes.overworld).runCommand('clear @a map')
+            world.getDimension(MinecraftDimensionTypes.Overworld).runCommand('clear @a map')
 
             // Grace Period Ends
             if (this.game_time === this.settings.grace_period_mins*60 - 3) {
-                world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
+                world.getDimension(MinecraftDimensionTypes.Overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
             else if (this.game_time === this.settings.grace_period_mins*60) {
                 world.gameRules.pvp = true
@@ -311,7 +310,7 @@ export class GameManager {
 
             // Halftime
             else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60/2 - 3) {
-                world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
+                world.getDimension(MinecraftDimensionTypes.Overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
             else if (this.game_time === (this.settings.main_period_mins+this.settings.grace_period_mins)*60/2) {
                 let halftime_message = "Congratulations on making it through half of the game!"
@@ -334,7 +333,7 @@ export class GameManager {
                 )
             }
             else if (this.game_time === (this.settings.grace_period_mins+this.settings.main_period_mins)*60 - 3) {
-                world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
+                world.getDimension(MinecraftDimensionTypes.Overworld).playSound('uhc.checkpoint', {x: 0, y:0, z: 0}, {volume:1000})
             }
             else if (this.game_time === (this.settings.grace_period_mins+this.settings.main_period_mins)*60) {
                 if (this.settings.deathmatch_enabled) {
