@@ -10,32 +10,31 @@ import {
 } from "@minecraft/server";
 
 // How many blocks past the wall before we skip knockback and teleport directly.
-// Knockback cannot reliably push a player who is far outside, so we fall back.
 const TELEPORT_OVERSHOOT_THRESHOLD = 5;
 
 // Ticks of fall-damage immunity granted after a knockback or forced teleport.
-// Knockback arcs the player upward; teleport may land them mid-air.
 const NO_FALL_TICKS_KNOCKBACK = 30;  // ~1.5 s
 const NO_FALL_TICKS_TELEPORT  = 60;  // ~3 s
 
-// Knockback strengths. Horizontal drives the player back toward centre;
-// vertical gives a small arc so they don't slide along the wall.
+// Knockback strengths.
 const KNOCKBACK_HORIZONTAL = 1.2;
 const KNOCKBACK_VERTICAL   = 0.35;
 
 // Warning zone: show actionbar when this many blocks from the wall.
 const WARNING_DISTANCE = 15;
 
-// Particles: shown when the player is within this distance of any wall face.
-const PARTICLE_VISIBILITY = 20;  // blocks
-const PARTICLE_SEGMENT    = 30;  // blocks either side of player along the wall
-const PARTICLE_STEP       = 4;   // horizontal spacing between emitters
-const PARTICLE_Y_BELOW    = 2;   // blocks below player Y
-const PARTICLE_Y_ABOVE    = 10;  // blocks above player Y
-const PARTICLE_Y_STEP     = 2;   // vertical spacing between emitters
+// Each particle billboard is 8 blocks wide and 192 blocks tall (full world height).
+// One emitter per strip is all that is needed — no vertical loop required.
+const PARTICLE_WIDTH      = 8;   // matches the "size": [8, 192] in the particle JSON
+const PARTICLE_VISIBILITY = 20;  // blocks from the wall before we start rendering
+const PARTICLE_SEGMENT    = 32;  // blocks either side of the player along the wall
 
-// worldborder:worldborder faces N/S (fixed X axis, custom_direction [1,0,0]).
-// worldborder:worldborder_ew faces E/W (fixed Z axis, custom_direction [0,0,1]).
+// Y at which emitters are placed. The particle is 192 blocks tall so it covers
+// the full build height regardless of where vertically it is spawned.
+const PARTICLE_SPAWN_Y = 128;
+
+// worldborder:worldborder  — N/S walls (fixed X, billboard faces along X)
+// worldborder:worldborder_ew — E/W walls (fixed Z, billboard faces along Z)
 const PARTICLE_NS = "worldborder:worldborder";
 const PARTICLE_EW = "worldborder:worldborder_ew";
 
@@ -68,8 +67,7 @@ export class BorderManager {
             { allowedDamageCauses: [EntityDamageCause.fall] }
         );
 
-        // Particle rendering runs on its own faster interval so the wall
-        // looks smooth without burdening the main game-loop tick.
+        // Particle rendering runs on its own interval, decoupled from the game loop.
         system.runInterval(() => this.renderParticlesForAllPlayers(), 5);
     }
 
@@ -93,8 +91,7 @@ export class BorderManager {
     private enforcePlayerBorder(player: Player, half: number): void {
         const { x, z } = player.location;
 
-        // Chebyshev distance from the square border wall.
-        // Positive → outside, negative → inside.
+        // Chebyshev distance: positive = outside, negative = inside.
         const overshoot = Math.max(Math.abs(x), Math.abs(z)) - half;
 
         if (overshoot > 0) {
@@ -109,11 +106,9 @@ export class BorderManager {
 
     private handleOutsideBorder(player: Player, half: number, overshoot: number): void {
         if (overshoot > TELEPORT_OVERSHOOT_THRESHOLD) {
-            // Too deep for knockback to be effective; teleport them back.
             this.teleportPlayerInside(player, half);
             this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
         } else {
-            // Normal case: push them back with knockback.
             this.applyKnockback(player);
             player.onScreenDisplay.setActionBar("§cYou hit the world border!");
         }
@@ -127,7 +122,6 @@ export class BorderManager {
         const { x, z } = player.location;
         const magnitude = Math.sqrt(x * x + z * z);
 
-        // If the player is exactly at the origin, push them north arbitrarily.
         const dirX = magnitude > 0 ? -x / magnitude : 0;
         const dirZ = magnitude > 0 ? -z / magnitude : -1;
 
@@ -146,15 +140,11 @@ export class BorderManager {
     private teleportPlayerInside(player: Player, half: number): void {
         const { x, y, z } = player.location;
 
-        // Clamp each axis independently to keep the player as close as possible
-        // to where they were (rather than snapping to the border centre-edge).
         const safeX = Math.max(-(half - 1), Math.min(half - 1, x));
         const safeZ = Math.max(-(half - 1), Math.min(half - 1, z));
 
-        const destination: Vector3 = { x: safeX, y, z: safeZ };
-
         try {
-            player.teleport(destination);
+            player.teleport({ x: safeX, y, z: safeZ });
             this.grantNoFall(player.id, NO_FALL_TICKS_TELEPORT);
             player.onScreenDisplay.setActionBar("§cYou hit the world border!");
         } catch {
@@ -176,68 +166,69 @@ export class BorderManager {
 
     private renderParticlesForAllPlayers(): void {
         const half = this.settings.border_radius;
-
-        for (const player of world.getAllPlayers()) {
-            this.renderParticlesForPlayer(player, half);
-        }
-    }
-
-    private renderParticlesForPlayer(player: Player, half: number): void {
-        const { x, y, z } = player.location;
-
-        // Build the MolangVariableMap once per player per frame.
-        // variable.color is consumed by the particle_appearance_tinting component.
         const molang = new MolangVariableMap();
         molang.setColorRGBA("variable.color", PARTICLE_COLOR);
 
-        // Distance to each wall face from the player (positive = player inside).
-        const distToEast  = half - x;   // East wall at x = +half
-        const distToWest  = half + x;   // West wall at x = -half
-        const distToSouth = half - z;   // South wall at z = +half
-        const distToNorth = half + z;   // North wall at z = -half
+        for (const player of world.getAllPlayers()) {
+            this.renderParticlesForPlayer(player, half, molang);
+        }
+    }
 
-        // N/S walls run parallel to the Z axis → use worldborder:worldborder (custom_direction [1,0,0])
-        if (distToEast  <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y,  half, z, "xFixed", PARTICLE_NS, molang);
-        if (distToWest  <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, z, "xFixed", PARTICLE_NS, molang);
+    private renderParticlesForPlayer(player: Player, half: number, molang: MolangVariableMap): void {
+        const { x, z } = player.location;
 
-        // E/W walls run parallel to the X axis → use worldborder:worldborder_ew (custom_direction [0,0,1])
-        if (distToSouth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y,  half, x, "zFixed", PARTICLE_EW, molang);
-        if (distToNorth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, x, "zFixed", PARTICLE_EW, molang);
+        // Signed distance from each wall face. Positive = player is inside.
+        const distToEast  = half - x;
+        const distToWest  = half + x;
+        const distToSouth = half - z;
+        const distToNorth = half + z;
+
+        // N/S walls (fixed X) → strip runs along Z, use worldborder:worldborder
+        if (distToEast  <= PARTICLE_VISIBILITY) this.spawnWallStrip(player,  half, z, "xFixed", PARTICLE_NS, molang);
+        if (distToWest  <= PARTICLE_VISIBILITY) this.spawnWallStrip(player, -half, z, "xFixed", PARTICLE_NS, molang);
+
+        // E/W walls (fixed Z) → strip runs along X, use worldborder:worldborder_ew
+        if (distToSouth <= PARTICLE_VISIBILITY) this.spawnWallStrip(player,  half, x, "zFixed", PARTICLE_EW, molang);
+        if (distToNorth <= PARTICLE_VISIBILITY) this.spawnWallStrip(player, -half, x, "zFixed", PARTICLE_EW, molang);
     }
 
     /**
-     * Spawns a vertical slice of particles along one wall face.
+     * Spawns a horizontal strip of particles along one wall face.
+     *
+     * Each particle is PARTICLE_WIDTH blocks wide and covers the full world
+     * height, so only one emitter per strip position is needed — no Y loop.
+     * Positions are snapped to a PARTICLE_WIDTH grid so tiles are seamless
+     * regardless of where along the wall the player is standing.
      *
      * @param wallFixed   Fixed coordinate of this wall face (+half or -half).
      * @param playerAlong Player’s coordinate along the wall’s parallel axis.
      * @param axis        "xFixed" → N/S wall (fixed X), "zFixed" → E/W wall (fixed Z).
-     * @param particleId  Particle to use — NS or EW variant.
+     * @param particleId  NS or EW particle variant.
      */
-    private spawnWallSegment(
+    private spawnWallStrip(
         player: Player,
-        playerY: number,
         wallFixed: number,
         playerAlong: number,
         axis: "xFixed" | "zFixed",
         particleId: string,
         molang: MolangVariableMap
     ): void {
-        const minAlong = playerAlong - PARTICLE_SEGMENT;
-        const maxAlong = playerAlong + PARTICLE_SEGMENT;
-        const minY     = Math.floor(playerY) - PARTICLE_Y_BELOW;
-        const maxY     = Math.floor(playerY) + PARTICLE_Y_ABOVE;
+        // Snap the player’s position to the nearest strip boundary so the
+        // rendered segment is always aligned to the PARTICLE_WIDTH grid.
+        const snappedCenter = Math.floor(playerAlong / PARTICLE_WIDTH) * PARTICLE_WIDTH;
+        const strips = Math.ceil(PARTICLE_SEGMENT / PARTICLE_WIDTH);
 
-        for (let along = minAlong; along <= maxAlong; along += PARTICLE_STEP) {
-            for (let py = minY; py <= maxY; py += PARTICLE_Y_STEP) {
-                const pos: Vector3 = axis === "xFixed"
-                    ? { x: wallFixed, y: py, z: along }
-                    : { x: along,     y: py, z: wallFixed };
+        for (let i = -strips; i <= strips; i++) {
+            const along = snappedCenter + i * PARTICLE_WIDTH;
 
-                try {
-                    player.spawnParticle(particleId, pos, molang);
-                } catch {
-                    // Chunk not loaded; skip silently.
-                }
+            const pos: Vector3 = axis === "xFixed"
+                ? { x: wallFixed, y: PARTICLE_SPAWN_Y, z: along }
+                : { x: along,     y: PARTICLE_SPAWN_Y, z: wallFixed };
+
+            try {
+                player.spawnParticle(particleId, pos, molang);
+            } catch {
+                // Chunk not loaded; skip silently.
             }
         }
     }
