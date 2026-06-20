@@ -1,6 +1,6 @@
-import {MinecraftDimensionTypes, Player, TicksPerSecond, world} from "@minecraft/server";
+import {Player, TicksPerSecond, world} from "@minecraft/server";
 import {MessageManager} from "./messagebar";
-import {MinecraftEffectTypes} from "@minecraft/vanilla-data";
+import {MinecraftEffectTypes, MinecraftDimensionTypes} from "@minecraft/vanilla-data";
 
 class Team {
     readonly string_id: string
@@ -91,7 +91,7 @@ export class TeamsManager {
 
             let coordinates = { x: r * Math.cos(theta), y: 0, z: r * Math.sin(theta) }
 
-            let block = world.getDimension(MinecraftDimensionTypes.overworld).getTopmostBlock(
+            let block = world.getDimension(MinecraftDimensionTypes.Overworld).getTopmostBlock(
                 {x: coordinates.x, z: coordinates.z},
             )
 
