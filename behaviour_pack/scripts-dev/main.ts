@@ -4,7 +4,7 @@ import {
     ItemStack,
     Player,
     system,
-    TicksPerSecond,
+    TicksPerSecond, Vector3,
     world
 } from "@minecraft/server";
 import {GameManager} from "./game";
@@ -64,8 +64,12 @@ world.afterEvents.playerSpawn.subscribe(event => {
     else if (game_manager.game_status === 'running') {
         if (!game_manager.teams_manager.get_team(event.player)) {
             event.player.setGameMode(GameMode.Spectator)
-            // @ts-ignore
-            event.player.teleport(event.player.getDynamicProperty('uhc:death_location'))
+
+            const death_location: Vector3 = event.player.getDynamicProperty('uhc:death_location') as Vector3
+            
+            if (death_location) {
+                event.player.teleport(death_location)
+            }
         }
     }
 })
