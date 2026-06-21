@@ -82,13 +82,13 @@ export function admin_form(game_manager: GameManager, player: Player) {
         .spacer({ visible: settingsVisible })
         .header('Game Timer', { visible: settingsVisible })
         .spacer({ visible: settingsVisible })
-        .slider('Grace period', gracePeriod, 5, 60, { step: 5, visible: settingsVisible })
-        .slider('Main game length', mainPeriod, 20, 120, { step: 10, visible: settingsVisible })
+        .slider('Grace Period', gracePeriod, 5, 60, { step: 5, description: '(in minutes)', visible: settingsVisible })
+        .slider('Main Game', mainPeriod, 20, 120, { step: 10, description: '(in minutes)', visible: settingsVisible })
         .spacer({ visible: settingsVisible })
         .header('Modifiers', { visible: settingsVisible })
         .spacer({ visible: settingsVisible })
-        .toggle('Enable Deathmatch', deathmatch, { visible: settingsVisible })
-        .toggle('Regeneration at halftime', halftimeRegen, { visible: settingsVisible })
+        .toggle('Enable Deathmatch', deathmatch, { description: 'The border shrinks to 100 blocks and all surviving players are teleported to the centre for a final fight.', visible: settingsVisible })
+        .toggle('Enable Halftime Regeneration', halftimeRegen, { description: 'Gives 30 seconds of Regeneration', visible: settingsVisible })
         .spacer({ visible: settingsVisible })
         .button('Save Changes', () => {
             s.border_radius         = borderRadius.getData();
