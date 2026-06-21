@@ -5,6 +5,7 @@
       "dependencies": {
         "@minecraft/server": "2.8.0",
         "@minecraft/server-net": "1.0.0-beta.1.26.31-stable",
+        "@minecraft/server-ui": "2.1.0",
         "@minecraft/vanilla-data": "^1.26.31",
       },
       "devDependencies": {
@@ -69,6 +70,8 @@
     "@minecraft/server-admin": ["@minecraft/server-admin@1.0.0-beta.release.1.19.50", "", {}, "sha512-RVHU4LLs0gZeTntbfcUEc+WM9DEWXbl1kK+vh02kCta8KSWWmW2aGX+vNdrJjrlyAVy3+uZgzLAb3O67g24xig=="],
 
     "@minecraft/server-net": ["@minecraft/server-net@1.0.0-beta.1.26.31-stable", "", { "peerDependencies": { "@minecraft/common": "^1.0.0", "@minecraft/server": "^1.17.0 || ^2.0.0", "@minecraft/server-admin": "^1.0.0-beta.1.26.31-stable" } }, "sha512-Lqk4He+9rF4m2y6lszTUwmvof7jT2JZ3KK4FWEjZ1zn9lxmA+iTsVtnnzLeCUHegzv71E1jYfiv6beALAsRVkQ=="],
+
+    "@minecraft/server-ui": ["@minecraft/server-ui@2.1.0", "", { "peerDependencies": { "@minecraft/common": "^1.0.0", "@minecraft/server": "^2.0.0" } }, "sha512-7zXyqK6HI62aH0RlfObLitBc7EldpoAH3AeC8JWOaI6CCNoCi2DG2U78ELdq+NrUIjvCE87Bix/I+hgXsQ5AdA=="],
 
     "@minecraft/vanilla-data": ["@minecraft/vanilla-data@1.26.31", "", {}, "sha512-EkaBw/FBfEw/iezLNHtdb+SvM+vKixLf3ihHCdxfDKG3o5kdPlXlpHlutlA8cOkkQ+N/xphzJDw47F7h7Yy6Yw=="],
 
