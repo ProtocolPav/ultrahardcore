@@ -29,8 +29,8 @@ const WARNING_DISTANCE = 15;
 // We step one chunk (16 blocks) between emitters and spawn at the chunk centre
 // (+8), which gives a 50% overlap between adjacent billboards — seamless wall.
 const CHUNK_SIZE          = 16;
-const PARTICLE_VISIBILITY = 20;   // blocks from the wall face
-const PARTICLE_SEGMENT    = 32;   // blocks either side of the player along the wall
+const PARTICLE_VISIBILITY = 100;   // blocks from the wall face
+const PARTICLE_SEGMENT    = 128;   // blocks either side of the player along the wall
 const PARTICLE_SPAWN_Y    = 128;
 
 // Interval must match or exceed particle max_lifetime (3 s = 60 ticks) to
