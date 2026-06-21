@@ -107,20 +107,9 @@ export class BorderManager {
             const { x, z } = player.location;
             const overshoot = Math.max(Math.abs(x), Math.abs(z)) - half;
 
-            if (overshoot <= 0) {
-                if (overshoot > -WARNING_DISTANCE) {
-                    const dist = Math.floor(-overshoot);
-                    player.onScreenDisplay.setActionBar(
-                        `§eApproaching border — §c${dist} block${dist === 1 ? "" : "s"}§e remaining`
-                    );
-                }
-                continue;
-            }
-
             // Deeply outside players are handled by checkBorder() via teleport.
             if (overshoot <= TELEPORT_OVERSHOOT_THRESHOLD) {
                 this.applyKnockback(player);
-                player.onScreenDisplay.setActionBar("§cYou hit the world border!");
             }
         }
     }
@@ -159,7 +148,6 @@ export class BorderManager {
         try {
             player.teleport({ x: safeX, y, z: safeZ });
             this.grantNoFall(player.id, NO_FALL_TICKS_TELEPORT);
-            player.onScreenDisplay.setActionBar("§cYou hit the world border!");
         } catch {
             // Silently ignore; will retry on next game loop tick.
         }
