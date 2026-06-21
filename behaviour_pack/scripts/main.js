@@ -3805,151 +3805,102 @@ import {
   system,
   world as world6
 } from "@minecraft/server";
-var TELEPORT_OVERSHOOT_THRESHOLD = 5;
-var NO_FALL_TICKS_KNOCKBACK = 30;
-var NO_FALL_TICKS_TELEPORT = 60;
-var KNOCKBACK_VERTICAL = 0.35;
-var WARNING_DISTANCE = 15;
-var PARTICLE_VISIBILITY = 20;
-var PARTICLE_SEGMENT = 30;
-var PARTICLE_STEP = 4;
-var PARTICLE_Y_BELOW = 2;
-var PARTICLE_Y_ABOVE = 10;
-var PARTICLE_Y_STEP = 2;
+var TELEPORT_THRESHOLD = 7;
+var NO_FALL_KNOCKBACK = 30;
+var NO_FALL_TELEPORT = 60;
+var CHUNK_SIZE = 16;
+var PARTICLE_VISIBILITY = 100;
+var PARTICLE_SEGMENT = 128;
+var PARTICLE_SPAWN_Y = 128;
 var PARTICLE_NS = "worldborder:worldborder";
 var PARTICLE_EW = "worldborder:worldborder_ew";
 var PARTICLE_COLOR = { red: 1, green: 0.2, blue: 0.2, alpha: 1 };
 var BorderManager = class {
   constructor(settings, messageManager) {
-    // Maps player.id → tick at which fall-damage immunity expires.
     this.noFallUntil = /* @__PURE__ */ new Map();
     this.settings = settings;
     this.messageManager = messageManager;
     world6.beforeEvents.entityHurt.subscribe(
       (event) => {
-        const entity = event.hurtEntity;
-        if (entity.typeId !== "minecraft:player") return;
-        const expiresAt = this.noFallUntil.get(entity.id);
+        if (event.hurtEntity.typeId !== "minecraft:player") return;
+        const expiresAt = this.noFallUntil.get(event.hurtEntity.id);
         if (expiresAt !== void 0 && system.currentTick <= expiresAt) {
           event.cancel = true;
         }
       },
       { allowedDamageCauses: [EntityDamageCause.fall] }
     );
-    system.runInterval(() => this.renderParticlesForAllPlayers(), 5);
   }
-  // ─────────────────────────────────────────────────────────────────────────
-  // Public API
-  // ─────────────────────────────────────────────────────────────────────────
-  /** Called every game-loop tick while the game is running. */
+  /** Called from the game loop. Teleports players who are too deep to recover via knockback. */
   checkBorder() {
     const half = this.settings.border_radius;
+    this.renderParticles();
     for (const player of world6.getAllPlayers()) {
-      this.enforcePlayerBorder(player, half);
+      const overshoot = this.getOvershoot(player, half);
+      if (overshoot > 0 && overshoot <= TELEPORT_THRESHOLD) {
+        this.applyKnockback(player, half);
+      } else if (overshoot > TELEPORT_THRESHOLD) {
+        this.teleportInside(player, half);
+        this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
+      }
     }
   }
-  // ─────────────────────────────────────────────────────────────────────────
-  // Enforcement
-  // ─────────────────────────────────────────────────────────────────────────
-  enforcePlayerBorder(player, half) {
+  // Returns how far outside the square border the player is. Negative = inside.
+  getOvershoot(player, half) {
     const { x, z } = player.location;
-    const overshoot = Math.max(Math.abs(x), Math.abs(z)) - half;
-    if (overshoot > 0) {
-      this.handleOutsideBorder(player, half, overshoot);
-    } else if (overshoot > -WARNING_DISTANCE) {
-      const distanceToWall = Math.floor(-overshoot);
-      player.onScreenDisplay.setActionBar(
-        `\xA7eApproaching border \u2014 \xA7c${distanceToWall} block${distanceToWall === 1 ? "" : "s"}\xA7e remaining`
-      );
-    }
+    return Math.max(Math.abs(x), Math.abs(z)) - half;
   }
-  handleOutsideBorder(player, half, overshoot) {
-    if (overshoot > TELEPORT_OVERSHOOT_THRESHOLD) {
-      this.teleportPlayerInside(player, half);
-      this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
-    } else {
-      this.applyKnockback(player);
-      player.onScreenDisplay.setActionBar("\xA7cYou hit the world border!");
-    }
-  }
-  // ─────────────────────────────────────────────────────────────────────────
-  // Knockback
-  // ─────────────────────────────────────────────────────────────────────────
-  applyKnockback(player) {
+  applyKnockback(player, half) {
     const { x, z } = player.location;
-    const magnitude = Math.sqrt(x * x + z * z);
-    const dirX = magnitude > 0 ? -x / magnitude : 0;
-    const dirZ = magnitude > 0 ? -z / magnitude : -1;
-    const vectorXZ = { x: dirX, z: dirZ };
+    const overshoot = this.getOvershoot(player, half);
+    const t = overshoot / TELEPORT_THRESHOLD;
+    const strength = 1.7 + t ** 2 * 6;
+    const vertical = 0.15 + t ** 2 * 0.35;
+    const direction = Math.abs(x) >= Math.abs(z) ? { x: x > 0 ? -strength : strength, z: 0 } : { x: 0, z: z > 0 ? -strength : strength };
     try {
-      player.applyKnockback(vectorXZ, KNOCKBACK_VERTICAL);
-      this.grantNoFall(player.id, NO_FALL_TICKS_KNOCKBACK);
+      player.applyKnockback(direction, vertical);
+      this.grantNoFall(player.id, NO_FALL_KNOCKBACK);
     } catch {
     }
   }
-  // ─────────────────────────────────────────────────────────────────────────
-  // Teleport fallback
-  // ─────────────────────────────────────────────────────────────────────────
-  teleportPlayerInside(player, half) {
+  teleportInside(player, half) {
     const { x, y, z } = player.location;
-    const safeX = Math.max(-(half - 1), Math.min(half - 1, x));
-    const safeZ = Math.max(-(half - 1), Math.min(half - 1, z));
-    const destination = { x: safeX, y, z: safeZ };
+    const clamp = (v) => Math.max(-(half - 1), Math.min(half - 1, v));
     try {
-      player.teleport(destination);
-      this.grantNoFall(player.id, NO_FALL_TICKS_TELEPORT);
-      player.onScreenDisplay.setActionBar("\xA7cYou hit the world border!");
+      player.teleport({ x: clamp(x), y, z: clamp(z) });
+      this.grantNoFall(player.id, NO_FALL_TELEPORT);
     } catch {
     }
   }
-  // ─────────────────────────────────────────────────────────────────────────
-  // Fall-damage immunity
-  // ─────────────────────────────────────────────────────────────────────────
   grantNoFall(playerId, ticks) {
     this.noFallUntil.set(playerId, system.currentTick + ticks);
   }
-  // ─────────────────────────────────────────────────────────────────────────
-  // Particle wall
-  // ─────────────────────────────────────────────────────────────────────────
-  renderParticlesForAllPlayers() {
+  renderParticles() {
     const half = this.settings.border_radius;
-    for (const player of world6.getAllPlayers()) {
-      this.renderParticlesForPlayer(player, half);
-    }
-  }
-  renderParticlesForPlayer(player, half) {
-    const { x, y, z } = player.location;
     const molang = new MolangVariableMap();
     molang.setColorRGBA("variable.color", PARTICLE_COLOR);
-    const distToEast = half - x;
-    const distToWest = half + x;
-    const distToSouth = half - z;
-    const distToNorth = half + z;
-    if (distToEast <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, half, z, "xFixed", PARTICLE_NS, molang);
-    if (distToWest <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, z, "xFixed", PARTICLE_NS, molang);
-    if (distToSouth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, half, x, "zFixed", PARTICLE_EW, molang);
-    if (distToNorth <= PARTICLE_VISIBILITY) this.spawnWallSegment(player, y, -half, x, "zFixed", PARTICLE_EW, molang);
+    for (const player of world6.getAllPlayers()) {
+      this.renderPlayerParticles(player, half, molang);
+    }
   }
-  /**
-   * Spawns a vertical slice of particles along one wall face.
-   *
-   * @param wallFixed   Fixed coordinate of this wall face (+half or -half).
-   * @param playerAlong Player’s coordinate along the wall’s parallel axis.
-   * @param axis        "xFixed" → N/S wall (fixed X), "zFixed" → E/W wall (fixed Z).
-   * @param particleId  Particle to use — NS or EW variant.
-   */
-  spawnWallSegment(player, playerY, wallFixed, playerAlong, axis, particleId, molang) {
-    const minAlong = playerAlong - PARTICLE_SEGMENT;
-    const maxAlong = playerAlong + PARTICLE_SEGMENT;
-    const minY = Math.floor(playerY) - PARTICLE_Y_BELOW;
-    const maxY = Math.floor(playerY) + PARTICLE_Y_ABOVE;
-    for (let along = minAlong; along <= maxAlong; along += PARTICLE_STEP) {
-      for (let py = minY; py <= maxY; py += PARTICLE_Y_STEP) {
-        const pos = axis === "xFixed" ? { x: wallFixed, y: py, z: along } : { x: along, y: py, z: wallFixed };
-        try {
-          player.spawnParticle(particleId, pos, molang);
-        } catch {
-        }
+  renderPlayerParticles(player, half, molang) {
+    const { x, z } = player.location;
+    const chunkX = Math.floor(x / CHUNK_SIZE) * CHUNK_SIZE;
+    const chunkZ = Math.floor(z / CHUNK_SIZE) * CHUNK_SIZE;
+    if (Math.abs(half - x) <= PARTICLE_VISIBILITY) this.spawnWallChunks(player, half, chunkZ, "xFixed", PARTICLE_NS, molang);
+    if (Math.abs(-half - x) <= PARTICLE_VISIBILITY) this.spawnWallChunks(player, -half, chunkZ, "xFixed", PARTICLE_NS, molang);
+    if (Math.abs(half - z) <= PARTICLE_VISIBILITY) this.spawnWallChunks(player, half, chunkX, "zFixed", PARTICLE_EW, molang);
+    if (Math.abs(-half - z) <= PARTICLE_VISIBILITY) this.spawnWallChunks(player, -half, chunkX, "zFixed", PARTICLE_EW, molang);
+  }
+  spawnWallChunks(player, wallFixed, playerChunkAlong, axis, particleId, molang) {
+    const min = playerChunkAlong - PARTICLE_SEGMENT;
+    const max = playerChunkAlong + PARTICLE_SEGMENT;
+    for (let chunk = min; chunk <= max; chunk += CHUNK_SIZE) {
+      const along = chunk + CHUNK_SIZE / 2;
+      const pos = axis === "xFixed" ? { x: wallFixed, y: PARTICLE_SPAWN_Y, z: along } : { x: along, y: PARTICLE_SPAWN_Y, z: wallFixed };
+      try {
+        player.spawnParticle(particleId, pos, molang);
+      } catch {
       }
     }
   }

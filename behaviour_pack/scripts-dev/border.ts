@@ -11,13 +11,11 @@ import {
 } from "@minecraft/server";
 
 // How far outside the border before we give up on knockback and teleport instead.
-const TELEPORT_THRESHOLD = 5;
+const TELEPORT_THRESHOLD = 7;
 
 // Ticks of fall-damage immunity granted after knockback / teleport.
 const NO_FALL_KNOCKBACK = 30;
 const NO_FALL_TELEPORT  = 60;
-
-const KNOCKBACK_VERTICAL = 0.45;
 
 // Particle billboards are 8 blocks wide × 192 tall, spawned every CHUNK_SIZE
 // blocks along the wall at chunk centre. Interval matches particle max_lifetime
@@ -26,7 +24,6 @@ const CHUNK_SIZE          = 16;
 const PARTICLE_VISIBILITY = 100;
 const PARTICLE_SEGMENT    = 128;
 const PARTICLE_SPAWN_Y    = 128;
-const PARTICLE_INTERVAL   = 60;
 
 const PARTICLE_NS    = "worldborder:worldborder";
 const PARTICLE_EW    = "worldborder:worldborder_ew";
@@ -53,30 +50,22 @@ export class BorderManager {
             },
             { allowedDamageCauses: [EntityDamageCause.fall] }
         );
-
-        system.runInterval(() => this.knockbackPass(), 2);
-        system.runInterval(() => this.renderParticles(), PARTICLE_INTERVAL);
     }
 
     /** Called from the game loop. Teleports players who are too deep to recover via knockback. */
     public checkBorder(): void {
         const half = this.settings.border_radius;
 
-        for (const player of world.getAllPlayers()) {
-            if (this.getOvershoot(player, half) > TELEPORT_THRESHOLD) {
-                this.teleportInside(player, half);
-                this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
-            }
-        }
-    }
-
-    private knockbackPass(): void {
-        const half = this.settings.border_radius;
+        this.renderParticles()
 
         for (const player of world.getAllPlayers()) {
             const overshoot = this.getOvershoot(player, half);
+
             if (overshoot > 0 && overshoot <= TELEPORT_THRESHOLD) {
                 this.applyKnockback(player, half);
+            } else if (overshoot > TELEPORT_THRESHOLD) {
+                this.teleportInside(player, half);
+                this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
             }
         }
     }
@@ -89,16 +78,19 @@ export class BorderManager {
 
     private applyKnockback(player: Player, half: number): void {
         const { x, z } = player.location;
+        const overshoot = this.getOvershoot(player, half);
 
-        // Push perpendicular to whichever wall face the player crossed.
-        // For a square border the breached axis is whichever absolute coordinate
-        // is larger, so we zero out the other component entirely.
+        // Quadratic scaling: weak nudge near the wall, strong push when deep.
+        const t = overshoot / TELEPORT_THRESHOLD;
+        const strength = 1.7 + t ** 2 * 6.0;
+        const vertical = 0.15 + t ** 2 * 0.35;
+
         const direction: VectorXZ = Math.abs(x) >= Math.abs(z)
-            ? { x: x > 0 ? -1 : 1, z: 0 }
-            : { x: 0, z: z > 0 ? -1 : 1 };
+            ? { x: x > 0 ? -strength : strength, z: 0 }
+            : { x: 0, z: z > 0 ? -strength : strength };
 
         try {
-            player.applyKnockback(direction, KNOCKBACK_VERTICAL);
+            player.applyKnockback(direction, vertical);
             this.grantNoFall(player.id, NO_FALL_KNOCKBACK);
         } catch {
             // no-op: player may be mid-death
