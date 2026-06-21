@@ -10,13 +10,18 @@ import {
     world
 } from "@minecraft/server";
 
+// How far outside the border before we give up on knockback and teleport instead.
 const TELEPORT_THRESHOLD = 5;
 
+// Ticks of fall-damage immunity granted after knockback / teleport.
 const NO_FALL_KNOCKBACK = 30;
 const NO_FALL_TELEPORT  = 60;
 
 const KNOCKBACK_VERTICAL = 0.45;
 
+// Particle billboards are 8 blocks wide × 192 tall, spawned every CHUNK_SIZE
+// blocks along the wall at chunk centre. Interval matches particle max_lifetime
+// (3 s = 60 ticks) so only one generation is alive at a time.
 const CHUNK_SIZE          = 16;
 const PARTICLE_VISIBILITY = 100;
 const PARTICLE_SEGMENT    = 128;
@@ -53,13 +58,12 @@ export class BorderManager {
         system.runInterval(() => this.renderParticles(), PARTICLE_INTERVAL);
     }
 
+    /** Called from the game loop. Teleports players who are too deep to recover via knockback. */
     public checkBorder(): void {
         const half = this.settings.border_radius;
 
         for (const player of world.getAllPlayers()) {
-            const overshoot = this.getOvershoot(player, half);
-
-            if (overshoot > TELEPORT_THRESHOLD) {
+            if (this.getOvershoot(player, half) > TELEPORT_THRESHOLD) {
                 this.teleportInside(player, half);
                 this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
             }
@@ -71,26 +75,27 @@ export class BorderManager {
 
         for (const player of world.getAllPlayers()) {
             const overshoot = this.getOvershoot(player, half);
-
             if (overshoot > 0 && overshoot <= TELEPORT_THRESHOLD) {
-                this.applyKnockback(player);
+                this.applyKnockback(player, half);
             }
         }
     }
 
+    // Returns how far outside the square border the player is. Negative = inside.
     private getOvershoot(player: Player, half: number): number {
         const { x, z } = player.location;
         return Math.max(Math.abs(x), Math.abs(z)) - half;
     }
 
-    private applyKnockback(player: Player): void {
+    private applyKnockback(player: Player, half: number): void {
         const { x, z } = player.location;
-        const magnitude = Math.sqrt(x * x + z * z);
 
-        const direction: VectorXZ = {
-            x: magnitude > 0 ? -x / magnitude : 0,
-            z: magnitude > 0 ? -z / magnitude : -1
-        };
+        // Push perpendicular to whichever wall face the player crossed.
+        // For a square border the breached axis is whichever absolute coordinate
+        // is larger, so we zero out the other component entirely.
+        const direction: VectorXZ = Math.abs(x) >= Math.abs(z)
+            ? { x: x > 0 ? -1 : 1, z: 0 }
+            : { x: 0, z: z > 0 ? -1 : 1 };
 
         try {
             player.applyKnockback(direction, KNOCKBACK_VERTICAL);
