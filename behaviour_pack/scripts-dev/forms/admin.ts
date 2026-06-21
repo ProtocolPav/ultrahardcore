@@ -1,119 +1,121 @@
-import {ActionFormData, MessageFormData, ModalFormData} from "@minecraft/server-ui";
+import {
+    CustomForm,
+    ObservableNumber,
+    ObservableBoolean,
+    ObservableString
+} from "@minecraft/server-ui";
 import {GameManager} from "../game";
-import {Player} from "@minecraft/server";
+import {Player, system} from "@minecraft/server";
 
 export function admin_form(game_manager: GameManager, player: Player) {
-    const form = new ActionFormData();
-    form.title('UHC Manager')
-    form.button('Start Game', 'textures/ui/dressing_room_skins')
-    form.button('Settings', 'textures/ui/icon_setting')
-    form.button('Challenge Logs', 'textures/ui/icon_best3')
+    const canStart = game_manager.game_status === 'waiting' || game_manager.game_status === 'finished';
 
-// @ts-ignore
-    form.show(player).then(r => {
-        // This will stop the code when the player closes the form
-        if (r.canceled) return;
+    const form = new CustomForm(player, 'UHC Manager')
+        .button('Start Game', () => {
+            form.close();
+            system.runTimeout(() => {confirm_start_form(game_manager, player)}, 15)
+        }, { disabled: !canStart })
+        .button('Settings', () => {
+            form.close();
+            system.runTimeout(() => {settings_form(game_manager, player)}, 15)
+        })
+        .button('Challenge Logs', () => {
+            form.close();
+            system.runTimeout(() => {challenge_logs_form(game_manager, player)}, 15)
+        });
 
-        let response = r.selection;
-        switch (response) {
-            case 0:
-                confirm_start_form(game_manager, player);
-                break;
-
-            case 1:
-                settings_form(game_manager, player);
-                break;
-
-            case 2:
-                challenge_logs_form(game_manager, player);
-                break;
-        }
-
-    }).catch(e => {
-        console.error(e, e.stack);
-    });
+    form.show().catch(e => console.error(e, e.stack));
 }
 
 function confirm_start_form(game_manager: GameManager, player: Player) {
-    const form = new MessageFormData()
-    form.title('Are you sure?')
-    form.body(
-        'Pressing start will begin a 15 second countdown, ' +
-        'after which each team will be teleported and the UHC begins.\n\n' +
-        "Once the game starts, you §4can't§r:\n" +
-        "- Stop the game\n" +
-        "- Have any new players join the game\n"
-    )
-    form.button1("I'm Sure")
-    form.button2("Cancel")
+    const form = new CustomForm(player, 'Are you sure?')
+        .label(
+            'Pressing start will begin a 15 second countdown, ' +
+            'after which each team will be teleported and the UHC begins.\n\n' +
+            "Once the game starts, you §4can't§r:\n" +
+            "- Stop the game\n" +
+            "- Have any new players join the game"
+        )
+        .divider()
+        .button("I'm Sure", () => {
+            game_manager.begin_countdown_to_start();
+            form.close();
+        })
 
-    //@ts-ignore
-    form.show(player).then(r => {
-        if (r.canceled || r.selection == 1){
-            return
-        }
-
-        game_manager.begin_countdown_to_start()
-    })
+    form.show().catch(e => console.error(e, e.stack));
 }
 
 function settings_form(game_manager: GameManager, player: Player) {
-    const form = new ModalFormData()
-    form.title('UHC Settings')
+    const s = game_manager.settings;
 
-    form.slider('Border Radius', 500, 3800, { valueStep: 150, defaultValue: game_manager.settings.border_radius })
-    form.slider('Max players per team', 1, 8, { valueStep: 1, defaultValue: game_manager.settings.players_per_team })
-    // form.toggle('Enable random loot chests to spawn', game_manager.settings.loot_chests_enabled)
-    // form.toggle('Enable centre loot chests', game_manager.settings.centre_chests_enabled)
-    form.slider('Grace Period length (minutes)', 5, 60, { valueStep: 5, defaultValue: game_manager.settings.grace_period_mins })
-    form.slider('Main Game length (After Grace Period)', 20, 120, { valueStep: 10, defaultValue: game_manager.settings.main_period_mins })
-    form.toggle('Enable Deathmatch', { defaultValue: game_manager.settings.deathmatch_enabled })
-    form.toggle('Enable Regeneration at halftime', { defaultValue: game_manager.settings.halftime_regeneration })
-    form.submitButton('Confirm Changes')
+    const borderRadius = new ObservableNumber(s.border_radius, { clientWritable: true });
+    const playersPerTeam = new ObservableNumber(s.players_per_team, { clientWritable: true });
+    const gracePeriod = new ObservableNumber(s.grace_period_mins, { clientWritable: true });
+    const mainPeriod = new ObservableNumber(s.main_period_mins, { clientWritable: true });
+    const deathmatch = new ObservableBoolean(s.deathmatch_enabled, { clientWritable: true });
+    const halftimeRegen = new ObservableBoolean(s.halftime_regeneration, { clientWritable: true });
 
-    form.show(player).then(r => {
-        if (r.canceled || !r.formValues) return
+    const borderDescription = new ObservableString(
+        `The half-width of the square border. Full width: ${s.border_radius * 2} blocks (${s.border_radius} from centre to each wall).`,
+        { clientWritable: false }
+    );
 
-        const values = r.formValues
+    const form = new CustomForm(player, 'UHC Settings')
+        .header('World Border')
+        .spacer()
+        .slider('Border Size', borderRadius, 500, 3800, { step: 150, description: borderDescription })
+        .spacer()
+        .header('Teams')
+        .spacer()
+        .slider('Team Size', playersPerTeam, 1, 8, { step: 1 })
+        .spacer()
+        .header('Game Timer')
+        .spacer()
+        .slider('Grace Period', gracePeriod, 5, 60, { step: 5, description: "How long the Grace Period lasts in minutes." })
+        .slider('Main Game', mainPeriod, 20, 120, { step: 10, description: "How long the Main Game lasts in minutes." })
+        .spacer()
+        .header('Modifiers')
+        .spacer()
+        .toggle('Enable Deathmatch', deathmatch, { description: "Border Size decreased to 100, remaining players are teleported to the centre, and fight to the death." })
+        .toggle('Regeneration at halftime', halftimeRegen)
+        .spacer()
+        .button('Save Changes', () => {
+            s.border_radius         = borderRadius.getData();
+            s.players_per_team      = playersPerTeam.getData();
+            s.grace_period_mins     = gracePeriod.getData();
+            s.main_period_mins      = mainPeriod.getData();
+            s.deathmatch_enabled    = deathmatch.getData();
+            s.halftime_regeneration = halftimeRegen.getData();
+            s.update_settings();
+            form.close();
+        });
 
-        game_manager.settings.border_radius = values[0] as number
-        game_manager.settings.players_per_team = values[1] as number
-        // game_manager.settings.loot_chests_enabled = Boolean(values[2])
-        // game_manager.settings.centre_chests_enabled = Boolean(values[3])
-        game_manager.settings.grace_period_mins = values[2] as number
-        game_manager.settings.main_period_mins = values[3] as number
-        game_manager.settings.deathmatch_enabled = values[4] as boolean
-        game_manager.settings.halftime_regeneration = values[5] as boolean
-
-        game_manager.settings.update_settings()
-    })
+    form.show().catch(e => console.error(e, e.stack));
 }
 
 function challenge_logs_form(game_manager: GameManager, player: Player) {
-    let body = ''
-    for (let challengesKey in game_manager.challenges) {
-        let challenge = game_manager.challenges[challengesKey]
-        body = `${body}\n§e${challenge.name}§r\n`
-        challenge.progress.sort((a, b) => a.progress - b.progress).forEach((progress) => {
-            if (progress.player) {
-                body = `${body}\n- ${progress.player.name} | ${progress.progress}/${progress.max_progress}`
-            }
-            else if (!progress.player) {
-                body = `${body}\n- ${progress.team} | ${progress.progress}/${progress.max_progress}`
-            }
-        })
+    const form = new CustomForm(player, 'Challenge Logs');
+
+    if (Object.keys(game_manager.challenges).length === 0) {
+        form.label('§7No challenge data yet.');
     }
 
-    const form = new MessageFormData()
-    form.title('Challenge Logs')
-    form.body(body)
-    form.button1("Exit")
-    form.button2("Cancel")
+    for (const key in game_manager.challenges) {
+        const challenge = game_manager.challenges[key];
+        form.label(`§e${challenge.name}§r`);
 
-    //@ts-ignore
-    form.show(player).then(r => {
-        if (r.canceled || r.selection == 1){
-            return
-        }
-    })
+        challenge.progress
+            .slice()
+            .sort((a, b) => b.progress - a.progress)
+            .forEach(p => {
+                const label = p.player ? p.player.name : p.team;
+                form.label(`- ${label} | ${p.progress}/${p.max_progress}`);
+            });
+
+        form.divider();
+    }
+
+    form.button('Exit', () => form.close());
+
+    form.show().catch(e => console.error(e, e.stack));
 }

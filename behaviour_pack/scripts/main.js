@@ -3,8 +3,8 @@ import {
   EntityComponentTypes as EntityComponentTypes4,
   GameMode as GameMode2,
   ItemStack as ItemStack2,
-  Player as Player9,
-  system as system3,
+  Player as Player10,
+  system as system4,
   TicksPerSecond as TicksPerSecond3,
   world as world8
 } from "@minecraft/server";
@@ -3812,8 +3812,8 @@ var CHUNK_SIZE = 16;
 var PARTICLE_VISIBILITY = 100;
 var PARTICLE_SEGMENT = 128;
 var PARTICLE_SPAWN_Y = 128;
-var PARTICLE_NS = "worldborder:worldborder";
-var PARTICLE_EW = "worldborder:worldborder_ew";
+var PARTICLE_NS = "uhc:world_border";
+var PARTICLE_EW = "uhc:world_border_ew";
 var PARTICLE_COLOR = { red: 1, green: 0.2, blue: 0.2, alpha: 1 };
 var BorderManager = class {
   constructor(settings, messageManager) {
@@ -4153,103 +4153,88 @@ function team_form(game_manager2, player) {
 }
 
 // behaviour_pack/scripts-dev/forms/admin.ts
-import { ActionFormData as ActionFormData2, MessageFormData, ModalFormData } from "@minecraft/server-ui";
+import {
+  CustomForm,
+  ObservableNumber,
+  ObservableBoolean,
+  ObservableString
+} from "@minecraft/server-ui";
+import { system as system3 } from "@minecraft/server";
 function admin_form(game_manager2, player) {
-  const form = new ActionFormData2();
-  form.title("UHC Manager");
-  form.button("Start Game", "textures/ui/dressing_room_skins");
-  form.button("Settings", "textures/ui/icon_setting");
-  form.button("Challenge Logs", "textures/ui/icon_best3");
-  form.show(player).then((r) => {
-    if (r.canceled) return;
-    let response = r.selection;
-    switch (response) {
-      case 0:
-        confirm_start_form(game_manager2, player);
-        break;
-      case 1:
-        settings_form(game_manager2, player);
-        break;
-      case 2:
-        challenge_logs_form(game_manager2, player);
-        break;
-    }
-  }).catch((e) => {
-    console.error(e, e.stack);
+  const canStart = game_manager2.game_status === "waiting" || game_manager2.game_status === "finished";
+  const form = new CustomForm(player, "UHC Manager").button("Start Game", () => {
+    form.close();
+    system3.runTimeout(() => {
+      confirm_start_form(game_manager2, player);
+    }, 15);
+  }, { disabled: !canStart }).button("Settings", () => {
+    form.close();
+    system3.runTimeout(() => {
+      settings_form(game_manager2, player);
+    }, 15);
+  }).button("Challenge Logs", () => {
+    form.close();
+    system3.runTimeout(() => {
+      challenge_logs_form(game_manager2, player);
+    }, 15);
   });
+  form.show().catch((e) => console.error(e, e.stack));
 }
 function confirm_start_form(game_manager2, player) {
-  const form = new MessageFormData();
-  form.title("Are you sure?");
-  form.body(
-    "Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\nOnce the game starts, you \xA74can't\xA7r:\n- Stop the game\n- Have any new players join the game\n"
-  );
-  form.button1("I'm Sure");
-  form.button2("Cancel");
-  form.show(player).then((r) => {
-    if (r.canceled || r.selection == 1) {
-      return;
-    }
+  const form = new CustomForm(player, "Are you sure?").label(
+    "Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\nOnce the game starts, you \xA74can't\xA7r:\n- Stop the game\n- Have any new players join the game"
+  ).divider().button("I'm Sure", () => {
     game_manager2.begin_countdown_to_start();
+    form.close();
   });
+  form.show().catch((e) => console.error(e, e.stack));
 }
 function settings_form(game_manager2, player) {
-  const form = new ModalFormData();
-  form.title("UHC Settings");
-  form.slider("Border Circular Radius", 500, 3800, 150, game_manager2.settings.border_radius);
-  form.slider("Max players per team", 1, 8, 1, game_manager2.settings.players_per_team);
-  form.slider("Grace Period length (minutes)", 5, 60, 5, game_manager2.settings.grace_period_mins);
-  form.slider("Main Game length (After Grace Period)", 20, 120, 10, game_manager2.settings.main_period_mins);
-  form.toggle("Enable Deathmatch", game_manager2.settings.deathmatch_enabled);
-  form.toggle("Enable Regeneration at halftime", game_manager2.settings.halftime_regeneration);
-  form.submitButton("Confirm Changes");
-  form.show(player).then((r) => {
-    if (r.canceled) return;
-    if (r.formValues) {
-      let values = r.formValues;
-      game_manager2.settings.border_radius = Number(values[0]);
-      game_manager2.settings.players_per_team = Number(values[1]);
-      game_manager2.settings.grace_period_mins = Number(values[2]);
-      game_manager2.settings.main_period_mins = Number(values[3]);
-      game_manager2.settings.deathmatch_enabled = Boolean(values[4]);
-      game_manager2.settings.halftime_regeneration = Boolean(values[5]);
-      game_manager2.settings.update_settings();
-    }
+  const s = game_manager2.settings;
+  const borderRadius = new ObservableNumber(s.border_radius, { clientWritable: true });
+  const playersPerTeam = new ObservableNumber(s.players_per_team, { clientWritable: true });
+  const gracePeriod = new ObservableNumber(s.grace_period_mins, { clientWritable: true });
+  const mainPeriod = new ObservableNumber(s.main_period_mins, { clientWritable: true });
+  const deathmatch = new ObservableBoolean(s.deathmatch_enabled, { clientWritable: true });
+  const halftimeRegen = new ObservableBoolean(s.halftime_regeneration, { clientWritable: true });
+  const borderDescription = new ObservableString(
+    `The half-width of the square border. Full width: ${s.border_radius * 2} blocks (${s.border_radius} from centre to each wall).`,
+    { clientWritable: false }
+  );
+  const form = new CustomForm(player, "UHC Settings").header("World Border").spacer().slider("Border Size", borderRadius, 500, 3800, { step: 150, description: borderDescription }).header("Teams").spacer().slider("Team Size", playersPerTeam, 1, 8, { step: 1 }).header("Game Timer").spacer().slider("Grace Period", gracePeriod, 5, 60, { step: 5, description: "How long the Grace Period lasts in minutes." }).slider("Main Game", mainPeriod, 20, 120, { step: 10, description: "How long the Main Game lasts in minutes." }).header("Modifiers").spacer().toggle("Enable Deathmatch", deathmatch, { description: "Border Size decreased to 100, remaining players are teleported to the centre, and fight to the death." }).toggle("Regeneration at halftime", halftimeRegen).button("Save Changes", () => {
+    s.border_radius = borderRadius.getData();
+    s.players_per_team = playersPerTeam.getData();
+    s.grace_period_mins = gracePeriod.getData();
+    s.main_period_mins = mainPeriod.getData();
+    s.deathmatch_enabled = deathmatch.getData();
+    s.halftime_regeneration = halftimeRegen.getData();
+    s.update_settings();
+    form.close();
   });
+  form.show().catch((e) => console.error(e, e.stack));
 }
 function challenge_logs_form(game_manager2, player) {
-  let body = "";
-  for (let challengesKey in game_manager2.challenges) {
-    let challenge = game_manager2.challenges[challengesKey];
-    body = `${body}
-\xA7e${challenge.name}\xA7r
-`;
-    challenge.progress.sort((a, b) => a.progress - b.progress).forEach((progress) => {
-      if (progress.player) {
-        body = `${body}
-- ${progress.player.name} | ${progress.progress}/${progress.max_progress}`;
-      } else if (!progress.player) {
-        body = `${body}
-- ${progress.team} | ${progress.progress}/${progress.max_progress}`;
-      }
-    });
+  const form = new CustomForm(player, "Challenge Logs");
+  if (Object.keys(game_manager2.challenges).length === 0) {
+    form.label("\xA77No challenge data yet.");
   }
-  const form = new MessageFormData();
-  form.title("Challenge Logs");
-  form.body(body);
-  form.button1("Exit");
-  form.button2("Cancel");
-  form.show(player).then((r) => {
-    if (r.canceled || r.selection == 1) {
-      return;
-    }
-  });
+  for (const key in game_manager2.challenges) {
+    const challenge = game_manager2.challenges[key];
+    form.label(`\xA7e${challenge.name}\xA7r`);
+    challenge.progress.slice().sort((a, b) => b.progress - a.progress).forEach((p) => {
+      const label = p.player ? p.player.name : p.team;
+      form.label(`- ${label} | ${p.progress}/${p.max_progress}`);
+    });
+    form.divider();
+  }
+  form.button("Exit", () => form.close());
+  form.show().catch((e) => console.error(e, e.stack));
 }
 
 // behaviour_pack/scripts-dev/forms/challenges.ts
-import { ActionFormData as ActionFormData3, MessageFormData as MessageFormData2 } from "@minecraft/server-ui";
+import { ActionFormData as ActionFormData2, MessageFormData } from "@minecraft/server-ui";
 function challenges_form(game_manager2, player) {
-  const form = new ActionFormData3();
+  const form = new ActionFormData2();
   const button_indexes = [];
   form.title("UHC Challenges");
   for (let challenge in game_manager2.challenges) {
@@ -4273,7 +4258,7 @@ function challenges_form(game_manager2, player) {
   });
 }
 function info_form(challenge_id, game_manager2, player) {
-  const form = new MessageFormData2();
+  const form = new MessageFormData();
   const challenge = game_manager2.challenges[challenge_id];
   let player_challenge = challenge.get_progress(player);
   let colour = game_manager2.teams_manager.get_team(player)?.get_team_colour();
@@ -4304,8 +4289,8 @@ Reward: ${challenge.reward} (On Everthorn Server)
 
 // behaviour_pack/scripts-dev/main.ts
 var game_manager;
-system3.beforeEvents.startup.subscribe((event) => {
-  system3.run(() => game_manager = GameManager.initialize());
+system4.beforeEvents.startup.subscribe((event) => {
+  system4.run(() => game_manager = GameManager.initialize());
 });
 world8.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
@@ -4321,21 +4306,21 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
     );
     event.player.setGameMode(GameMode2.Adventure);
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l4\xA7r! The game is about to start. Sit back, relax, and good luck!`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 5);
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Select your team by pressing :_input_key.use:`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 8);
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `For admins: \xA7e/give @p uhc:admin_book\xA7r to edit settings and start the game`,
         "random.toast",
@@ -4345,7 +4330,10 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
   } else if (game_manager.game_status === "running") {
     if (!game_manager.teams_manager.get_team(event.player)) {
       event.player.setGameMode(GameMode2.Spectator);
-      event.player.teleport(event.player.getDynamicProperty("uhc:death_location"));
+      const death_location = event.player.getDynamicProperty("uhc:death_location");
+      if (death_location) {
+        event.player.teleport(death_location);
+      }
     }
   }
 });
@@ -4359,7 +4347,7 @@ world8.afterEvents.itemUse.subscribe((event) => {
   }
 });
 world8.afterEvents.entityDie.subscribe((event) => {
-  if (event.deadEntity instanceof Player9) {
+  if (event.deadEntity instanceof Player10) {
     const team = game_manager.teams_manager.get_team(event.deadEntity);
     if (team) {
       team.remove_player(event.deadEntity, game_manager.message_manager);
@@ -4370,7 +4358,7 @@ world8.afterEvents.entityDie.subscribe((event) => {
 world8.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const this_challenge = game_manager.challenges.eliminate_challenge;
-    if (event.deadEntity instanceof Player9 && event.damageSource.damagingEntity instanceof Player9) {
+    if (event.deadEntity instanceof Player10 && event.damageSource.damagingEntity instanceof Player10) {
       const dead_team = game_manager.teams_manager.get_team(event.deadEntity);
       const killing_team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
       if (dead_team?.string_id !== killing_team?.string_id && dead_team?.players.length === 1) {
@@ -4408,7 +4396,7 @@ world8.beforeEvents.playerBreakBlock.subscribe((event) => {
 world8.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const this_challenge = game_manager.challenges.skeleton_challenge;
-    if (event.deadEntity.typeId === MinecraftEntityTypes.Skeleton && event.damageSource.damagingEntity instanceof Player9) {
+    if (event.deadEntity.typeId === MinecraftEntityTypes.Skeleton && event.damageSource.damagingEntity instanceof Player10) {
       const team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
       if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
         game_manager.message_manager.send_message(`${team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
