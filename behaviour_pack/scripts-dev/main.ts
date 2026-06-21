@@ -16,7 +16,7 @@ import {challenges_form} from "./forms/challenges";
 let game_manager: GameManager
 
 system.beforeEvents.startup.subscribe(event => {
-    game_manager = GameManager.initialize()
+    system.run(() => game_manager = GameManager.initialize())
 })
 
 world.afterEvents.playerSpawn.subscribe(event => {

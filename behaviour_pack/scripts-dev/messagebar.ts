@@ -1,4 +1,5 @@
-import {MinecraftDimensionTypes, Player, RawMessage, world} from "@minecraft/server";
+import {Player, RawMessage, world} from "@minecraft/server";
+import {MinecraftDimensionTypes} from "@minecraft/vanilla-data";
 
 export class MessageManager {
 
@@ -30,7 +31,7 @@ export class MessageManager {
             player.sendMessage({"text": `§l§e[UHC]§r ${message}`})
         } else {
             if (sound) {
-                world.getDimension(MinecraftDimensionTypes.overworld).playSound(sound, {x: 0, y:0, z: 0}, {volume:1000})
+                world.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, {x: 0, y:0, z: 0}, {volume:1000})
             }
             world.sendMessage({"text": `§l§e[UHC]§r ${message}`})
         }
@@ -40,7 +41,7 @@ export class MessageManager {
         const time_until_start = Math.abs(game_time);
 
         if (time_until_start === 3) {
-            world.getDimension(MinecraftDimensionTypes.overworld).playSound('uhc.start', {x: 0, y:0, z: 0}, {volume:1000})
+            world.getDimension(MinecraftDimensionTypes.Overworld).playSound('uhc.start', {x: 0, y:0, z: 0}, {volume:1000})
         }
 
         world.getAllPlayers().forEach((player) => {
