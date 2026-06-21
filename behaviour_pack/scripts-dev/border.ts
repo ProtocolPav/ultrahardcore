@@ -25,12 +25,17 @@ const KNOCKBACK_VERTICAL   = 0.45;
 // Warn the player when this many blocks from the wall.
 const WARNING_DISTANCE = 15;
 
-// Particle billboard is 8 blocks wide × 192 blocks tall (full world height).
-// One emitter per strip at a fixed Y is all that is needed.
-const PARTICLE_WIDTH      = 8;
-const PARTICLE_VISIBILITY = 20;  // blocks from the wall face
-const PARTICLE_SEGMENT    = 32;  // blocks either side of player along the wall
+// Particles are chunk-aligned. Each billboard is 8 blocks wide × 192 tall.
+// We step one chunk (16 blocks) between emitters and spawn at the chunk centre
+// (+8), which gives a 50% overlap between adjacent billboards — seamless wall.
+const CHUNK_SIZE          = 16;
+const PARTICLE_VISIBILITY = 20;   // blocks from the wall face
+const PARTICLE_SEGMENT    = 32;   // blocks either side of the player along the wall
 const PARTICLE_SPAWN_Y    = 128;
+
+// Interval must match or exceed particle max_lifetime (3 s = 60 ticks) to
+// avoid stacking multiple generations of particles on the same positions.
+const PARTICLE_INTERVAL = 60;
 
 const PARTICLE_NS    = "worldborder:worldborder";     // N/S walls (fixed X)
 const PARTICLE_EW    = "worldborder:worldborder_ew";  // E/W walls (fixed Z)
@@ -63,8 +68,9 @@ export class BorderManager {
         // Teleport fallback runs via checkBorder() in the game loop.
         system.runInterval(() => this.runKnockbackPass(), 2);
 
-        // Particles on their own interval, decoupled from enforcement.
-        system.runInterval(() => this.renderParticlesForAllPlayers(), 5);
+        // Particle interval matches particle lifetime so exactly one generation
+        // of particles is alive at any time — no stacking, no double wall.
+        system.runInterval(() => this.renderParticlesForAllPlayers(), PARTICLE_INTERVAL);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -73,8 +79,8 @@ export class BorderManager {
 
     /**
      * Called from the game loop (every 20 ticks).
-     * Only handles the teleport fallback for players who are deeply outside.
-     * Knockback is handled independently on a 2-tick interval.
+     * Only handles the teleport fallback for players deeply outside the border.
+     * Knockback is handled on its own 2-tick interval.
      */
     public checkBorder(): void {
         const half = this.settings.border_radius;
@@ -111,8 +117,7 @@ export class BorderManager {
                 continue;
             }
 
-            // Only apply knockback within the recoverable range.
-            // Players beyond TELEPORT_OVERSHOOT_THRESHOLD are handled by checkBorder().
+            // Deeply outside players are handled by checkBorder() via teleport.
             if (overshoot <= TELEPORT_OVERSHOOT_THRESHOLD) {
                 this.applyKnockback(player);
                 player.onScreenDisplay.setActionBar("§cYou hit the world border!");
@@ -128,8 +133,6 @@ export class BorderManager {
         const { x, z } = player.location;
         const magnitude = Math.sqrt(x * x + z * z);
 
-        // Direction points from the player back toward the centre (0, 0).
-        // If the player is exactly at the origin, push them north.
         const dirX = magnitude > 0 ? -x / magnitude : 0;
         const dirZ = magnitude > 0 ? -z / magnitude : -1;
 
@@ -187,39 +190,51 @@ export class BorderManager {
     private renderParticlesForPlayer(player: Player, half: number, molang: MolangVariableMap): void {
         const { x, z } = player.location;
 
-        // Absolute distance from the player to each wall face.
-        // Using Math.abs ensures this is always positive regardless of which
-        // side of the border the player is on, so only truly nearby walls render.
+        // Snap the player position to the chunk grid for stable, seamless tiling.
+        const playerChunkX = Math.floor(x / CHUNK_SIZE) * CHUNK_SIZE;
+        const playerChunkZ = Math.floor(z / CHUNK_SIZE) * CHUNK_SIZE;
+
+        // Absolute distance to each wall face — works correctly from both sides.
         const distToEast  = Math.abs( half - x);
         const distToWest  = Math.abs(-half - x);
         const distToSouth = Math.abs( half - z);
         const distToNorth = Math.abs(-half - z);
 
-        if (distToEast  <= PARTICLE_VISIBILITY) this.spawnWallStrip(player,  half, z, "xFixed", PARTICLE_NS, molang);
-        if (distToWest  <= PARTICLE_VISIBILITY) this.spawnWallStrip(player, -half, z, "xFixed", PARTICLE_NS, molang);
-        if (distToSouth <= PARTICLE_VISIBILITY) this.spawnWallStrip(player,  half, x, "zFixed", PARTICLE_EW, molang);
-        if (distToNorth <= PARTICLE_VISIBILITY) this.spawnWallStrip(player, -half, x, "zFixed", PARTICLE_EW, molang);
+        // N/S walls (fixed X) → strip runs along Z axis
+        if (distToEast  <= PARTICLE_VISIBILITY) this.spawnWallChunks(player,  half, playerChunkZ, "xFixed", PARTICLE_NS, molang);
+        if (distToWest  <= PARTICLE_VISIBILITY) this.spawnWallChunks(player, -half, playerChunkZ, "xFixed", PARTICLE_NS, molang);
+
+        // E/W walls (fixed Z) → strip runs along X axis
+        if (distToSouth <= PARTICLE_VISIBILITY) this.spawnWallChunks(player,  half, playerChunkX, "zFixed", PARTICLE_EW, molang);
+        if (distToNorth <= PARTICLE_VISIBILITY) this.spawnWallChunks(player, -half, playerChunkX, "zFixed", PARTICLE_EW, molang);
     }
 
     /**
-     * Spawns a horizontal strip of particles along one wall face.
-     * Each billboard is PARTICLE_WIDTH wide and 192 blocks tall, so one emitter
-     * per strip covers the full world height with no vertical loop needed.
-     * Strip origins are snapped to a PARTICLE_WIDTH-aligned grid for seamless tiling.
+     * Spawns chunk-aligned particles along one wall face.
+     *
+     * Iterates in CHUNK_SIZE (16-block) steps and places each emitter at the
+     * chunk centre (+8). The billboard is 8 blocks wide, so adjacent emitters
+     * overlap by 50% — giving a seamless, single-thickness wall.
+     *
+     * @param wallFixed        Fixed coordinate of this wall face.
+     * @param playerChunkAlong Player’s chunk-snapped coordinate along the wall.
+     * @param axis             "xFixed" → N/S wall, "zFixed" → E/W wall.
+     * @param particleId       NS or EW particle variant.
      */
-    private spawnWallStrip(
+    private spawnWallChunks(
         player: Player,
         wallFixed: number,
-        playerAlong: number,
+        playerChunkAlong: number,
         axis: "xFixed" | "zFixed",
         particleId: string,
         molang: MolangVariableMap
     ): void {
-        const snappedCenter = Math.floor(playerAlong / PARTICLE_WIDTH) * PARTICLE_WIDTH;
-        const strips = Math.ceil(PARTICLE_SEGMENT / PARTICLE_WIDTH);
+        const min = playerChunkAlong - PARTICLE_SEGMENT;
+        const max = playerChunkAlong + PARTICLE_SEGMENT;
 
-        for (let i = -strips; i <= strips; i++) {
-            const along = snappedCenter + i * PARTICLE_WIDTH;
+        for (let chunk = min; chunk <= max; chunk += CHUNK_SIZE) {
+            // Centre of this chunk strip.
+            const along = chunk + (CHUNK_SIZE / 2);
 
             const pos: Vector3 = axis === "xFixed"
                 ? { x: wallFixed, y: PARTICLE_SPAWN_Y, z: along }
