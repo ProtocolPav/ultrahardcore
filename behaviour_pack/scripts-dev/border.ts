@@ -25,8 +25,8 @@ const PARTICLE_VISIBILITY = 100;
 const PARTICLE_SEGMENT    = 128;
 const PARTICLE_SPAWN_Y    = 128;
 
-const PARTICLE_NS    = "worldborder:worldborder";
-const PARTICLE_EW    = "worldborder:worldborder_ew";
+const PARTICLE_NS    = "uhc:world_border";
+const PARTICLE_EW    = "uhc:world_border_ew";
 const PARTICLE_COLOR = { red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0 };
 
 type WallAxis = "xFixed" | "zFixed";
