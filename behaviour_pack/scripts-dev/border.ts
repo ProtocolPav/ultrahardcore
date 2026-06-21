@@ -5,60 +5,52 @@ import {
     MolangVariableMap,
     Player,
     system,
-    Vector3, VectorXZ,
+    Vector3,
+    VectorXZ,
     world
 } from "@minecraft/server";
 
-// How many blocks past the wall before we skip knockback and teleport directly.
+// How many blocks past the wall before knockback is skipped and the player
+// is teleported directly. Beyond this threshold knockback can't recover them.
 const TELEPORT_OVERSHOOT_THRESHOLD = 5;
 
-// Ticks of fall-damage immunity granted after a knockback or forced teleport.
+// Ticks of fall-damage immunity after knockback or teleport.
 const NO_FALL_TICKS_KNOCKBACK = 30;  // ~1.5 s
 const NO_FALL_TICKS_TELEPORT  = 60;  // ~3 s
 
-// Knockback strengths.
-const KNOCKBACK_HORIZONTAL = 1.2;
-const KNOCKBACK_VERTICAL   = 0.35;
+// Knockback applied when the player crosses the wall.
+const KNOCKBACK_HORIZONTAL = 1.8;
+const KNOCKBACK_VERTICAL   = 0.45;
 
-// Warning zone: show actionbar when this many blocks from the wall.
+// Warn the player when this many blocks from the wall.
 const WARNING_DISTANCE = 15;
 
-// Each particle billboard is 8 blocks wide and 192 blocks tall (full world height).
-// One emitter per strip is all that is needed — no vertical loop required.
-const PARTICLE_WIDTH      = 8;   // matches the "size": [8, 192] in the particle JSON
-const PARTICLE_VISIBILITY = 20;  // blocks from the wall before we start rendering
-const PARTICLE_SEGMENT    = 32;  // blocks either side of the player along the wall
+// Particle billboard is 8 blocks wide × 192 blocks tall (full world height).
+// One emitter per strip at a fixed Y is all that is needed.
+const PARTICLE_WIDTH      = 8;
+const PARTICLE_VISIBILITY = 20;  // blocks from the wall face
+const PARTICLE_SEGMENT    = 32;  // blocks either side of player along the wall
+const PARTICLE_SPAWN_Y    = 128;
 
-// Y at which emitters are placed. The particle is 192 blocks tall so it covers
-// the full build height regardless of where vertically it is spawned.
-const PARTICLE_SPAWN_Y = 128;
-
-// worldborder:worldborder  — N/S walls (fixed X, billboard faces along X)
-// worldborder:worldborder_ew — E/W walls (fixed Z, billboard faces along Z)
-const PARTICLE_NS = "worldborder:worldborder";
-const PARTICLE_EW = "worldborder:worldborder_ew";
-
-// Border colour: red tint, full opacity.
+const PARTICLE_NS    = "worldborder:worldborder";     // N/S walls (fixed X)
+const PARTICLE_EW    = "worldborder:worldborder_ew";  // E/W walls (fixed Z)
 const PARTICLE_COLOR = { red: 1.0, green: 0.2, blue: 0.2, alpha: 1.0 };
 
 export class BorderManager {
     private readonly settings: Settings;
     private readonly messageManager: MessageManager;
 
-    // Maps player.id → tick at which fall-damage immunity expires.
     private readonly noFallUntil = new Map<string, number>();
 
     constructor(settings: Settings, messageManager: MessageManager) {
         this.settings = settings;
         this.messageManager = messageManager;
 
-        // Cancel fall damage for any player who is currently protected.
-        // This listener persists for the lifetime of the add-on.
+        // Cancel fall damage for protected players.
         world.beforeEvents.entityHurt.subscribe(
             (event) => {
                 const entity = event.hurtEntity;
                 if (entity.typeId !== "minecraft:player") return;
-
                 const expiresAt = this.noFallUntil.get(entity.id);
                 if (expiresAt !== undefined && system.currentTick <= expiresAt) {
                     event.cancel = true;
@@ -67,7 +59,11 @@ export class BorderManager {
             { allowedDamageCauses: [EntityDamageCause.fall] }
         );
 
-        // Particle rendering runs on its own interval, decoupled from the game loop.
+        // Knockback runs on a fast interval so it feels immediate.
+        // Teleport fallback runs via checkBorder() in the game loop.
+        system.runInterval(() => this.runKnockbackPass(), 2);
+
+        // Particles on their own interval, decoupled from enforcement.
         system.runInterval(() => this.renderParticlesForAllPlayers(), 5);
     }
 
@@ -75,42 +71,52 @@ export class BorderManager {
     // Public API
     // ─────────────────────────────────────────────────────────────────────────
 
-    /** Called every game-loop tick while the game is running. */
+    /**
+     * Called from the game loop (every 20 ticks).
+     * Only handles the teleport fallback for players who are deeply outside.
+     * Knockback is handled independently on a 2-tick interval.
+     */
     public checkBorder(): void {
         const half = this.settings.border_radius;
 
         for (const player of world.getAllPlayers()) {
-            this.enforcePlayerBorder(player, half);
+            const { x, z } = player.location;
+            const overshoot = Math.max(Math.abs(x), Math.abs(z)) - half;
+
+            if (overshoot > TELEPORT_OVERSHOOT_THRESHOLD) {
+                this.teleportPlayerInside(player, half);
+                this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
+            }
         }
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Enforcement
+    // Knockback pass (2-tick interval)
     // ─────────────────────────────────────────────────────────────────────────
 
-    private enforcePlayerBorder(player: Player, half: number): void {
-        const { x, z } = player.location;
+    private runKnockbackPass(): void {
+        const half = this.settings.border_radius;
 
-        // Chebyshev distance: positive = outside, negative = inside.
-        const overshoot = Math.max(Math.abs(x), Math.abs(z)) - half;
+        for (const player of world.getAllPlayers()) {
+            const { x, z } = player.location;
+            const overshoot = Math.max(Math.abs(x), Math.abs(z)) - half;
 
-        if (overshoot > 0) {
-            this.handleOutsideBorder(player, half, overshoot);
-        } else if (overshoot > -WARNING_DISTANCE) {
-            const distanceToWall = Math.floor(-overshoot);
-            player.onScreenDisplay.setActionBar(
-                `§eApproaching border — §c${distanceToWall} block${distanceToWall === 1 ? "" : "s"}§e remaining`
-            );
-        }
-    }
+            if (overshoot <= 0) {
+                if (overshoot > -WARNING_DISTANCE) {
+                    const dist = Math.floor(-overshoot);
+                    player.onScreenDisplay.setActionBar(
+                        `§eApproaching border — §c${dist} block${dist === 1 ? "" : "s"}§e remaining`
+                    );
+                }
+                continue;
+            }
 
-    private handleOutsideBorder(player: Player, half: number, overshoot: number): void {
-        if (overshoot > TELEPORT_OVERSHOOT_THRESHOLD) {
-            this.teleportPlayerInside(player, half);
-            this.messageManager.send_message("Stay within the border!", "uhc.team.death.global", player);
-        } else {
-            this.applyKnockback(player);
-            player.onScreenDisplay.setActionBar("§cYou hit the world border!");
+            // Only apply knockback within the recoverable range.
+            // Players beyond TELEPORT_OVERSHOOT_THRESHOLD are handled by checkBorder().
+            if (overshoot <= TELEPORT_OVERSHOOT_THRESHOLD) {
+                this.applyKnockback(player);
+                player.onScreenDisplay.setActionBar("§cYou hit the world border!");
+            }
         }
     }
 
@@ -122,16 +128,18 @@ export class BorderManager {
         const { x, z } = player.location;
         const magnitude = Math.sqrt(x * x + z * z);
 
+        // Direction points from the player back toward the centre (0, 0).
+        // If the player is exactly at the origin, push them north.
         const dirX = magnitude > 0 ? -x / magnitude : 0;
         const dirZ = magnitude > 0 ? -z / magnitude : -1;
 
-        const vectorXZ: VectorXZ = { x: dirX, z: dirZ };
+        const direction: VectorXZ = { x: dirX, z: dirZ };
 
         try {
-            player.applyKnockback(vectorXZ, KNOCKBACK_VERTICAL);
+            player.applyKnockback(direction, KNOCKBACK_VERTICAL);
             this.grantNoFall(player.id, NO_FALL_TICKS_KNOCKBACK);
         } catch {
-            // Player may be in an invalid state (e.g. dead); silently ignore.
+            // Player may be in an invalid state (e.g. dying); silently ignore.
         }
     }
 
@@ -150,7 +158,7 @@ export class BorderManager {
             this.grantNoFall(player.id, NO_FALL_TICKS_TELEPORT);
             player.onScreenDisplay.setActionBar("§cYou hit the world border!");
         } catch {
-            // Silently ignore; will retry next tick.
+            // Silently ignore; will retry on next game loop tick.
         }
     }
 
@@ -179,33 +187,25 @@ export class BorderManager {
     private renderParticlesForPlayer(player: Player, half: number, molang: MolangVariableMap): void {
         const { x, z } = player.location;
 
-        // Signed distance from each wall face. Positive = player is inside.
-        const distToEast  = half - x;
-        const distToWest  = half + x;
-        const distToSouth = half - z;
-        const distToNorth = half + z;
+        // Absolute distance from the player to each wall face.
+        // Using Math.abs ensures this is always positive regardless of which
+        // side of the border the player is on, so only truly nearby walls render.
+        const distToEast  = Math.abs( half - x);
+        const distToWest  = Math.abs(-half - x);
+        const distToSouth = Math.abs( half - z);
+        const distToNorth = Math.abs(-half - z);
 
-        // N/S walls (fixed X) → strip runs along Z, use worldborder:worldborder
         if (distToEast  <= PARTICLE_VISIBILITY) this.spawnWallStrip(player,  half, z, "xFixed", PARTICLE_NS, molang);
         if (distToWest  <= PARTICLE_VISIBILITY) this.spawnWallStrip(player, -half, z, "xFixed", PARTICLE_NS, molang);
-
-        // E/W walls (fixed Z) → strip runs along X, use worldborder:worldborder_ew
         if (distToSouth <= PARTICLE_VISIBILITY) this.spawnWallStrip(player,  half, x, "zFixed", PARTICLE_EW, molang);
         if (distToNorth <= PARTICLE_VISIBILITY) this.spawnWallStrip(player, -half, x, "zFixed", PARTICLE_EW, molang);
     }
 
     /**
      * Spawns a horizontal strip of particles along one wall face.
-     *
-     * Each particle is PARTICLE_WIDTH blocks wide and covers the full world
-     * height, so only one emitter per strip position is needed — no Y loop.
-     * Positions are snapped to a PARTICLE_WIDTH grid so tiles are seamless
-     * regardless of where along the wall the player is standing.
-     *
-     * @param wallFixed   Fixed coordinate of this wall face (+half or -half).
-     * @param playerAlong Player’s coordinate along the wall’s parallel axis.
-     * @param axis        "xFixed" → N/S wall (fixed X), "zFixed" → E/W wall (fixed Z).
-     * @param particleId  NS or EW particle variant.
+     * Each billboard is PARTICLE_WIDTH wide and 192 blocks tall, so one emitter
+     * per strip covers the full world height with no vertical loop needed.
+     * Strip origins are snapped to a PARTICLE_WIDTH-aligned grid for seamless tiling.
      */
     private spawnWallStrip(
         player: Player,
@@ -215,8 +215,6 @@ export class BorderManager {
         particleId: string,
         molang: MolangVariableMap
     ): void {
-        // Snap the player’s position to the nearest strip boundary so the
-        // rendered segment is always aligned to the PARTICLE_WIDTH grid.
         const snappedCenter = Math.floor(playerAlong / PARTICLE_WIDTH) * PARTICLE_WIDTH;
         const strips = Math.ceil(PARTICLE_SEGMENT / PARTICLE_WIDTH);
 
