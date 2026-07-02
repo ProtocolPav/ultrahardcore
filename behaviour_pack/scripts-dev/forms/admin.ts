@@ -64,7 +64,7 @@ export function admin_form(game_manager: GameManager, player: Player) {
 
         // Main
         .button('Start Game',      () => view.setData('confirm_start'), { visible: mainVisible, disabled: !canStart })
-        .button('End Game',      () => view.setData('confirm_end'), { visible: mainVisible, disabled: canStart })
+        .button('End Game',      () => view.setData('confirm_end'), { visible: mainVisible, disabled: game_manager.teams_manager.teams.length > 1 })
         .button('Settings',        () => view.setData('settings'),      { visible: mainVisible })
         .button('Challenge Logs',  () => view.setData('challenge_logs'),{ visible: mainVisible })
 
