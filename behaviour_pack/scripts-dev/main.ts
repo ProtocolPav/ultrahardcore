@@ -86,16 +86,18 @@ world.afterEvents.playerSpawn.subscribe(event => {
 })
 
 world.beforeEvents.playerLeave.subscribe(event => {
-    const team = game_manager.teams_manager.get_team(event.player)
-    const alive_teams = game_manager.teams_manager.teams.filter(team => team.players.length > 0)
+    if (game_manager.game_status === 'running') {
+        const team = game_manager.teams_manager.get_team(event.player)
+        const alive_teams = game_manager.teams_manager.teams.filter(team => team.players.length > 0)
 
-    if (team && team.players.length === 1 && alive_teams.length == 2) {
-        game_manager.opponent_team_left = true
+        if (team && team.players.length === 1 && alive_teams.length == 2) {
+            game_manager.opponent_team_left = true
 
-        game_manager.message_manager.send_message(
-            `Team ${team.get_team_name()} has left. The UHC is paused until they reconnect.`,
-            'random.toast'
-        )
+            game_manager.message_manager.send_message(
+                `Team ${team.get_team_name()} has left. The UHC is paused until they reconnect.`,
+                'random.toast'
+            )
+        }
     }
 })
 

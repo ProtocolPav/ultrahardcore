@@ -4,7 +4,7 @@ import {
   GameMode as GameMode2,
   ItemStack as ItemStack2,
   Player as Player9,
-  system as system3,
+  system as system4,
   TicksPerSecond as TicksPerSecond3,
   world as world8
 } from "@minecraft/server";
@@ -15,7 +15,7 @@ import {
   EntityComponentTypes as EntityComponentTypes3,
   GameMode,
   ItemStack,
-  system as system2,
+  system as system3,
   TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
   world as world7
@@ -3397,7 +3397,7 @@ var TeamsManager = class {
 };
 
 // behaviour_pack/scripts-dev/messagebar.ts
-import { world as world2 } from "@minecraft/server";
+import { system, world as world2 } from "@minecraft/server";
 var MessageManager = class {
   set_bar(game_time, status, grace_period, end, deathmatch) {
     if (status === "waiting") {
@@ -3420,7 +3420,7 @@ var MessageManager = class {
       player.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
     } else {
       if (sound) {
-        world2.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        system.run(() => world2.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 }));
       }
       world2.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
     }
@@ -3802,7 +3802,7 @@ var Settings = class {
 import {
   EntityDamageCause,
   MolangVariableMap,
-  system,
+  system as system2,
   world as world6
 } from "@minecraft/server";
 var TELEPORT_THRESHOLD = 7;
@@ -3824,7 +3824,7 @@ var BorderManager = class {
       (event) => {
         if (event.hurtEntity.typeId !== "minecraft:player") return;
         const expiresAt = this.noFallUntil.get(event.hurtEntity.id);
-        if (expiresAt !== void 0 && system.currentTick <= expiresAt) {
+        if (expiresAt !== void 0 && system2.currentTick <= expiresAt) {
           event.cancel = true;
         }
       },
@@ -3873,7 +3873,7 @@ var BorderManager = class {
     }
   }
   grantNoFall(playerId, ticks) {
-    this.noFallUntil.set(playerId, system.currentTick + ticks);
+    this.noFallUntil.set(playerId, system2.currentTick + ticks);
   }
   renderParticles() {
     const half = this.settings.border_radius;
@@ -3931,8 +3931,8 @@ var GameManager = class _GameManager {
       new ItemStack(MinecraftItemTypes.PinkPetals, 1)
     ];
     this.challenges = game_challenges;
-    system2.runInterval(() => this.game_loop(), 20);
-    system2.runInterval(() => this.challenge_loop(), 1);
+    system3.runInterval(() => this.game_loop(), 20);
+    system3.runInterval(() => this.challenge_loop(), 1);
   }
   static initialize() {
     let initialized = Boolean(world7.getDynamicProperty("uhc:initialized"));
@@ -3967,7 +3967,7 @@ var GameManager = class _GameManager {
       `The game is about to start! Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
       "uhc.start.before"
     );
-    system2.runTimeout(() => {
+    system3.runTimeout(() => {
       this.message_manager.send_message(
         `You might be teleported into the sky, do not worry! You will have resistance to save your fall.`,
         "random.toast"
@@ -4253,8 +4253,8 @@ Reward: ${challenge.reward} (On Everthorn Server)
 
 // behaviour_pack/scripts-dev/main.ts
 var game_manager;
-system3.beforeEvents.startup.subscribe((event) => {
-  system3.run(() => game_manager = GameManager.initialize());
+system4.beforeEvents.startup.subscribe((event) => {
+  system4.run(() => game_manager = GameManager.initialize());
 });
 world8.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
@@ -4270,21 +4270,21 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
     );
     event.player.setGameMode(GameMode2.Adventure);
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l4\xA7r! The game is about to start. Sit back, relax, and good luck!`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 5);
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Select your team by pressing :_input_key.use:`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 8);
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `For admins: \xA7e/give @p uhc:admin_book\xA7r to edit settings and start the game`,
         "random.toast",
@@ -4311,14 +4311,16 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
   }
 });
 world8.beforeEvents.playerLeave.subscribe((event) => {
-  const team = game_manager.teams_manager.get_team(event.player);
-  const alive_teams = game_manager.teams_manager.teams.filter((team2) => team2.players.length > 0);
-  if (team && team.players.length === 1 && alive_teams.length == 2) {
-    game_manager.opponent_team_left = true;
-    game_manager.message_manager.send_message(
-      `Team ${team.get_team_name()} has left. The UHC is paused until they reconnect.`,
-      "random.toast"
-    );
+  if (game_manager.game_status === "running") {
+    const team = game_manager.teams_manager.get_team(event.player);
+    const alive_teams = game_manager.teams_manager.teams.filter((team2) => team2.players.length > 0);
+    if (team && team.players.length === 1 && alive_teams.length == 2) {
+      game_manager.opponent_team_left = true;
+      game_manager.message_manager.send_message(
+        `Team ${team.get_team_name()} has left. The UHC is paused until they reconnect.`,
+        "random.toast"
+      );
+    }
   }
 });
 world8.afterEvents.itemUse.subscribe((event) => {
