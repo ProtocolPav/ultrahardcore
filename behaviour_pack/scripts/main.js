@@ -3465,6 +3465,7 @@ var MessageManager = class {
 var ChallengeProgress = class {
   constructor(team, max_progress, player) {
     this.player = player;
+    this.player_name = player?.name;
     this.team = team;
     this.progress = 0;
     this.max_progress = max_progress;
@@ -4173,7 +4174,7 @@ function admin_form(game_manager2, player) {
     logBody += `\xA7e${challenge.name}\xA7r
 `;
     challenge.progress.slice().sort((a, b) => b.progress - a.progress).forEach((p) => {
-      const label = p.player ? p.player.name : p.team;
+      const label = p.player ? p.player_name : p.team;
       logBody += `- ${label} | ${p.progress}/${p.max_progress}
 `;
     });

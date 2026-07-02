@@ -2,12 +2,14 @@ import {Player} from "@minecraft/server";
 
 class ChallengeProgress {
     player?: Player;
+    player_name?: string;
     team: string;
     progress: number;
     max_progress: number;
 
     constructor(team: string, max_progress: number, player?: Player,) {
         this.player = player;
+        this.player_name = player?.name;
         this.team = team;
         this.progress = 0;
         this.max_progress = max_progress;

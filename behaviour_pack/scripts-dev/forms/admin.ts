@@ -51,7 +51,7 @@ export function admin_form(game_manager: GameManager, player: Player) {
             .slice()
             .sort((a, b) => b.progress - a.progress)
             .forEach(p => {
-                const label = p.player ? p.player.name : p.team;
+                const label = p.player ? p.player_name : p.team;
                 logBody += `- ${label} | ${p.progress}/${p.max_progress}\n`;
             });
         logBody += '\n';
