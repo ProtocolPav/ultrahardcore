@@ -235,7 +235,7 @@ export class GameManager {
             this.border_manager.checkBorder();
 
             let team = this.teams_manager.winner_check()
-            if (team && !this.opponent_team_left) {
+            if (team && !this.opponent_team_left) { // If there are 2 teams remaining, and one team leaves, wait until they join back
                 this.finish_game(team)
             }
 

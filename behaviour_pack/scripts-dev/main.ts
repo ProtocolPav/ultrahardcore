@@ -81,7 +81,7 @@ world.beforeEvents.playerLeave.subscribe(event => {
     const team = game_manager.teams_manager.get_team(event.player)
     const alive_teams = game_manager.teams_manager.teams.filter(team => team.players.length > 0)
 
-    if (team && team.players.length === 1 && alive_teams.length > 1) {
+    if (team && team.players.length === 1 && alive_teams.length == 2) {
         game_manager.opponent_team_left = true
     }
 })

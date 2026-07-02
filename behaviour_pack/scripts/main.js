@@ -3909,6 +3909,7 @@ var BorderManager = class {
 // behaviour_pack/scripts-dev/game.ts
 var GameManager = class _GameManager {
   constructor(teams_manager, game_status, game_time, initialized, message_manager, settings) {
+    this.opponent_team_left = false;
     this.teams_manager = teams_manager;
     this.game_status = game_status;
     this.game_time = game_time;
@@ -4003,22 +4004,6 @@ var GameManager = class _GameManager {
       team.update();
     });
   }
-  border() {
-    const players = world7.getAllPlayers();
-    players.forEach((player) => {
-      let distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
-      if (distance > this.settings.border_radius) {
-        let angle = Math.atan2(player.location.z, player.location.x);
-        let tp_location = {
-          x: (this.settings.border_radius - 1) * Math.cos(angle),
-          y: player.location.y,
-          z: (this.settings.border_radius - 1) * Math.sin(angle)
-        };
-        this.message_manager.send_message("Stay within the border", "uhc.team.death.global", player);
-        player.teleport(tp_location);
-      }
-    });
-  }
   start_game() {
     this.game_status = "running";
     const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10);
@@ -4076,7 +4061,8 @@ var GameManager = class _GameManager {
       this.game_time++;
       this.border_manager.checkBorder();
       let team = this.teams_manager.winner_check();
-      if (team) {
+      world7.sendMessage(`Opponent Left? ${this.opponent_team_left} | Team: ${team} | Game Time: ${this.game_time}`);
+      if (team && !this.opponent_team_left) {
         this.finish_game(team);
       }
       world7.getDimension(MinecraftDimensionTypes.Overworld).runCommand("clear @a map");
@@ -4198,7 +4184,7 @@ function admin_form(game_manager2, player) {
   const form = new CustomForm(player, "UHC Manager").button("Start Game", () => view.setData("confirm_start"), { visible: mainVisible, disabled: !canStart }).button("Settings", () => view.setData("settings"), { visible: mainVisible }).button("Challenge Logs", () => view.setData("challenge_logs"), { visible: mainVisible }).label("Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\n\xA7cOnce started:\n\xA7r- The game cannot be stopped\n- No new players can join", { visible: confirmVisible }).divider({ visible: confirmVisible }).button("I'm Sure", () => {
     game_manager2.begin_countdown_to_start();
     form.close();
-  }, { visible: confirmVisible }).button("Back", () => view.setData("main"), { visible: confirmVisible }).header("World Border", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Border Size", borderRadius, 500, 3800, { step: 150, description: borderDescription, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Teams", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Team Size", playersPerTeam, 1, 8, { step: 1, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Game Timer", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Grace Period", gracePeriod, 5, 60, { step: 5, description: "(in minutes)", visible: settingsVisible }).slider("Main Game", mainPeriod, 20, 120, { step: 10, description: "(in minutes)", visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Modifiers", { visible: settingsVisible }).spacer({ visible: settingsVisible }).toggle("Enable Deathmatch", deathmatch, { description: "The border shrinks to 100 blocks and all surviving players are teleported to the centre for a final fight.", visible: settingsVisible }).label("idk im just testing it out???").toggle("Enable Halftime Regeneration", halftimeRegen, { description: "Gives 30 seconds of Regeneration", visible: settingsVisible }).spacer({ visible: settingsVisible }).button("Save Changes", () => {
+  }, { visible: confirmVisible }).button("Back", () => view.setData("main"), { visible: confirmVisible }).header("World Border", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Border Size", borderRadius, 500, 3800, { step: 150, description: borderDescription, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Teams", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Team Size", playersPerTeam, 1, 8, { step: 1, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Game Timer", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Grace Period", gracePeriod, 5, 60, { step: 5, description: "(in minutes)", visible: settingsVisible }).slider("Main Game", mainPeriod, 20, 120, { step: 10, description: "(in minutes)", visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Modifiers", { visible: settingsVisible }).spacer({ visible: settingsVisible }).toggle("Enable Deathmatch", deathmatch, { description: "The border shrinks to 100 blocks and all surviving players are teleported to the centre for a final fight.", visible: settingsVisible }).toggle("Enable Halftime Regeneration", halftimeRegen, { description: "Gives 30 seconds of Regeneration", visible: settingsVisible }).spacer({ visible: settingsVisible }).button("Save Changes", () => {
     s.border_radius = borderRadius.getData();
     s.players_per_team = playersPerTeam.getData();
     s.grace_period_mins = gracePeriod.getData();
@@ -4307,7 +4293,9 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
         event.player
       );
     }, TicksPerSecond3 * 18);
-  } else if (game_manager.game_status === "running") {
+  } else if (game_manager.game_status === "running" && event.initialSpawn && game_manager.opponent_team_left) {
+    game_manager.opponent_team_left = false;
+  } else if (game_manager.game_status === "running" && !event.initialSpawn) {
     if (!game_manager.teams_manager.get_team(event.player)) {
       event.player.setGameMode(GameMode2.Spectator);
       const death_location = event.player.getDynamicProperty("uhc:death_location");
@@ -4315,6 +4303,15 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
         event.player.teleport(death_location);
       }
     }
+  }
+});
+world8.beforeEvents.playerLeave.subscribe((event) => {
+  const team = game_manager.teams_manager.get_team(event.player);
+  const alive_teams = game_manager.teams_manager.teams.filter((team2) => team2.players.length > 0);
+  world8.sendMessage(`${team?.get_team_name()} has left the game. Remaining teams: ${alive_teams.map((team2) => team2.get_team_name()).join(", ")}`);
+  if (team && team.players.length === 1 && alive_teams.length == 2) {
+    game_manager.opponent_team_left = true;
+    world8.sendMessage("opponent left");
   }
 });
 world8.afterEvents.itemUse.subscribe((event) => {
