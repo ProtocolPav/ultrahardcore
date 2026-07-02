@@ -61,7 +61,10 @@ world.afterEvents.playerSpawn.subscribe(event => {
             )
         }, TicksPerSecond*18)
     }
-    else if (game_manager.game_status === 'running') {
+    else if (game_manager.game_status === 'running' && event.initialSpawn && game_manager.opponent_team_left) {
+        game_manager.opponent_team_left = false
+    }
+    else if (game_manager.game_status === 'running' && !event.initialSpawn) {
         if (!game_manager.teams_manager.get_team(event.player)) {
             event.player.setGameMode(GameMode.Spectator)
 
@@ -71,6 +74,15 @@ world.afterEvents.playerSpawn.subscribe(event => {
                 event.player.teleport(death_location)
             }
         }
+    }
+})
+
+world.beforeEvents.playerLeave.subscribe(event => {
+    const team = game_manager.teams_manager.get_team(event.player)
+    const alive_teams = game_manager.teams_manager.teams.filter(team => team.players.length > 0)
+
+    if (team && team.players.length === 1 && alive_teams.length > 1) {
+        game_manager.opponent_team_left = true
     }
 })
 
