@@ -62,7 +62,15 @@ world.afterEvents.playerSpawn.subscribe(event => {
         }, TicksPerSecond*18)
     }
     else if (game_manager.game_status === 'running' && event.initialSpawn && game_manager.opponent_team_left) {
+        game_manager.teams_manager.teams.forEach((team) => {
+            team.update()
+        })
         game_manager.opponent_team_left = false
+
+        game_manager.message_manager.send_message(
+            `The UHC has been resumed. Good Luck!`,
+            'random.toast'
+        )
     }
     else if (game_manager.game_status === 'running' && !event.initialSpawn) {
         if (!game_manager.teams_manager.get_team(event.player)) {
@@ -83,6 +91,11 @@ world.beforeEvents.playerLeave.subscribe(event => {
 
     if (team && team.players.length === 1 && alive_teams.length == 2) {
         game_manager.opponent_team_left = true
+
+        game_manager.message_manager.send_message(
+            `Team ${team.get_team_name()} has left. The UHC is paused until they reconnect.`,
+            'random.toast'
+        )
     }
 })
 

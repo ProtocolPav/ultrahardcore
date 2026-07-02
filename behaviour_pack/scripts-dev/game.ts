@@ -181,7 +181,7 @@ export class GameManager {
                 player.removeEffect(effect.typeId)
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
-            player.runCommand('clear @a')
+            //player.runCommand('clear @a')
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges)
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})

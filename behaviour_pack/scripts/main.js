@@ -4022,7 +4022,6 @@ var GameManager = class _GameManager {
         player.removeEffect(effect.typeId);
       });
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
-      player.runCommand("clear @a");
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(beef);
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(challenges);
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
@@ -4061,7 +4060,6 @@ var GameManager = class _GameManager {
       this.game_time++;
       this.border_manager.checkBorder();
       let team = this.teams_manager.winner_check();
-      world7.sendMessage(`Opponent Left? ${this.opponent_team_left} | Team: ${team} | Game Time: ${this.game_time}`);
       if (team && !this.opponent_team_left) {
         this.finish_game(team);
       }
@@ -4294,7 +4292,14 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
       );
     }, TicksPerSecond3 * 18);
   } else if (game_manager.game_status === "running" && event.initialSpawn && game_manager.opponent_team_left) {
+    game_manager.teams_manager.teams.forEach((team) => {
+      team.update();
+    });
     game_manager.opponent_team_left = false;
+    game_manager.message_manager.send_message(
+      `The UHC has been resumed. Good Luck!`,
+      "random.toast"
+    );
   } else if (game_manager.game_status === "running" && !event.initialSpawn) {
     if (!game_manager.teams_manager.get_team(event.player)) {
       event.player.setGameMode(GameMode2.Spectator);
@@ -4308,10 +4313,12 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
 world8.beforeEvents.playerLeave.subscribe((event) => {
   const team = game_manager.teams_manager.get_team(event.player);
   const alive_teams = game_manager.teams_manager.teams.filter((team2) => team2.players.length > 0);
-  world8.sendMessage(`${team?.get_team_name()} has left the game. Remaining teams: ${alive_teams.map((team2) => team2.get_team_name()).join(", ")}`);
   if (team && team.players.length === 1 && alive_teams.length == 2) {
     game_manager.opponent_team_left = true;
-    world8.sendMessage("opponent left");
+    game_manager.message_manager.send_message(
+      `Team ${team.get_team_name()} has left. The UHC is paused until they reconnect.`,
+      "random.toast"
+    );
   }
 });
 world8.afterEvents.itemUse.subscribe((event) => {
