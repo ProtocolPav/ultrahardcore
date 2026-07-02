@@ -4159,12 +4159,14 @@ function admin_form(game_manager2, player) {
   const is = (v) => new ObservableBoolean(view.getData() === v, { clientWritable: false });
   const isNot = (v) => new ObservableBoolean(view.getData() !== v, { clientWritable: false });
   const mainVisible = is("main");
-  const confirmVisible = is("confirm_start");
+  const startGameVisible = is("confirm_start");
+  const endGameVisible = is("confirm_end");
   const settingsVisible = is("settings");
   const logsVisible = is("challenge_logs");
   view.subscribe((v) => {
     mainVisible.setData(v === "main");
-    confirmVisible.setData(v === "confirm_start");
+    startGameVisible.setData(v === "confirm_start");
+    endGameVisible.setData(v === "confirm_end");
     settingsVisible.setData(v === "settings");
     logsVisible.setData(v === "challenge_logs");
   });
@@ -4180,10 +4182,13 @@ function admin_form(game_manager2, player) {
     });
     logBody += "\n";
   }
-  const form = new CustomForm(player, "UHC Manager").button("Start Game", () => view.setData("confirm_start"), { visible: mainVisible, disabled: !canStart }).button("Settings", () => view.setData("settings"), { visible: mainVisible }).button("Challenge Logs", () => view.setData("challenge_logs"), { visible: mainVisible }).label("Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\n\xA7cOnce started:\n\xA7r- The game cannot be stopped\n- No new players can join", { visible: confirmVisible }).divider({ visible: confirmVisible }).button("I'm Sure", () => {
+  const form = new CustomForm(player, "UHC Manager").button("Start Game", () => view.setData("confirm_start"), { visible: mainVisible, disabled: !canStart }).button("End Game", () => view.setData("confirm_end"), { visible: mainVisible, disabled: canStart }).button("Settings", () => view.setData("settings"), { visible: mainVisible }).button("Challenge Logs", () => view.setData("challenge_logs"), { visible: mainVisible }).label("Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\n\xA7cOnce started:\n\xA7r- The game cannot be stopped\n- No new players can join", { visible: startGameVisible }).divider({ visible: startGameVisible }).button("I'm Sure", () => {
     game_manager2.begin_countdown_to_start();
     form.close();
-  }, { visible: confirmVisible }).button("Back", () => view.setData("main"), { visible: confirmVisible }).header("World Border", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Border Size", borderRadius, 500, 3800, { step: 150, description: borderDescription, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Teams", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Team Size", playersPerTeam, 1, 8, { step: 1, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Game Timer", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Grace Period", gracePeriod, 5, 60, { step: 5, description: "(in minutes)", visible: settingsVisible }).slider("Main Game", mainPeriod, 20, 120, { step: 10, description: "(in minutes)", visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Modifiers", { visible: settingsVisible }).spacer({ visible: settingsVisible }).toggle("Enable Deathmatch", deathmatch, { description: "The border shrinks to 100 blocks and all surviving players are teleported to the centre for a final fight.", visible: settingsVisible }).toggle("Enable Halftime Regeneration", halftimeRegen, { description: "Gives 30 seconds of Regeneration", visible: settingsVisible }).spacer({ visible: settingsVisible }).button("Save Changes", () => {
+  }, { visible: startGameVisible }).button("Back", () => view.setData("main"), { visible: startGameVisible }).label(`Ending the game will mean that ${game_manager2.teams_manager.winner_check()} will win the game immediately. This only works if UHC is in "pause" mode due to one team leaving.`, { visible: endGameVisible }).divider({ visible: endGameVisible }).button("I'm Sure", () => {
+    game_manager2.opponent_team_left = false;
+    form.close();
+  }, { visible: endGameVisible }).button("Back", () => view.setData("main"), { visible: endGameVisible }).header("World Border", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Border Size", borderRadius, 500, 3800, { step: 150, description: borderDescription, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Teams", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Team Size", playersPerTeam, 1, 8, { step: 1, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Game Timer", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Grace Period", gracePeriod, 5, 60, { step: 5, description: "(in minutes)", visible: settingsVisible }).slider("Main Game", mainPeriod, 20, 120, { step: 10, description: "(in minutes)", visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Modifiers", { visible: settingsVisible }).spacer({ visible: settingsVisible }).toggle("Enable Deathmatch", deathmatch, { description: "The border shrinks to 100 blocks and all surviving players are teleported to the centre for a final fight.", visible: settingsVisible }).toggle("Enable Halftime Regeneration", halftimeRegen, { description: "Gives 30 seconds of Regeneration", visible: settingsVisible }).spacer({ visible: settingsVisible }).button("Save Changes", () => {
     s.border_radius = borderRadius.getData();
     s.players_per_team = playersPerTeam.getData();
     s.grace_period_mins = gracePeriod.getData();

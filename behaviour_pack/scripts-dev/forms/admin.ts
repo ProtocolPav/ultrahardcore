@@ -2,7 +2,7 @@ import {GameManager} from "../game";
 import {Player} from "@minecraft/server";
 import {CustomForm, ObservableBoolean, ObservableNumber, ObservableString} from "@minecraft/server-ui";
 
-type AdminView = 'main' | 'confirm_start' | 'settings' | 'challenge_logs';
+type AdminView = 'main' | 'confirm_start' | 'confirm_end' | 'settings' | 'challenge_logs';
 
 export function admin_form(game_manager: GameManager, player: Player) {
     const s = game_manager.settings;
@@ -31,13 +31,15 @@ export function admin_form(game_manager: GameManager, player: Player) {
     const isNot = (v: AdminView) => new ObservableBoolean(view.getData() !== v, { clientWritable: false });
 
     const mainVisible         = is('main');
-    const confirmVisible      = is('confirm_start');
+    const startGameVisible      = is('confirm_start');
+    const endGameVisible      = is('confirm_end');
     const settingsVisible     = is('settings');
     const logsVisible         = is('challenge_logs');
 
     view.subscribe(v => {
         mainVisible.setData(v === 'main');
-        confirmVisible.setData(v === 'confirm_start');
+        startGameVisible.setData(v === 'confirm_start');
+        endGameVisible.setData(v === 'confirm_end');
         settingsVisible.setData(v === 'settings');
         logsVisible.setData(v === 'challenge_logs');
     });
@@ -62,14 +64,21 @@ export function admin_form(game_manager: GameManager, player: Player) {
 
         // Main
         .button('Start Game',      () => view.setData('confirm_start'), { visible: mainVisible, disabled: !canStart })
+        .button('End Game',      () => view.setData('confirm_end'), { visible: mainVisible, disabled: canStart })
         .button('Settings',        () => view.setData('settings'),      { visible: mainVisible })
         .button('Challenge Logs',  () => view.setData('challenge_logs'),{ visible: mainVisible })
 
         // Confirm start
-        .label("Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\n§cOnce started:\n§r- The game cannot be stopped\n- No new players can join", { visible: confirmVisible })
-        .divider({ visible: confirmVisible })
-        .button("I'm Sure", () => { game_manager.begin_countdown_to_start(); form.close(); }, { visible: confirmVisible })
-        .button('Back',     () => view.setData('main'), { visible: confirmVisible })
+        .label("Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\n§cOnce started:\n§r- The game cannot be stopped\n- No new players can join", { visible: startGameVisible })
+        .divider({ visible: startGameVisible })
+        .button("I'm Sure", () => { game_manager.begin_countdown_to_start(); form.close(); }, { visible: startGameVisible })
+        .button('Back',     () => view.setData('main'), { visible: startGameVisible })
+
+        // Confirm end
+        .label(`Ending the game will mean that ${game_manager.teams_manager.winner_check()} will win the game immediately. This only works if UHC is in "pause" mode due to one team leaving.`, { visible: endGameVisible })
+        .divider({ visible: endGameVisible })
+        .button("I'm Sure", () => { game_manager.opponent_team_left = false; form.close(); }, { visible: endGameVisible })
+        .button('Back',     () => view.setData('main'), { visible: endGameVisible })
 
         // Settings
         .header('World Border', { visible: settingsVisible })
