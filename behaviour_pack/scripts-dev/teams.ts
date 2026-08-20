@@ -99,7 +99,7 @@ export class TeamsManager {
 
             team.players.forEach((player: Player) => {
                 player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond*60, {amplifier: 100})
-                player.teleport(coordinates, {keepVelocity: false})
+                player.teleport(coordinates, {keepVelocity: false, dimension: world.getDimension(MinecraftDimensionTypes.Overworld)})
             })
         })
     }
@@ -117,7 +117,7 @@ export class TeamsManager {
         if (block) coordinates.y = block.y+1
 
         player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond*60, {amplifier: 100})
-        player.teleport(coordinates, {keepVelocity: false})
+        player.teleport(coordinates, {keepVelocity: false, dimension: world.getDimension(MinecraftDimensionTypes.Overworld)})
     }
 
     winner_check(): Team | undefined {
