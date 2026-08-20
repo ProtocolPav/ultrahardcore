@@ -204,7 +204,7 @@ export class GameManager {
         world.getAllPlayers().forEach((player: Player) => {
             player.teleport(winning_player.location)
             player.setGameMode(GameMode.Survival)
-            player.addEffect(MinecraftEffectTypes.Resistance, 20000000, {amplifier: 100})
+            player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond * 60 * 500, {amplifier: 100})
         })
     }
 
@@ -237,7 +237,9 @@ export class GameManager {
             this.border_manager.checkBorder();
 
             let team = this.teams_manager.winner_check()
-            if (team && !this.opponent_team_left) { // If there are 2 teams remaining, and one team leaves, wait until they join back
+
+            // If there are 2 teams remaining, and one team leaves, wait until they join back
+            if (team && !this.opponent_team_left) {
                 this.finish_game(team)
             }
 
