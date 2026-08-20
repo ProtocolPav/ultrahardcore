@@ -37,6 +37,8 @@ export class GameManager {
     items: ItemStack[]
     challenges: typeof game_challenges
 
+    opponent_team_left: boolean = false
+
     private constructor(
         teams_manager: TeamsManager,
         game_status: 'waiting' | 'starting' | 'running' | 'finished',
@@ -159,25 +161,6 @@ export class GameManager {
         })
     }
 
-    private border() {
-        const players = world.getAllPlayers()
-
-        players.forEach((player) => {
-            let distance = Math.sqrt(player.location.x**2 + player.location.z**2)
-            if (distance > this.settings.border_radius) {
-                let angle = Math.atan2(player.location.z, player.location.x)
-                let tp_location = {
-                    x: (this.settings.border_radius-1) * Math.cos(angle),
-                    y: player.location.y,
-                    z: (this.settings.border_radius-1) * Math.sin(angle)
-                }
-
-                this.message_manager.send_message("Stay within the border", 'uhc.team.death.global', player)
-                player.teleport(tp_location)
-            }
-        })
-    }
-
     private start_game() {
         this.game_status = 'running'
 
@@ -198,7 +181,7 @@ export class GameManager {
                 player.removeEffect(effect.typeId)
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
-            player.runCommand('clear @a')
+            //player.runCommand('clear @a')
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges)
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
@@ -252,7 +235,7 @@ export class GameManager {
             this.border_manager.checkBorder();
 
             let team = this.teams_manager.winner_check()
-            if (team) {
+            if (team && !this.opponent_team_left) { // If there are 2 teams remaining, and one team leaves, wait until they join back
                 this.finish_game(team)
             }
 

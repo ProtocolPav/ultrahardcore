@@ -4,7 +4,7 @@ import {
   GameMode as GameMode2,
   ItemStack as ItemStack2,
   Player as Player9,
-  system as system3,
+  system as system4,
   TicksPerSecond as TicksPerSecond3,
   world as world8
 } from "@minecraft/server";
@@ -15,7 +15,7 @@ import {
   EntityComponentTypes as EntityComponentTypes3,
   GameMode,
   ItemStack,
-  system as system2,
+  system as system3,
   TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
   world as world7
@@ -3397,7 +3397,7 @@ var TeamsManager = class {
 };
 
 // behaviour_pack/scripts-dev/messagebar.ts
-import { world as world2 } from "@minecraft/server";
+import { system, world as world2 } from "@minecraft/server";
 var MessageManager = class {
   set_bar(game_time, status, grace_period, end, deathmatch) {
     if (status === "waiting") {
@@ -3420,7 +3420,7 @@ var MessageManager = class {
       player.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
     } else {
       if (sound) {
-        world2.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        system.run(() => world2.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, { x: 0, y: 0, z: 0 }, { volume: 1e3 }));
       }
       world2.sendMessage({ "text": `\xA7l\xA7e[UHC]\xA7r ${message}` });
     }
@@ -3465,6 +3465,7 @@ var MessageManager = class {
 var ChallengeProgress = class {
   constructor(team, max_progress, player) {
     this.player = player;
+    this.player_name = player?.name;
     this.team = team;
     this.progress = 0;
     this.max_progress = max_progress;
@@ -3802,7 +3803,7 @@ var Settings = class {
 import {
   EntityDamageCause,
   MolangVariableMap,
-  system,
+  system as system2,
   world as world6
 } from "@minecraft/server";
 var TELEPORT_THRESHOLD = 7;
@@ -3824,7 +3825,7 @@ var BorderManager = class {
       (event) => {
         if (event.hurtEntity.typeId !== "minecraft:player") return;
         const expiresAt = this.noFallUntil.get(event.hurtEntity.id);
-        if (expiresAt !== void 0 && system.currentTick <= expiresAt) {
+        if (expiresAt !== void 0 && system2.currentTick <= expiresAt) {
           event.cancel = true;
         }
       },
@@ -3873,7 +3874,7 @@ var BorderManager = class {
     }
   }
   grantNoFall(playerId, ticks) {
-    this.noFallUntil.set(playerId, system.currentTick + ticks);
+    this.noFallUntil.set(playerId, system2.currentTick + ticks);
   }
   renderParticles() {
     const half = this.settings.border_radius;
@@ -3909,6 +3910,7 @@ var BorderManager = class {
 // behaviour_pack/scripts-dev/game.ts
 var GameManager = class _GameManager {
   constructor(teams_manager, game_status, game_time, initialized, message_manager, settings) {
+    this.opponent_team_left = false;
     this.teams_manager = teams_manager;
     this.game_status = game_status;
     this.game_time = game_time;
@@ -3930,8 +3932,8 @@ var GameManager = class _GameManager {
       new ItemStack(MinecraftItemTypes.PinkPetals, 1)
     ];
     this.challenges = game_challenges;
-    system2.runInterval(() => this.game_loop(), 20);
-    system2.runInterval(() => this.challenge_loop(), 1);
+    system3.runInterval(() => this.game_loop(), 20);
+    system3.runInterval(() => this.challenge_loop(), 1);
   }
   static initialize() {
     let initialized = Boolean(world7.getDynamicProperty("uhc:initialized"));
@@ -3966,7 +3968,7 @@ var GameManager = class _GameManager {
       `The game is about to start! Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
       "uhc.start.before"
     );
-    system2.runTimeout(() => {
+    system3.runTimeout(() => {
       this.message_manager.send_message(
         `You might be teleported into the sky, do not worry! You will have resistance to save your fall.`,
         "random.toast"
@@ -4003,22 +4005,6 @@ var GameManager = class _GameManager {
       team.update();
     });
   }
-  border() {
-    const players = world7.getAllPlayers();
-    players.forEach((player) => {
-      let distance = Math.sqrt(player.location.x ** 2 + player.location.z ** 2);
-      if (distance > this.settings.border_radius) {
-        let angle = Math.atan2(player.location.z, player.location.x);
-        let tp_location = {
-          x: (this.settings.border_radius - 1) * Math.cos(angle),
-          y: player.location.y,
-          z: (this.settings.border_radius - 1) * Math.sin(angle)
-        };
-        this.message_manager.send_message("Stay within the border", "uhc.team.death.global", player);
-        player.teleport(tp_location);
-      }
-    });
-  }
   start_game() {
     this.game_status = "running";
     const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10);
@@ -4037,7 +4023,6 @@ var GameManager = class _GameManager {
         player.removeEffect(effect.typeId);
       });
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
-      player.runCommand("clear @a");
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(beef);
       player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(challenges);
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
@@ -4076,7 +4061,7 @@ var GameManager = class _GameManager {
       this.game_time++;
       this.border_manager.checkBorder();
       let team = this.teams_manager.winner_check();
-      if (team) {
+      if (team && !this.opponent_team_left) {
         this.finish_game(team);
       }
       world7.getDimension(MinecraftDimensionTypes.Overworld).runCommand("clear @a map");
@@ -4174,12 +4159,14 @@ function admin_form(game_manager2, player) {
   const is = (v) => new ObservableBoolean(view.getData() === v, { clientWritable: false });
   const isNot = (v) => new ObservableBoolean(view.getData() !== v, { clientWritable: false });
   const mainVisible = is("main");
-  const confirmVisible = is("confirm_start");
+  const startGameVisible = is("confirm_start");
+  const endGameVisible = is("confirm_end");
   const settingsVisible = is("settings");
   const logsVisible = is("challenge_logs");
   view.subscribe((v) => {
     mainVisible.setData(v === "main");
-    confirmVisible.setData(v === "confirm_start");
+    startGameVisible.setData(v === "confirm_start");
+    endGameVisible.setData(v === "confirm_end");
     settingsVisible.setData(v === "settings");
     logsVisible.setData(v === "challenge_logs");
   });
@@ -4189,16 +4176,19 @@ function admin_form(game_manager2, player) {
     logBody += `\xA7e${challenge.name}\xA7r
 `;
     challenge.progress.slice().sort((a, b) => b.progress - a.progress).forEach((p) => {
-      const label = p.player ? p.player.name : p.team;
+      const label = p.player ? p.player_name : p.team;
       logBody += `- ${label} | ${p.progress}/${p.max_progress}
 `;
     });
     logBody += "\n";
   }
-  const form = new CustomForm(player, "UHC Manager").button("Start Game", () => view.setData("confirm_start"), { visible: mainVisible, disabled: !canStart }).button("Settings", () => view.setData("settings"), { visible: mainVisible }).button("Challenge Logs", () => view.setData("challenge_logs"), { visible: mainVisible }).label("Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\n\xA7cOnce started:\n\xA7r- The game cannot be stopped\n- No new players can join", { visible: confirmVisible }).divider({ visible: confirmVisible }).button("I'm Sure", () => {
+  const form = new CustomForm(player, "UHC Manager").button("Start Game", () => view.setData("confirm_start"), { visible: mainVisible, disabled: !canStart }).button("End Game", () => view.setData("confirm_end"), { visible: mainVisible, disabled: game_manager2.teams_manager.teams.length > 1 }).button("Settings", () => view.setData("settings"), { visible: mainVisible }).button("Challenge Logs", () => view.setData("challenge_logs"), { visible: mainVisible }).label("Pressing start will begin a 15 second countdown, after which each team will be teleported and the UHC begins.\n\n\xA7cOnce started:\n\xA7r- The game cannot be stopped\n- No new players can join", { visible: startGameVisible }).divider({ visible: startGameVisible }).button("I'm Sure", () => {
     game_manager2.begin_countdown_to_start();
     form.close();
-  }, { visible: confirmVisible }).button("Back", () => view.setData("main"), { visible: confirmVisible }).header("World Border", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Border Size", borderRadius, 500, 3800, { step: 150, description: borderDescription, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Teams", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Team Size", playersPerTeam, 1, 8, { step: 1, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Game Timer", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Grace Period", gracePeriod, 5, 60, { step: 5, description: "(in minutes)", visible: settingsVisible }).slider("Main Game", mainPeriod, 20, 120, { step: 10, description: "(in minutes)", visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Modifiers", { visible: settingsVisible }).spacer({ visible: settingsVisible }).toggle("Enable Deathmatch", deathmatch, { description: "The border shrinks to 100 blocks and all surviving players are teleported to the centre for a final fight.", visible: settingsVisible }).label("idk im just testing it out???").toggle("Enable Halftime Regeneration", halftimeRegen, { description: "Gives 30 seconds of Regeneration", visible: settingsVisible }).spacer({ visible: settingsVisible }).button("Save Changes", () => {
+  }, { visible: startGameVisible }).button("Back", () => view.setData("main"), { visible: startGameVisible }).label(`Ending the game will mean that ${game_manager2.teams_manager.winner_check()} will win the game immediately. This only works if UHC is in "pause" mode due to one team leaving.`, { visible: endGameVisible }).divider({ visible: endGameVisible }).button("I'm Sure", () => {
+    game_manager2.opponent_team_left = false;
+    form.close();
+  }, { visible: endGameVisible }).button("Back", () => view.setData("main"), { visible: endGameVisible }).header("World Border", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Border Size", borderRadius, 500, 3800, { step: 150, description: borderDescription, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Teams", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Team Size", playersPerTeam, 1, 8, { step: 1, visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Game Timer", { visible: settingsVisible }).spacer({ visible: settingsVisible }).slider("Grace Period", gracePeriod, 5, 60, { step: 5, description: "(in minutes)", visible: settingsVisible }).slider("Main Game", mainPeriod, 20, 120, { step: 10, description: "(in minutes)", visible: settingsVisible }).spacer({ visible: settingsVisible }).header("Modifiers", { visible: settingsVisible }).spacer({ visible: settingsVisible }).toggle("Enable Deathmatch", deathmatch, { description: "The border shrinks to 100 blocks and all surviving players are teleported to the centre for a final fight.", visible: settingsVisible }).toggle("Enable Halftime Regeneration", halftimeRegen, { description: "Gives 30 seconds of Regeneration", visible: settingsVisible }).spacer({ visible: settingsVisible }).button("Save Changes", () => {
     s.border_radius = borderRadius.getData();
     s.players_per_team = playersPerTeam.getData();
     s.grace_period_mins = gracePeriod.getData();
@@ -4269,8 +4259,8 @@ Reward: ${challenge.reward} (On Everthorn Server)
 
 // behaviour_pack/scripts-dev/main.ts
 var game_manager;
-system3.beforeEvents.startup.subscribe((event) => {
-  system3.run(() => game_manager = GameManager.initialize());
+system4.beforeEvents.startup.subscribe((event) => {
+  system4.run(() => game_manager = GameManager.initialize());
 });
 world8.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
@@ -4286,34 +4276,56 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
     );
     event.player.setGameMode(GameMode2.Adventure);
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l4\xA7r! The game is about to start. Sit back, relax, and good luck!`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 5);
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Select your team by pressing :_input_key.use:`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 8);
-    system3.runTimeout(() => {
+    system4.runTimeout(() => {
       game_manager.message_manager.send_message(
         `For admins: \xA7e/give @p uhc:admin_book\xA7r to edit settings and start the game`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 18);
-  } else if (game_manager.game_status === "running") {
+  } else if (game_manager.game_status === "running" && event.initialSpawn && game_manager.opponent_team_left) {
+    game_manager.teams_manager.teams.forEach((team) => {
+      team.update();
+    });
+    game_manager.opponent_team_left = false;
+    game_manager.message_manager.send_message(
+      `The UHC has been resumed. Good Luck!`,
+      "random.toast"
+    );
+  } else if (game_manager.game_status === "running" && !event.initialSpawn) {
     if (!game_manager.teams_manager.get_team(event.player)) {
       event.player.setGameMode(GameMode2.Spectator);
       const death_location = event.player.getDynamicProperty("uhc:death_location");
       if (death_location) {
         event.player.teleport(death_location);
       }
+    }
+  }
+});
+world8.beforeEvents.playerLeave.subscribe((event) => {
+  if (game_manager.game_status === "running") {
+    const team = game_manager.teams_manager.get_team(event.player);
+    const alive_teams = game_manager.teams_manager.teams.filter((team2) => team2.players.length > 0);
+    if (team && team.players.length === 1 && alive_teams.length == 2) {
+      game_manager.opponent_team_left = true;
+      game_manager.message_manager.send_message(
+        `Team ${team.get_team_name()} has left. The UHC is paused until they reconnect.`,
+        "random.toast"
+      );
     }
   }
 });

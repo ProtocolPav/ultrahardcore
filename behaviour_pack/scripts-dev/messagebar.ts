@@ -1,4 +1,4 @@
-import {Player, RawMessage, world} from "@minecraft/server";
+import {Player, RawMessage, system, world} from "@minecraft/server";
 import {MinecraftDimensionTypes} from "@minecraft/vanilla-data";
 
 export class MessageManager {
@@ -31,7 +31,7 @@ export class MessageManager {
             player.sendMessage({"text": `§l§e[UHC]§r ${message}`})
         } else {
             if (sound) {
-                world.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, {x: 0, y:0, z: 0}, {volume:1000})
+                system.run(() => world.getDimension(MinecraftDimensionTypes.Overworld).playSound(sound, {x: 0, y:0, z: 0}, {volume:1000}))
             }
             world.sendMessage({"text": `§l§e[UHC]§r ${message}`})
         }
