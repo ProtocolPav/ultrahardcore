@@ -1,24 +1,24 @@
 // behaviour_pack/scripts-dev/main.ts
 import {
-  EntityComponentTypes as EntityComponentTypes4,
+  EntityComponentTypes as EntityComponentTypes5,
   GameMode as GameMode2,
   ItemStack as ItemStack2,
-  Player as Player9,
+  Player as Player8,
   system as system4,
   TicksPerSecond as TicksPerSecond3,
-  world as world8
+  world as world7
 } from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/game.ts
 import {
   DisplaySlotId,
-  EntityComponentTypes as EntityComponentTypes3,
+  EntityComponentTypes as EntityComponentTypes4,
   GameMode,
   ItemStack,
   system as system3,
   TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
-  world as world7
+  world as world6
 } from "@minecraft/server";
 
 // behaviour_pack/scripts-dev/teams.ts
@@ -41,6 +41,7 @@ var MinecraftBiomeTypes = ((MinecraftBiomeTypes2) => {
   MinecraftBiomeTypes2["ColdTaigaHills"] = "minecraft:cold_taiga_hills";
   MinecraftBiomeTypes2["ColdTaigaMutated"] = "minecraft:cold_taiga_mutated";
   MinecraftBiomeTypes2["CrimsonForest"] = "minecraft:crimson_forest";
+  MinecraftBiomeTypes2["DappledForest"] = "minecraft:dappled_forest";
   MinecraftBiomeTypes2["DeepColdOcean"] = "minecraft:deep_cold_ocean";
   MinecraftBiomeTypes2["DeepDark"] = "minecraft:deep_dark";
   MinecraftBiomeTypes2["DeepFrozenOcean"] = "minecraft:deep_frozen_ocean";
@@ -213,6 +214,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["BlackStainedGlassPane"] = "minecraft:black_stained_glass_pane";
   MinecraftBlockTypes2["BlackTerracotta"] = "minecraft:black_terracotta";
   MinecraftBlockTypes2["BlackWool"] = "minecraft:black_wool";
+  MinecraftBlockTypes2["BlackWoolDoubleSlab"] = "minecraft:black_wool_double_slab";
+  MinecraftBlockTypes2["BlackWoolSlab"] = "minecraft:black_wool_slab";
+  MinecraftBlockTypes2["BlackWoolStairs"] = "minecraft:black_wool_stairs";
   MinecraftBlockTypes2["Blackstone"] = "minecraft:blackstone";
   MinecraftBlockTypes2["BlackstoneDoubleSlab"] = "minecraft:blackstone_double_slab";
   MinecraftBlockTypes2["BlackstoneSlab"] = "minecraft:blackstone_slab";
@@ -232,6 +236,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["BlueStainedGlassPane"] = "minecraft:blue_stained_glass_pane";
   MinecraftBlockTypes2["BlueTerracotta"] = "minecraft:blue_terracotta";
   MinecraftBlockTypes2["BlueWool"] = "minecraft:blue_wool";
+  MinecraftBlockTypes2["BlueWoolDoubleSlab"] = "minecraft:blue_wool_double_slab";
+  MinecraftBlockTypes2["BlueWoolSlab"] = "minecraft:blue_wool_slab";
+  MinecraftBlockTypes2["BlueWoolStairs"] = "minecraft:blue_wool_stairs";
   MinecraftBlockTypes2["BoneBlock"] = "minecraft:bone_block";
   MinecraftBlockTypes2["Bookshelf"] = "minecraft:bookshelf";
   MinecraftBlockTypes2["BorderBlock"] = "minecraft:border_block";
@@ -258,6 +265,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["BrownStainedGlassPane"] = "minecraft:brown_stained_glass_pane";
   MinecraftBlockTypes2["BrownTerracotta"] = "minecraft:brown_terracotta";
   MinecraftBlockTypes2["BrownWool"] = "minecraft:brown_wool";
+  MinecraftBlockTypes2["BrownWoolDoubleSlab"] = "minecraft:brown_wool_double_slab";
+  MinecraftBlockTypes2["BrownWoolSlab"] = "minecraft:brown_wool_slab";
+  MinecraftBlockTypes2["BrownWoolStairs"] = "minecraft:brown_wool_stairs";
   MinecraftBlockTypes2["BubbleColumn"] = "minecraft:bubble_column";
   MinecraftBlockTypes2["BubbleCoral"] = "minecraft:bubble_coral";
   MinecraftBlockTypes2["BubbleCoralBlock"] = "minecraft:bubble_coral_block";
@@ -414,6 +424,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["CyanStainedGlassPane"] = "minecraft:cyan_stained_glass_pane";
   MinecraftBlockTypes2["CyanTerracotta"] = "minecraft:cyan_terracotta";
   MinecraftBlockTypes2["CyanWool"] = "minecraft:cyan_wool";
+  MinecraftBlockTypes2["CyanWoolDoubleSlab"] = "minecraft:cyan_wool_double_slab";
+  MinecraftBlockTypes2["CyanWoolSlab"] = "minecraft:cyan_wool_slab";
+  MinecraftBlockTypes2["CyanWoolStairs"] = "minecraft:cyan_wool_stairs";
   MinecraftBlockTypes2["DamagedAnvil"] = "minecraft:damaged_anvil";
   MinecraftBlockTypes2["Dandelion"] = "minecraft:dandelion";
   MinecraftBlockTypes2["DarkOakButton"] = "minecraft:dark_oak_button";
@@ -696,6 +709,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["GrayStainedGlassPane"] = "minecraft:gray_stained_glass_pane";
   MinecraftBlockTypes2["GrayTerracotta"] = "minecraft:gray_terracotta";
   MinecraftBlockTypes2["GrayWool"] = "minecraft:gray_wool";
+  MinecraftBlockTypes2["GrayWoolDoubleSlab"] = "minecraft:gray_wool_double_slab";
+  MinecraftBlockTypes2["GrayWoolSlab"] = "minecraft:gray_wool_slab";
+  MinecraftBlockTypes2["GrayWoolStairs"] = "minecraft:gray_wool_stairs";
   MinecraftBlockTypes2["GreenCandle"] = "minecraft:green_candle";
   MinecraftBlockTypes2["GreenCandleCake"] = "minecraft:green_candle_cake";
   MinecraftBlockTypes2["GreenCarpet"] = "minecraft:green_carpet";
@@ -707,6 +723,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["GreenStainedGlassPane"] = "minecraft:green_stained_glass_pane";
   MinecraftBlockTypes2["GreenTerracotta"] = "minecraft:green_terracotta";
   MinecraftBlockTypes2["GreenWool"] = "minecraft:green_wool";
+  MinecraftBlockTypes2["GreenWoolDoubleSlab"] = "minecraft:green_wool_double_slab";
+  MinecraftBlockTypes2["GreenWoolSlab"] = "minecraft:green_wool_slab";
+  MinecraftBlockTypes2["GreenWoolStairs"] = "minecraft:green_wool_stairs";
   MinecraftBlockTypes2["Grindstone"] = "minecraft:grindstone";
   MinecraftBlockTypes2["HangingRoots"] = "minecraft:hanging_roots";
   MinecraftBlockTypes2["HardBlackStainedGlass"] = "minecraft:hard_black_stained_glass";
@@ -827,6 +846,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["LightBlueStainedGlassPane"] = "minecraft:light_blue_stained_glass_pane";
   MinecraftBlockTypes2["LightBlueTerracotta"] = "minecraft:light_blue_terracotta";
   MinecraftBlockTypes2["LightBlueWool"] = "minecraft:light_blue_wool";
+  MinecraftBlockTypes2["LightBlueWoolDoubleSlab"] = "minecraft:light_blue_wool_double_slab";
+  MinecraftBlockTypes2["LightBlueWoolSlab"] = "minecraft:light_blue_wool_slab";
+  MinecraftBlockTypes2["LightBlueWoolStairs"] = "minecraft:light_blue_wool_stairs";
   MinecraftBlockTypes2["LightGrayCandle"] = "minecraft:light_gray_candle";
   MinecraftBlockTypes2["LightGrayCandleCake"] = "minecraft:light_gray_candle_cake";
   MinecraftBlockTypes2["LightGrayCarpet"] = "minecraft:light_gray_carpet";
@@ -837,6 +859,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["LightGrayStainedGlassPane"] = "minecraft:light_gray_stained_glass_pane";
   MinecraftBlockTypes2["LightGrayTerracotta"] = "minecraft:light_gray_terracotta";
   MinecraftBlockTypes2["LightGrayWool"] = "minecraft:light_gray_wool";
+  MinecraftBlockTypes2["LightGrayWoolDoubleSlab"] = "minecraft:light_gray_wool_double_slab";
+  MinecraftBlockTypes2["LightGrayWoolSlab"] = "minecraft:light_gray_wool_slab";
+  MinecraftBlockTypes2["LightGrayWoolStairs"] = "minecraft:light_gray_wool_stairs";
   MinecraftBlockTypes2["LightWeightedPressurePlate"] = "minecraft:light_weighted_pressure_plate";
   MinecraftBlockTypes2["LightningRod"] = "minecraft:lightning_rod";
   MinecraftBlockTypes2["Lilac"] = "minecraft:lilac";
@@ -852,6 +877,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["LimeStainedGlassPane"] = "minecraft:lime_stained_glass_pane";
   MinecraftBlockTypes2["LimeTerracotta"] = "minecraft:lime_terracotta";
   MinecraftBlockTypes2["LimeWool"] = "minecraft:lime_wool";
+  MinecraftBlockTypes2["LimeWoolDoubleSlab"] = "minecraft:lime_wool_double_slab";
+  MinecraftBlockTypes2["LimeWoolSlab"] = "minecraft:lime_wool_slab";
+  MinecraftBlockTypes2["LimeWoolStairs"] = "minecraft:lime_wool_stairs";
   MinecraftBlockTypes2["LitBlastFurnace"] = "minecraft:lit_blast_furnace";
   MinecraftBlockTypes2["LitDeepslateRedstoneOre"] = "minecraft:lit_deepslate_redstone_ore";
   MinecraftBlockTypes2["LitFurnace"] = "minecraft:lit_furnace";
@@ -872,6 +900,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["MagentaStainedGlassPane"] = "minecraft:magenta_stained_glass_pane";
   MinecraftBlockTypes2["MagentaTerracotta"] = "minecraft:magenta_terracotta";
   MinecraftBlockTypes2["MagentaWool"] = "minecraft:magenta_wool";
+  MinecraftBlockTypes2["MagentaWoolDoubleSlab"] = "minecraft:magenta_wool_double_slab";
+  MinecraftBlockTypes2["MagentaWoolSlab"] = "minecraft:magenta_wool_slab";
+  MinecraftBlockTypes2["MagentaWoolStairs"] = "minecraft:magenta_wool_stairs";
   MinecraftBlockTypes2["Magma"] = "minecraft:magma";
   MinecraftBlockTypes2["MangroveButton"] = "minecraft:mangrove_button";
   MinecraftBlockTypes2["MangroveDoor"] = "minecraft:mangrove_door";
@@ -955,12 +986,16 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["OrangeConcrete"] = "minecraft:orange_concrete";
   MinecraftBlockTypes2["OrangeConcretePowder"] = "minecraft:orange_concrete_powder";
   MinecraftBlockTypes2["OrangeGlazedTerracotta"] = "minecraft:orange_glazed_terracotta";
+  MinecraftBlockTypes2["OrangePoplarLeaves"] = "minecraft:orange_poplar_leaves";
   MinecraftBlockTypes2["OrangeShulkerBox"] = "minecraft:orange_shulker_box";
   MinecraftBlockTypes2["OrangeStainedGlass"] = "minecraft:orange_stained_glass";
   MinecraftBlockTypes2["OrangeStainedGlassPane"] = "minecraft:orange_stained_glass_pane";
   MinecraftBlockTypes2["OrangeTerracotta"] = "minecraft:orange_terracotta";
   MinecraftBlockTypes2["OrangeTulip"] = "minecraft:orange_tulip";
   MinecraftBlockTypes2["OrangeWool"] = "minecraft:orange_wool";
+  MinecraftBlockTypes2["OrangeWoolDoubleSlab"] = "minecraft:orange_wool_double_slab";
+  MinecraftBlockTypes2["OrangeWoolSlab"] = "minecraft:orange_wool_slab";
+  MinecraftBlockTypes2["OrangeWoolStairs"] = "minecraft:orange_wool_stairs";
   MinecraftBlockTypes2["OxeyeDaisy"] = "minecraft:oxeye_daisy";
   MinecraftBlockTypes2["OxidizedChiseledCopper"] = "minecraft:oxidized_chiseled_copper";
   MinecraftBlockTypes2["OxidizedCopper"] = "minecraft:oxidized_copper";
@@ -1019,6 +1054,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["PinkTerracotta"] = "minecraft:pink_terracotta";
   MinecraftBlockTypes2["PinkTulip"] = "minecraft:pink_tulip";
   MinecraftBlockTypes2["PinkWool"] = "minecraft:pink_wool";
+  MinecraftBlockTypes2["PinkWoolDoubleSlab"] = "minecraft:pink_wool_double_slab";
+  MinecraftBlockTypes2["PinkWoolSlab"] = "minecraft:pink_wool_slab";
+  MinecraftBlockTypes2["PinkWoolStairs"] = "minecraft:pink_wool_stairs";
   MinecraftBlockTypes2["Piston"] = "minecraft:piston";
   MinecraftBlockTypes2["PistonArmCollision"] = "minecraft:piston_arm_collision";
   MinecraftBlockTypes2["PitcherCrop"] = "minecraft:pitcher_crop";
@@ -1071,6 +1109,23 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["PolishedTuffSlab"] = "minecraft:polished_tuff_slab";
   MinecraftBlockTypes2["PolishedTuffStairs"] = "minecraft:polished_tuff_stairs";
   MinecraftBlockTypes2["PolishedTuffWall"] = "minecraft:polished_tuff_wall";
+  MinecraftBlockTypes2["PoplarButton"] = "minecraft:poplar_button";
+  MinecraftBlockTypes2["PoplarDoor"] = "minecraft:poplar_door";
+  MinecraftBlockTypes2["PoplarDoubleSlab"] = "minecraft:poplar_double_slab";
+  MinecraftBlockTypes2["PoplarFence"] = "minecraft:poplar_fence";
+  MinecraftBlockTypes2["PoplarFenceGate"] = "minecraft:poplar_fence_gate";
+  MinecraftBlockTypes2["PoplarHangingSign"] = "minecraft:poplar_hanging_sign";
+  MinecraftBlockTypes2["PoplarLog"] = "minecraft:poplar_log";
+  MinecraftBlockTypes2["PoplarPlanks"] = "minecraft:poplar_planks";
+  MinecraftBlockTypes2["PoplarPressurePlate"] = "minecraft:poplar_pressure_plate";
+  MinecraftBlockTypes2["PoplarSapling"] = "minecraft:poplar_sapling";
+  MinecraftBlockTypes2["PoplarShelf"] = "minecraft:poplar_shelf";
+  MinecraftBlockTypes2["PoplarSlab"] = "minecraft:poplar_slab";
+  MinecraftBlockTypes2["PoplarStairs"] = "minecraft:poplar_stairs";
+  MinecraftBlockTypes2["PoplarStandingSign"] = "minecraft:poplar_standing_sign";
+  MinecraftBlockTypes2["PoplarTrapdoor"] = "minecraft:poplar_trapdoor";
+  MinecraftBlockTypes2["PoplarWallSign"] = "minecraft:poplar_wall_sign";
+  MinecraftBlockTypes2["PoplarWood"] = "minecraft:poplar_wood";
   MinecraftBlockTypes2["Poppy"] = "minecraft:poppy";
   MinecraftBlockTypes2["Portal"] = "minecraft:portal";
   MinecraftBlockTypes2["Potatoes"] = "minecraft:potatoes";
@@ -1100,6 +1155,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["PurpleStainedGlassPane"] = "minecraft:purple_stained_glass_pane";
   MinecraftBlockTypes2["PurpleTerracotta"] = "minecraft:purple_terracotta";
   MinecraftBlockTypes2["PurpleWool"] = "minecraft:purple_wool";
+  MinecraftBlockTypes2["PurpleWoolDoubleSlab"] = "minecraft:purple_wool_double_slab";
+  MinecraftBlockTypes2["PurpleWoolSlab"] = "minecraft:purple_wool_slab";
+  MinecraftBlockTypes2["PurpleWoolStairs"] = "minecraft:purple_wool_stairs";
   MinecraftBlockTypes2["PurpurBlock"] = "minecraft:purpur_block";
   MinecraftBlockTypes2["PurpurDoubleSlab"] = "minecraft:purpur_double_slab";
   MinecraftBlockTypes2["PurpurPillar"] = "minecraft:purpur_pillar";
@@ -1129,18 +1187,23 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["RedNetherBrickSlab"] = "minecraft:red_nether_brick_slab";
   MinecraftBlockTypes2["RedNetherBrickStairs"] = "minecraft:red_nether_brick_stairs";
   MinecraftBlockTypes2["RedNetherBrickWall"] = "minecraft:red_nether_brick_wall";
+  MinecraftBlockTypes2["RedPoplarLeaves"] = "minecraft:red_poplar_leaves";
   MinecraftBlockTypes2["RedSand"] = "minecraft:red_sand";
   MinecraftBlockTypes2["RedSandstone"] = "minecraft:red_sandstone";
   MinecraftBlockTypes2["RedSandstoneDoubleSlab"] = "minecraft:red_sandstone_double_slab";
   MinecraftBlockTypes2["RedSandstoneSlab"] = "minecraft:red_sandstone_slab";
   MinecraftBlockTypes2["RedSandstoneStairs"] = "minecraft:red_sandstone_stairs";
   MinecraftBlockTypes2["RedSandstoneWall"] = "minecraft:red_sandstone_wall";
+  MinecraftBlockTypes2["RedShrub"] = "minecraft:red_shrub";
   MinecraftBlockTypes2["RedShulkerBox"] = "minecraft:red_shulker_box";
   MinecraftBlockTypes2["RedStainedGlass"] = "minecraft:red_stained_glass";
   MinecraftBlockTypes2["RedStainedGlassPane"] = "minecraft:red_stained_glass_pane";
   MinecraftBlockTypes2["RedTerracotta"] = "minecraft:red_terracotta";
   MinecraftBlockTypes2["RedTulip"] = "minecraft:red_tulip";
   MinecraftBlockTypes2["RedWool"] = "minecraft:red_wool";
+  MinecraftBlockTypes2["RedWoolDoubleSlab"] = "minecraft:red_wool_double_slab";
+  MinecraftBlockTypes2["RedWoolSlab"] = "minecraft:red_wool_slab";
+  MinecraftBlockTypes2["RedWoolStairs"] = "minecraft:red_wool_stairs";
   MinecraftBlockTypes2["RedstoneBlock"] = "minecraft:redstone_block";
   MinecraftBlockTypes2["RedstoneLamp"] = "minecraft:redstone_lamp";
   MinecraftBlockTypes2["RedstoneOre"] = "minecraft:redstone_ore";
@@ -1173,6 +1236,7 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["SeaLantern"] = "minecraft:sea_lantern";
   MinecraftBlockTypes2["SeaPickle"] = "minecraft:sea_pickle";
   MinecraftBlockTypes2["Seagrass"] = "minecraft:seagrass";
+  MinecraftBlockTypes2["ShelfMushroom"] = "minecraft:shelf_mushroom";
   MinecraftBlockTypes2["ShortDryGrass"] = "minecraft:short_dry_grass";
   MinecraftBlockTypes2["ShortGrass"] = "minecraft:short_grass";
   MinecraftBlockTypes2["Shroomlight"] = "minecraft:shroomlight";
@@ -1242,6 +1306,7 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["StonePressurePlate"] = "minecraft:stone_pressure_plate";
   MinecraftBlockTypes2["StoneStairs"] = "minecraft:stone_stairs";
   MinecraftBlockTypes2["StonecutterBlock"] = "minecraft:stonecutter_block";
+  MinecraftBlockTypes2["StrawBed"] = "minecraft:straw_bed";
   MinecraftBlockTypes2["StrippedAcaciaLog"] = "minecraft:stripped_acacia_log";
   MinecraftBlockTypes2["StrippedAcaciaWood"] = "minecraft:stripped_acacia_wood";
   MinecraftBlockTypes2["StrippedBambooBlock"] = "minecraft:stripped_bamboo_block";
@@ -1261,6 +1326,8 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["StrippedOakWood"] = "minecraft:stripped_oak_wood";
   MinecraftBlockTypes2["StrippedPaleOakLog"] = "minecraft:stripped_pale_oak_log";
   MinecraftBlockTypes2["StrippedPaleOakWood"] = "minecraft:stripped_pale_oak_wood";
+  MinecraftBlockTypes2["StrippedPoplarLog"] = "minecraft:stripped_poplar_log";
+  MinecraftBlockTypes2["StrippedPoplarWood"] = "minecraft:stripped_poplar_wood";
   MinecraftBlockTypes2["StrippedSpruceLog"] = "minecraft:stripped_spruce_log";
   MinecraftBlockTypes2["StrippedSpruceWood"] = "minecraft:stripped_spruce_wood";
   MinecraftBlockTypes2["StrippedWarpedHyphae"] = "minecraft:stripped_warped_hyphae";
@@ -1441,6 +1508,9 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["WhiteTerracotta"] = "minecraft:white_terracotta";
   MinecraftBlockTypes2["WhiteTulip"] = "minecraft:white_tulip";
   MinecraftBlockTypes2["WhiteWool"] = "minecraft:white_wool";
+  MinecraftBlockTypes2["WhiteWoolDoubleSlab"] = "minecraft:white_wool_double_slab";
+  MinecraftBlockTypes2["WhiteWoolSlab"] = "minecraft:white_wool_slab";
+  MinecraftBlockTypes2["WhiteWoolStairs"] = "minecraft:white_wool_stairs";
   MinecraftBlockTypes2["Wildflowers"] = "minecraft:wildflowers";
   MinecraftBlockTypes2["WitherRose"] = "minecraft:wither_rose";
   MinecraftBlockTypes2["WitherSkeletonSkull"] = "minecraft:wither_skeleton_skull";
@@ -1453,11 +1523,15 @@ var MinecraftBlockTypes = ((MinecraftBlockTypes2) => {
   MinecraftBlockTypes2["YellowConcrete"] = "minecraft:yellow_concrete";
   MinecraftBlockTypes2["YellowConcretePowder"] = "minecraft:yellow_concrete_powder";
   MinecraftBlockTypes2["YellowGlazedTerracotta"] = "minecraft:yellow_glazed_terracotta";
+  MinecraftBlockTypes2["YellowPoplarLeaves"] = "minecraft:yellow_poplar_leaves";
   MinecraftBlockTypes2["YellowShulkerBox"] = "minecraft:yellow_shulker_box";
   MinecraftBlockTypes2["YellowStainedGlass"] = "minecraft:yellow_stained_glass";
   MinecraftBlockTypes2["YellowStainedGlassPane"] = "minecraft:yellow_stained_glass_pane";
   MinecraftBlockTypes2["YellowTerracotta"] = "minecraft:yellow_terracotta";
   MinecraftBlockTypes2["YellowWool"] = "minecraft:yellow_wool";
+  MinecraftBlockTypes2["YellowWoolDoubleSlab"] = "minecraft:yellow_wool_double_slab";
+  MinecraftBlockTypes2["YellowWoolSlab"] = "minecraft:yellow_wool_slab";
+  MinecraftBlockTypes2["YellowWoolStairs"] = "minecraft:yellow_wool_stairs";
   MinecraftBlockTypes2["ZombieHead"] = "minecraft:zombie_head";
   return MinecraftBlockTypes2;
 })(MinecraftBlockTypes || {});
@@ -1599,6 +1673,7 @@ var MinecraftEntityTypes = ((MinecraftEntityTypes2) => {
   MinecraftEntityTypes2["Cow"] = "minecraft:cow";
   MinecraftEntityTypes2["Creaking"] = "minecraft:creaking";
   MinecraftEntityTypes2["Creeper"] = "minecraft:creeper";
+  MinecraftEntityTypes2["Cushion"] = "minecraft:cushion";
   MinecraftEntityTypes2["Dolphin"] = "minecraft:dolphin";
   MinecraftEntityTypes2["Donkey"] = "minecraft:donkey";
   MinecraftEntityTypes2["DragonFireball"] = "minecraft:dragon_fireball";
@@ -1828,6 +1903,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["BlackCarpet"] = "minecraft:black_carpet";
   MinecraftItemTypes2["BlackConcrete"] = "minecraft:black_concrete";
   MinecraftItemTypes2["BlackConcretePowder"] = "minecraft:black_concrete_powder";
+  MinecraftItemTypes2["BlackCushion"] = "minecraft:black_cushion";
   MinecraftItemTypes2["BlackDye"] = "minecraft:black_dye";
   MinecraftItemTypes2["BlackGlazedTerracotta"] = "minecraft:black_glazed_terracotta";
   MinecraftItemTypes2["BlackHarness"] = "minecraft:black_harness";
@@ -1836,6 +1912,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["BlackStainedGlassPane"] = "minecraft:black_stained_glass_pane";
   MinecraftItemTypes2["BlackTerracotta"] = "minecraft:black_terracotta";
   MinecraftItemTypes2["BlackWool"] = "minecraft:black_wool";
+  MinecraftItemTypes2["BlackWoolDoubleSlab"] = "minecraft:black_wool_double_slab";
+  MinecraftItemTypes2["BlackWoolSlab"] = "minecraft:black_wool_slab";
+  MinecraftItemTypes2["BlackWoolStairs"] = "minecraft:black_wool_stairs";
   MinecraftItemTypes2["Blackstone"] = "minecraft:blackstone";
   MinecraftItemTypes2["BlackstoneSlab"] = "minecraft:blackstone_slab";
   MinecraftItemTypes2["BlackstoneStairs"] = "minecraft:blackstone_stairs";
@@ -1850,6 +1929,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["BlueCarpet"] = "minecraft:blue_carpet";
   MinecraftItemTypes2["BlueConcrete"] = "minecraft:blue_concrete";
   MinecraftItemTypes2["BlueConcretePowder"] = "minecraft:blue_concrete_powder";
+  MinecraftItemTypes2["BlueCushion"] = "minecraft:blue_cushion";
   MinecraftItemTypes2["BlueDye"] = "minecraft:blue_dye";
   MinecraftItemTypes2["BlueEgg"] = "minecraft:blue_egg";
   MinecraftItemTypes2["BlueGlazedTerracotta"] = "minecraft:blue_glazed_terracotta";
@@ -1861,6 +1941,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["BlueStainedGlassPane"] = "minecraft:blue_stained_glass_pane";
   MinecraftItemTypes2["BlueTerracotta"] = "minecraft:blue_terracotta";
   MinecraftItemTypes2["BlueWool"] = "minecraft:blue_wool";
+  MinecraftItemTypes2["BlueWoolDoubleSlab"] = "minecraft:blue_wool_double_slab";
+  MinecraftItemTypes2["BlueWoolSlab"] = "minecraft:blue_wool_slab";
+  MinecraftItemTypes2["BlueWoolStairs"] = "minecraft:blue_wool_stairs";
   MinecraftItemTypes2["BoggedSpawnEgg"] = "minecraft:bogged_spawn_egg";
   MinecraftItemTypes2["BoltArmorTrimSmithingTemplate"] = "minecraft:bolt_armor_trim_smithing_template";
   MinecraftItemTypes2["Bone"] = "minecraft:bone";
@@ -1890,6 +1973,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["BrownCarpet"] = "minecraft:brown_carpet";
   MinecraftItemTypes2["BrownConcrete"] = "minecraft:brown_concrete";
   MinecraftItemTypes2["BrownConcretePowder"] = "minecraft:brown_concrete_powder";
+  MinecraftItemTypes2["BrownCushion"] = "minecraft:brown_cushion";
   MinecraftItemTypes2["BrownDye"] = "minecraft:brown_dye";
   MinecraftItemTypes2["BrownEgg"] = "minecraft:brown_egg";
   MinecraftItemTypes2["BrownGlazedTerracotta"] = "minecraft:brown_glazed_terracotta";
@@ -1901,6 +1985,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["BrownStainedGlassPane"] = "minecraft:brown_stained_glass_pane";
   MinecraftItemTypes2["BrownTerracotta"] = "minecraft:brown_terracotta";
   MinecraftItemTypes2["BrownWool"] = "minecraft:brown_wool";
+  MinecraftItemTypes2["BrownWoolDoubleSlab"] = "minecraft:brown_wool_double_slab";
+  MinecraftItemTypes2["BrownWoolSlab"] = "minecraft:brown_wool_slab";
+  MinecraftItemTypes2["BrownWoolStairs"] = "minecraft:brown_wool_stairs";
   MinecraftItemTypes2["Brush"] = "minecraft:brush";
   MinecraftItemTypes2["BubbleCoral"] = "minecraft:bubble_coral";
   MinecraftItemTypes2["BubbleCoralBlock"] = "minecraft:bubble_coral_block";
@@ -2086,6 +2173,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["CyanCarpet"] = "minecraft:cyan_carpet";
   MinecraftItemTypes2["CyanConcrete"] = "minecraft:cyan_concrete";
   MinecraftItemTypes2["CyanConcretePowder"] = "minecraft:cyan_concrete_powder";
+  MinecraftItemTypes2["CyanCushion"] = "minecraft:cyan_cushion";
   MinecraftItemTypes2["CyanDye"] = "minecraft:cyan_dye";
   MinecraftItemTypes2["CyanGlazedTerracotta"] = "minecraft:cyan_glazed_terracotta";
   MinecraftItemTypes2["CyanHarness"] = "minecraft:cyan_harness";
@@ -2094,6 +2182,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["CyanStainedGlassPane"] = "minecraft:cyan_stained_glass_pane";
   MinecraftItemTypes2["CyanTerracotta"] = "minecraft:cyan_terracotta";
   MinecraftItemTypes2["CyanWool"] = "minecraft:cyan_wool";
+  MinecraftItemTypes2["CyanWoolDoubleSlab"] = "minecraft:cyan_wool_double_slab";
+  MinecraftItemTypes2["CyanWoolSlab"] = "minecraft:cyan_wool_slab";
+  MinecraftItemTypes2["CyanWoolStairs"] = "minecraft:cyan_wool_stairs";
   MinecraftItemTypes2["DamagedAnvil"] = "minecraft:damaged_anvil";
   MinecraftItemTypes2["Dandelion"] = "minecraft:dandelion";
   MinecraftItemTypes2["DangerPotterySherd"] = "minecraft:danger_pottery_sherd";
@@ -2314,6 +2405,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["GrayCarpet"] = "minecraft:gray_carpet";
   MinecraftItemTypes2["GrayConcrete"] = "minecraft:gray_concrete";
   MinecraftItemTypes2["GrayConcretePowder"] = "minecraft:gray_concrete_powder";
+  MinecraftItemTypes2["GrayCushion"] = "minecraft:gray_cushion";
   MinecraftItemTypes2["GrayDye"] = "minecraft:gray_dye";
   MinecraftItemTypes2["GrayGlazedTerracotta"] = "minecraft:gray_glazed_terracotta";
   MinecraftItemTypes2["GrayHarness"] = "minecraft:gray_harness";
@@ -2322,11 +2414,15 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["GrayStainedGlassPane"] = "minecraft:gray_stained_glass_pane";
   MinecraftItemTypes2["GrayTerracotta"] = "minecraft:gray_terracotta";
   MinecraftItemTypes2["GrayWool"] = "minecraft:gray_wool";
+  MinecraftItemTypes2["GrayWoolDoubleSlab"] = "minecraft:gray_wool_double_slab";
+  MinecraftItemTypes2["GrayWoolSlab"] = "minecraft:gray_wool_slab";
+  MinecraftItemTypes2["GrayWoolStairs"] = "minecraft:gray_wool_stairs";
   MinecraftItemTypes2["GreenBundle"] = "minecraft:green_bundle";
   MinecraftItemTypes2["GreenCandle"] = "minecraft:green_candle";
   MinecraftItemTypes2["GreenCarpet"] = "minecraft:green_carpet";
   MinecraftItemTypes2["GreenConcrete"] = "minecraft:green_concrete";
   MinecraftItemTypes2["GreenConcretePowder"] = "minecraft:green_concrete_powder";
+  MinecraftItemTypes2["GreenCushion"] = "minecraft:green_cushion";
   MinecraftItemTypes2["GreenDye"] = "minecraft:green_dye";
   MinecraftItemTypes2["GreenGlazedTerracotta"] = "minecraft:green_glazed_terracotta";
   MinecraftItemTypes2["GreenHarness"] = "minecraft:green_harness";
@@ -2335,6 +2431,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["GreenStainedGlassPane"] = "minecraft:green_stained_glass_pane";
   MinecraftItemTypes2["GreenTerracotta"] = "minecraft:green_terracotta";
   MinecraftItemTypes2["GreenWool"] = "minecraft:green_wool";
+  MinecraftItemTypes2["GreenWoolDoubleSlab"] = "minecraft:green_wool_double_slab";
+  MinecraftItemTypes2["GreenWoolSlab"] = "minecraft:green_wool_slab";
+  MinecraftItemTypes2["GreenWoolStairs"] = "minecraft:green_wool_stairs";
   MinecraftItemTypes2["Grindstone"] = "minecraft:grindstone";
   MinecraftItemTypes2["GuardianSpawnEgg"] = "minecraft:guardian_spawn_egg";
   MinecraftItemTypes2["Gunpowder"] = "minecraft:gunpowder";
@@ -2453,6 +2552,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["LightBlueCarpet"] = "minecraft:light_blue_carpet";
   MinecraftItemTypes2["LightBlueConcrete"] = "minecraft:light_blue_concrete";
   MinecraftItemTypes2["LightBlueConcretePowder"] = "minecraft:light_blue_concrete_powder";
+  MinecraftItemTypes2["LightBlueCushion"] = "minecraft:light_blue_cushion";
   MinecraftItemTypes2["LightBlueDye"] = "minecraft:light_blue_dye";
   MinecraftItemTypes2["LightBlueGlazedTerracotta"] = "minecraft:light_blue_glazed_terracotta";
   MinecraftItemTypes2["LightBlueHarness"] = "minecraft:light_blue_harness";
@@ -2461,11 +2561,15 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["LightBlueStainedGlassPane"] = "minecraft:light_blue_stained_glass_pane";
   MinecraftItemTypes2["LightBlueTerracotta"] = "minecraft:light_blue_terracotta";
   MinecraftItemTypes2["LightBlueWool"] = "minecraft:light_blue_wool";
+  MinecraftItemTypes2["LightBlueWoolDoubleSlab"] = "minecraft:light_blue_wool_double_slab";
+  MinecraftItemTypes2["LightBlueWoolSlab"] = "minecraft:light_blue_wool_slab";
+  MinecraftItemTypes2["LightBlueWoolStairs"] = "minecraft:light_blue_wool_stairs";
   MinecraftItemTypes2["LightGrayBundle"] = "minecraft:light_gray_bundle";
   MinecraftItemTypes2["LightGrayCandle"] = "minecraft:light_gray_candle";
   MinecraftItemTypes2["LightGrayCarpet"] = "minecraft:light_gray_carpet";
   MinecraftItemTypes2["LightGrayConcrete"] = "minecraft:light_gray_concrete";
   MinecraftItemTypes2["LightGrayConcretePowder"] = "minecraft:light_gray_concrete_powder";
+  MinecraftItemTypes2["LightGrayCushion"] = "minecraft:light_gray_cushion";
   MinecraftItemTypes2["LightGrayDye"] = "minecraft:light_gray_dye";
   MinecraftItemTypes2["LightGrayHarness"] = "minecraft:light_gray_harness";
   MinecraftItemTypes2["LightGrayShulkerBox"] = "minecraft:light_gray_shulker_box";
@@ -2473,6 +2577,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["LightGrayStainedGlassPane"] = "minecraft:light_gray_stained_glass_pane";
   MinecraftItemTypes2["LightGrayTerracotta"] = "minecraft:light_gray_terracotta";
   MinecraftItemTypes2["LightGrayWool"] = "minecraft:light_gray_wool";
+  MinecraftItemTypes2["LightGrayWoolDoubleSlab"] = "minecraft:light_gray_wool_double_slab";
+  MinecraftItemTypes2["LightGrayWoolSlab"] = "minecraft:light_gray_wool_slab";
+  MinecraftItemTypes2["LightGrayWoolStairs"] = "minecraft:light_gray_wool_stairs";
   MinecraftItemTypes2["LightWeightedPressurePlate"] = "minecraft:light_weighted_pressure_plate";
   MinecraftItemTypes2["LightningRod"] = "minecraft:lightning_rod";
   MinecraftItemTypes2["Lilac"] = "minecraft:lilac";
@@ -2482,6 +2589,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["LimeCarpet"] = "minecraft:lime_carpet";
   MinecraftItemTypes2["LimeConcrete"] = "minecraft:lime_concrete";
   MinecraftItemTypes2["LimeConcretePowder"] = "minecraft:lime_concrete_powder";
+  MinecraftItemTypes2["LimeCushion"] = "minecraft:lime_cushion";
   MinecraftItemTypes2["LimeDye"] = "minecraft:lime_dye";
   MinecraftItemTypes2["LimeGlazedTerracotta"] = "minecraft:lime_glazed_terracotta";
   MinecraftItemTypes2["LimeHarness"] = "minecraft:lime_harness";
@@ -2490,6 +2598,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["LimeStainedGlassPane"] = "minecraft:lime_stained_glass_pane";
   MinecraftItemTypes2["LimeTerracotta"] = "minecraft:lime_terracotta";
   MinecraftItemTypes2["LimeWool"] = "minecraft:lime_wool";
+  MinecraftItemTypes2["LimeWoolDoubleSlab"] = "minecraft:lime_wool_double_slab";
+  MinecraftItemTypes2["LimeWoolSlab"] = "minecraft:lime_wool_slab";
+  MinecraftItemTypes2["LimeWoolStairs"] = "minecraft:lime_wool_stairs";
   MinecraftItemTypes2["LingeringPotion"] = "minecraft:lingering_potion";
   MinecraftItemTypes2["LitPumpkin"] = "minecraft:lit_pumpkin";
   MinecraftItemTypes2["LlamaSpawnEgg"] = "minecraft:llama_spawn_egg";
@@ -2502,6 +2613,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["MagentaCarpet"] = "minecraft:magenta_carpet";
   MinecraftItemTypes2["MagentaConcrete"] = "minecraft:magenta_concrete";
   MinecraftItemTypes2["MagentaConcretePowder"] = "minecraft:magenta_concrete_powder";
+  MinecraftItemTypes2["MagentaCushion"] = "minecraft:magenta_cushion";
   MinecraftItemTypes2["MagentaDye"] = "minecraft:magenta_dye";
   MinecraftItemTypes2["MagentaGlazedTerracotta"] = "minecraft:magenta_glazed_terracotta";
   MinecraftItemTypes2["MagentaHarness"] = "minecraft:magenta_harness";
@@ -2510,6 +2622,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["MagentaStainedGlassPane"] = "minecraft:magenta_stained_glass_pane";
   MinecraftItemTypes2["MagentaTerracotta"] = "minecraft:magenta_terracotta";
   MinecraftItemTypes2["MagentaWool"] = "minecraft:magenta_wool";
+  MinecraftItemTypes2["MagentaWoolDoubleSlab"] = "minecraft:magenta_wool_double_slab";
+  MinecraftItemTypes2["MagentaWoolSlab"] = "minecraft:magenta_wool_slab";
+  MinecraftItemTypes2["MagentaWoolStairs"] = "minecraft:magenta_wool_stairs";
   MinecraftItemTypes2["Magma"] = "minecraft:magma";
   MinecraftItemTypes2["MagmaCream"] = "minecraft:magma_cream";
   MinecraftItemTypes2["MagmaCubeSpawnEgg"] = "minecraft:magma_cube_spawn_egg";
@@ -2645,15 +2760,20 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["OrangeCarpet"] = "minecraft:orange_carpet";
   MinecraftItemTypes2["OrangeConcrete"] = "minecraft:orange_concrete";
   MinecraftItemTypes2["OrangeConcretePowder"] = "minecraft:orange_concrete_powder";
+  MinecraftItemTypes2["OrangeCushion"] = "minecraft:orange_cushion";
   MinecraftItemTypes2["OrangeDye"] = "minecraft:orange_dye";
   MinecraftItemTypes2["OrangeGlazedTerracotta"] = "minecraft:orange_glazed_terracotta";
   MinecraftItemTypes2["OrangeHarness"] = "minecraft:orange_harness";
+  MinecraftItemTypes2["OrangePoplarLeaves"] = "minecraft:orange_poplar_leaves";
   MinecraftItemTypes2["OrangeShulkerBox"] = "minecraft:orange_shulker_box";
   MinecraftItemTypes2["OrangeStainedGlass"] = "minecraft:orange_stained_glass";
   MinecraftItemTypes2["OrangeStainedGlassPane"] = "minecraft:orange_stained_glass_pane";
   MinecraftItemTypes2["OrangeTerracotta"] = "minecraft:orange_terracotta";
   MinecraftItemTypes2["OrangeTulip"] = "minecraft:orange_tulip";
   MinecraftItemTypes2["OrangeWool"] = "minecraft:orange_wool";
+  MinecraftItemTypes2["OrangeWoolDoubleSlab"] = "minecraft:orange_wool_double_slab";
+  MinecraftItemTypes2["OrangeWoolSlab"] = "minecraft:orange_wool_slab";
+  MinecraftItemTypes2["OrangeWoolStairs"] = "minecraft:orange_wool_stairs";
   MinecraftItemTypes2["OxeyeDaisy"] = "minecraft:oxeye_daisy";
   MinecraftItemTypes2["OxidizedChiseledCopper"] = "minecraft:oxidized_chiseled_copper";
   MinecraftItemTypes2["OxidizedCopper"] = "minecraft:oxidized_copper";
@@ -2714,6 +2834,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["PinkCarpet"] = "minecraft:pink_carpet";
   MinecraftItemTypes2["PinkConcrete"] = "minecraft:pink_concrete";
   MinecraftItemTypes2["PinkConcretePowder"] = "minecraft:pink_concrete_powder";
+  MinecraftItemTypes2["PinkCushion"] = "minecraft:pink_cushion";
   MinecraftItemTypes2["PinkDye"] = "minecraft:pink_dye";
   MinecraftItemTypes2["PinkGlazedTerracotta"] = "minecraft:pink_glazed_terracotta";
   MinecraftItemTypes2["PinkHarness"] = "minecraft:pink_harness";
@@ -2724,6 +2845,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["PinkTerracotta"] = "minecraft:pink_terracotta";
   MinecraftItemTypes2["PinkTulip"] = "minecraft:pink_tulip";
   MinecraftItemTypes2["PinkWool"] = "minecraft:pink_wool";
+  MinecraftItemTypes2["PinkWoolDoubleSlab"] = "minecraft:pink_wool_double_slab";
+  MinecraftItemTypes2["PinkWoolSlab"] = "minecraft:pink_wool_slab";
+  MinecraftItemTypes2["PinkWoolStairs"] = "minecraft:pink_wool_stairs";
   MinecraftItemTypes2["Piston"] = "minecraft:piston";
   MinecraftItemTypes2["PitcherPlant"] = "minecraft:pitcher_plant";
   MinecraftItemTypes2["PitcherPod"] = "minecraft:pitcher_pod";
@@ -2769,6 +2893,23 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["PolishedTuffSlab"] = "minecraft:polished_tuff_slab";
   MinecraftItemTypes2["PolishedTuffStairs"] = "minecraft:polished_tuff_stairs";
   MinecraftItemTypes2["PolishedTuffWall"] = "minecraft:polished_tuff_wall";
+  MinecraftItemTypes2["PoplarBoat"] = "minecraft:poplar_boat";
+  MinecraftItemTypes2["PoplarButton"] = "minecraft:poplar_button";
+  MinecraftItemTypes2["PoplarChestBoat"] = "minecraft:poplar_chest_boat";
+  MinecraftItemTypes2["PoplarDoor"] = "minecraft:poplar_door";
+  MinecraftItemTypes2["PoplarFence"] = "minecraft:poplar_fence";
+  MinecraftItemTypes2["PoplarFenceGate"] = "minecraft:poplar_fence_gate";
+  MinecraftItemTypes2["PoplarHangingSign"] = "minecraft:poplar_hanging_sign";
+  MinecraftItemTypes2["PoplarLog"] = "minecraft:poplar_log";
+  MinecraftItemTypes2["PoplarPlanks"] = "minecraft:poplar_planks";
+  MinecraftItemTypes2["PoplarPressurePlate"] = "minecraft:poplar_pressure_plate";
+  MinecraftItemTypes2["PoplarSapling"] = "minecraft:poplar_sapling";
+  MinecraftItemTypes2["PoplarShelf"] = "minecraft:poplar_shelf";
+  MinecraftItemTypes2["PoplarSign"] = "minecraft:poplar_sign";
+  MinecraftItemTypes2["PoplarSlab"] = "minecraft:poplar_slab";
+  MinecraftItemTypes2["PoplarStairs"] = "minecraft:poplar_stairs";
+  MinecraftItemTypes2["PoplarTrapdoor"] = "minecraft:poplar_trapdoor";
+  MinecraftItemTypes2["PoplarWood"] = "minecraft:poplar_wood";
   MinecraftItemTypes2["PoppedChorusFruit"] = "minecraft:popped_chorus_fruit";
   MinecraftItemTypes2["Poppy"] = "minecraft:poppy";
   MinecraftItemTypes2["Porkchop"] = "minecraft:porkchop";
@@ -2797,6 +2938,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["PurpleCarpet"] = "minecraft:purple_carpet";
   MinecraftItemTypes2["PurpleConcrete"] = "minecraft:purple_concrete";
   MinecraftItemTypes2["PurpleConcretePowder"] = "minecraft:purple_concrete_powder";
+  MinecraftItemTypes2["PurpleCushion"] = "minecraft:purple_cushion";
   MinecraftItemTypes2["PurpleDye"] = "minecraft:purple_dye";
   MinecraftItemTypes2["PurpleGlazedTerracotta"] = "minecraft:purple_glazed_terracotta";
   MinecraftItemTypes2["PurpleHarness"] = "minecraft:purple_harness";
@@ -2805,6 +2947,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["PurpleStainedGlassPane"] = "minecraft:purple_stained_glass_pane";
   MinecraftItemTypes2["PurpleTerracotta"] = "minecraft:purple_terracotta";
   MinecraftItemTypes2["PurpleWool"] = "minecraft:purple_wool";
+  MinecraftItemTypes2["PurpleWoolDoubleSlab"] = "minecraft:purple_wool_double_slab";
+  MinecraftItemTypes2["PurpleWoolSlab"] = "minecraft:purple_wool_slab";
+  MinecraftItemTypes2["PurpleWoolStairs"] = "minecraft:purple_wool_stairs";
   MinecraftItemTypes2["PurpurBlock"] = "minecraft:purpur_block";
   MinecraftItemTypes2["PurpurPillar"] = "minecraft:purpur_pillar";
   MinecraftItemTypes2["PurpurSlab"] = "minecraft:purpur_slab";
@@ -2836,6 +2981,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["RedCarpet"] = "minecraft:red_carpet";
   MinecraftItemTypes2["RedConcrete"] = "minecraft:red_concrete";
   MinecraftItemTypes2["RedConcretePowder"] = "minecraft:red_concrete_powder";
+  MinecraftItemTypes2["RedCushion"] = "minecraft:red_cushion";
   MinecraftItemTypes2["RedDye"] = "minecraft:red_dye";
   MinecraftItemTypes2["RedGlazedTerracotta"] = "minecraft:red_glazed_terracotta";
   MinecraftItemTypes2["RedHarness"] = "minecraft:red_harness";
@@ -2845,17 +2991,22 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["RedNetherBrickSlab"] = "minecraft:red_nether_brick_slab";
   MinecraftItemTypes2["RedNetherBrickStairs"] = "minecraft:red_nether_brick_stairs";
   MinecraftItemTypes2["RedNetherBrickWall"] = "minecraft:red_nether_brick_wall";
+  MinecraftItemTypes2["RedPoplarLeaves"] = "minecraft:red_poplar_leaves";
   MinecraftItemTypes2["RedSand"] = "minecraft:red_sand";
   MinecraftItemTypes2["RedSandstone"] = "minecraft:red_sandstone";
   MinecraftItemTypes2["RedSandstoneSlab"] = "minecraft:red_sandstone_slab";
   MinecraftItemTypes2["RedSandstoneStairs"] = "minecraft:red_sandstone_stairs";
   MinecraftItemTypes2["RedSandstoneWall"] = "minecraft:red_sandstone_wall";
+  MinecraftItemTypes2["RedShrub"] = "minecraft:red_shrub";
   MinecraftItemTypes2["RedShulkerBox"] = "minecraft:red_shulker_box";
   MinecraftItemTypes2["RedStainedGlass"] = "minecraft:red_stained_glass";
   MinecraftItemTypes2["RedStainedGlassPane"] = "minecraft:red_stained_glass_pane";
   MinecraftItemTypes2["RedTerracotta"] = "minecraft:red_terracotta";
   MinecraftItemTypes2["RedTulip"] = "minecraft:red_tulip";
   MinecraftItemTypes2["RedWool"] = "minecraft:red_wool";
+  MinecraftItemTypes2["RedWoolDoubleSlab"] = "minecraft:red_wool_double_slab";
+  MinecraftItemTypes2["RedWoolSlab"] = "minecraft:red_wool_slab";
+  MinecraftItemTypes2["RedWoolStairs"] = "minecraft:red_wool_stairs";
   MinecraftItemTypes2["Redstone"] = "minecraft:redstone";
   MinecraftItemTypes2["RedstoneBlock"] = "minecraft:redstone_block";
   MinecraftItemTypes2["RedstoneLamp"] = "minecraft:redstone_lamp";
@@ -2899,6 +3050,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["SheafPotterySherd"] = "minecraft:sheaf_pottery_sherd";
   MinecraftItemTypes2["Shears"] = "minecraft:shears";
   MinecraftItemTypes2["SheepSpawnEgg"] = "minecraft:sheep_spawn_egg";
+  MinecraftItemTypes2["ShelfMushroom"] = "minecraft:shelf_mushroom";
   MinecraftItemTypes2["ShelterPotterySherd"] = "minecraft:shelter_pottery_sherd";
   MinecraftItemTypes2["Shield"] = "minecraft:shield";
   MinecraftItemTypes2["ShortDryGrass"] = "minecraft:short_dry_grass";
@@ -2989,6 +3141,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["StoneStairs"] = "minecraft:stone_stairs";
   MinecraftItemTypes2["StoneSword"] = "minecraft:stone_sword";
   MinecraftItemTypes2["StonecutterBlock"] = "minecraft:stonecutter_block";
+  MinecraftItemTypes2["StrawBed"] = "minecraft:straw_bed";
   MinecraftItemTypes2["StraySpawnEgg"] = "minecraft:stray_spawn_egg";
   MinecraftItemTypes2["StriderSpawnEgg"] = "minecraft:strider_spawn_egg";
   MinecraftItemTypes2["String"] = "minecraft:string";
@@ -3011,6 +3164,8 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["StrippedOakWood"] = "minecraft:stripped_oak_wood";
   MinecraftItemTypes2["StrippedPaleOakLog"] = "minecraft:stripped_pale_oak_log";
   MinecraftItemTypes2["StrippedPaleOakWood"] = "minecraft:stripped_pale_oak_wood";
+  MinecraftItemTypes2["StrippedPoplarLog"] = "minecraft:stripped_poplar_log";
+  MinecraftItemTypes2["StrippedPoplarWood"] = "minecraft:stripped_poplar_wood";
   MinecraftItemTypes2["StrippedSpruceLog"] = "minecraft:stripped_spruce_log";
   MinecraftItemTypes2["StrippedSpruceWood"] = "minecraft:stripped_spruce_wood";
   MinecraftItemTypes2["StrippedWarpedHyphae"] = "minecraft:stripped_warped_hyphae";
@@ -3192,6 +3347,7 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["WhiteCarpet"] = "minecraft:white_carpet";
   MinecraftItemTypes2["WhiteConcrete"] = "minecraft:white_concrete";
   MinecraftItemTypes2["WhiteConcretePowder"] = "minecraft:white_concrete_powder";
+  MinecraftItemTypes2["WhiteCushion"] = "minecraft:white_cushion";
   MinecraftItemTypes2["WhiteDye"] = "minecraft:white_dye";
   MinecraftItemTypes2["WhiteGlazedTerracotta"] = "minecraft:white_glazed_terracotta";
   MinecraftItemTypes2["WhiteHarness"] = "minecraft:white_harness";
@@ -3201,6 +3357,9 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["WhiteTerracotta"] = "minecraft:white_terracotta";
   MinecraftItemTypes2["WhiteTulip"] = "minecraft:white_tulip";
   MinecraftItemTypes2["WhiteWool"] = "minecraft:white_wool";
+  MinecraftItemTypes2["WhiteWoolDoubleSlab"] = "minecraft:white_wool_double_slab";
+  MinecraftItemTypes2["WhiteWoolSlab"] = "minecraft:white_wool_slab";
+  MinecraftItemTypes2["WhiteWoolStairs"] = "minecraft:white_wool_stairs";
   MinecraftItemTypes2["WildArmorTrimSmithingTemplate"] = "minecraft:wild_armor_trim_smithing_template";
   MinecraftItemTypes2["Wildflowers"] = "minecraft:wildflowers";
   MinecraftItemTypes2["WindCharge"] = "minecraft:wind_charge";
@@ -3226,14 +3385,19 @@ var MinecraftItemTypes = ((MinecraftItemTypes2) => {
   MinecraftItemTypes2["YellowCarpet"] = "minecraft:yellow_carpet";
   MinecraftItemTypes2["YellowConcrete"] = "minecraft:yellow_concrete";
   MinecraftItemTypes2["YellowConcretePowder"] = "minecraft:yellow_concrete_powder";
+  MinecraftItemTypes2["YellowCushion"] = "minecraft:yellow_cushion";
   MinecraftItemTypes2["YellowDye"] = "minecraft:yellow_dye";
   MinecraftItemTypes2["YellowGlazedTerracotta"] = "minecraft:yellow_glazed_terracotta";
   MinecraftItemTypes2["YellowHarness"] = "minecraft:yellow_harness";
+  MinecraftItemTypes2["YellowPoplarLeaves"] = "minecraft:yellow_poplar_leaves";
   MinecraftItemTypes2["YellowShulkerBox"] = "minecraft:yellow_shulker_box";
   MinecraftItemTypes2["YellowStainedGlass"] = "minecraft:yellow_stained_glass";
   MinecraftItemTypes2["YellowStainedGlassPane"] = "minecraft:yellow_stained_glass_pane";
   MinecraftItemTypes2["YellowTerracotta"] = "minecraft:yellow_terracotta";
   MinecraftItemTypes2["YellowWool"] = "minecraft:yellow_wool";
+  MinecraftItemTypes2["YellowWoolDoubleSlab"] = "minecraft:yellow_wool_double_slab";
+  MinecraftItemTypes2["YellowWoolSlab"] = "minecraft:yellow_wool_slab";
+  MinecraftItemTypes2["YellowWoolStairs"] = "minecraft:yellow_wool_stairs";
   MinecraftItemTypes2["ZoglinSpawnEgg"] = "minecraft:zoglin_spawn_egg";
   MinecraftItemTypes2["ZombieHead"] = "minecraft:zombie_head";
   MinecraftItemTypes2["ZombieHorseSpawnEgg"] = "minecraft:zombie_horse_spawn_egg";
@@ -3374,9 +3538,20 @@ var TeamsManager = class {
       if (block) coordinates.y = block.y + 1;
       team.players.forEach((player) => {
         player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond * 60, { amplifier: 100 });
-        player.teleport(coordinates, { keepVelocity: false });
+        player.teleport(coordinates, { keepVelocity: false, dimension: world.getDimension(MinecraftDimensionTypes.Overworld) });
       });
     });
+  }
+  spread_player(player, radius) {
+    let r = radius * Math.sqrt(Math.random());
+    let theta = Math.random() * 2 * Math.PI;
+    let coordinates = { x: r * Math.cos(theta), y: 0, z: r * Math.sin(theta) };
+    let block = world.getDimension(MinecraftDimensionTypes.Overworld).getTopmostBlock(
+      { x: coordinates.x, z: coordinates.z }
+    );
+    if (block) coordinates.y = block.y + 1;
+    player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond * 60, { amplifier: 100 });
+    player.teleport(coordinates, { keepVelocity: false, dimension: world.getDimension(MinecraftDimensionTypes.Overworld) });
   }
   winner_check() {
     let teams_alive = 0;
@@ -3517,156 +3692,114 @@ var Challenge = class {
   }
 };
 var game_challenges = {
-  travel_challenge: new Challenge(
-    "Traveler",
-    "Are you a true traveler? Prove it by traveling 500 blocks in this world!",
-    "textures/items/iron_ingot.png",
-    "1 Nug",
-    "player",
-    500
-  ),
-  build_challenge: new Challenge(
-    "High High High",
-    "I hear that getting the high ground can help a lot. Build up to build height (y320)",
-    "textures/items/iron_ingot.png",
-    "384 Blocks",
-    "player",
-    1
-  ),
-  lectern_challenge: new Challenge(
-    "Book Reader",
-    "A simple one, really. Craft a Lectern",
-    "textures/items/iron_ingot.png",
-    "Enchantment Book",
-    "player",
-    1
-  ),
+  // Tiny Challenges
   visit_challenge: new Challenge(
-    "Centrist",
+    "Shaken, Not Stirred",
     "Your journey will surely not be easy. Visit the centre of the world, at [0, 0]",
-    "textures/items/iron_ingot.png",
-    "Enchanted Diamond Sword",
+    "textures/items/compass_item.png",
+    "16 Stacks of Logs",
     "player",
     1
   ),
-  jump_challenge: new Challenge(
-    "Icarus",
-    "Icarus once tried the impossible - flying. That ended well! You should try it too. Jump from y320 down to y-50",
-    "textures/items/gold_ingot.png",
-    "640 Blocks",
-    "team",
+  tame_challenge: new Challenge(
+    "Best Friend",
+    "They say a player's best friend is a dog. So go tame one!",
+    "textures/items/bone.png",
+    "Wolf Spawn Egg",
+    "player",
     1
   ),
   halftime_challenge: new Challenge(
-    "Halftime",
+    "Where are the Cheerleaders?",
     "If you really think you are a master of the UHC, try surviving until halftime",
-    "textures/items/gold_ingot.png",
-    "15 of each Mineral Block",
+    "textures/items/clock_item.png",
+    "1 Nug",
+    "player",
+    1
+  ),
+  boat_challenge: new Challenge(
+    "Land Ho",
+    "A true sailor knows their way round. Travel 200 blocks on a boat.",
+    "textures/items/boat_oak.png",
+    "20 Sponges",
+    "player",
+    200
+  ),
+  kill_challenge: new Challenge(
+    "KDR",
+    "They say you should aim for a Kill-to-Death ratio of 2. So do that. Kill 2 Players.",
+    "textures/items/copper_sword.png",
+    "Ravager Spawn Egg",
+    "player",
+    2
+  ),
+  spear_challenge: new Challenge(
+    "Remarkable Sparkle",
+    "Let's make this fun. Craft a Diamond Spear.",
+    "textures/items/spear/diamond_spear.png",
+    "512 of Crying Obsidian and Gilded Blackstone",
+    "player",
+    1
+  ),
+  // Medium Challenges
+  hoe_challenge: new Challenge(
+    "Priority Hoe",
+    "The biggest waste of materials ever. Craft 1 Diamond Hoe.",
+    "textures/items/diamond_hoe.png",
+    "512 Mud",
     "team",
     1
   ),
-  skeleton_challenge: new Challenge(
-    "Die, Undead",
-    "Kill the undead. Simple. Kill 15 Skeletons",
-    "textures/items/gold_ingot.png",
-    "+140XP Levels",
+  amethyst_challenge: new Challenge(
+    "Purple Rain",
+    "Can you find one in time? Break one Amethyst Bud.",
+    "textures/items/amethyst_shard.png",
+    "3 Budding Amethyst",
     "team",
-    15
+    1
   ),
-  blaze_challenge: new Challenge(
-    "Blazing Through",
-    "This challenge requires you going to the nether. Can you obtain a single Blaze Rod?",
-    "textures/items/gold_ingot.png",
+  villager_challenge: new Challenge(
+    "View To Kill",
+    "If you can't kill a player, you can definitely kill a villager.",
+    "textures/items/emerald.png",
+    "3 Enchanted Books of your choice",
+    "team",
+    1
+  ),
+  gapple_challenge: new Challenge(
+    "Snapple Apple",
+    "Craft 3 Golden Apples. It is that simple.",
+    "textures/items/apple_golden.png",
+    "1 Enchanted Golden Apple",
+    "team",
+    3
+  ),
+  // XXL Challenges
+  iron_armour_challenge: new Challenge(
+    "Avengers, Assemble!",
+    "Get one full set of iron armour. That is: a helmet, chestplate, leggings, boots, and a shield!",
+    "textures/items/iron_chestplate.png",
+    "Team Coloured Helmet",
+    "first_team",
+    1
+  ),
+  brewing_challenge: new Challenge(
+    "Quick Brew",
+    "Brew ANY potion.",
+    "textures/items/potion_bottle_heal.png",
+    "Totem of Togetherness",
+    "first_team",
+    1
+  ),
+  baby_challenge: new Challenge(
+    "Hit Me Baby One More Time",
+    "Use a Golden Dandelion on a Hot, Temperate, and Cold Baby!",
+    "textures/blocks/golden_dandelion.png",
     "6 Nugs",
-    "team",
-    1
-  ),
-  wool_challenge: new Challenge(
-    "Wool Collection",
-    "A collectors dream... or nightmare? I dont know. Just collect all 16 colours of wool. One member of your team should hold all 16 colours at once to successfully complete this challenge.",
-    "textures/items/shears.png",
-    "Shulker Box",
     "first_team",
-    1
-  ),
-  eliminate_challenge: new Challenge(
-    "Back To The Lobby",
-    "Send them back to the lobby! Eliminate another team.",
-    "textures/items/netherite_sword.png",
-    "Steve Head",
-    "first_team",
-    1
-  ),
-  mining_challenge: new Challenge(
-    "Miners Delight",
-    "This one needs some real focus. Mine 128 different ores. Valid ores: Gold, Diamond, Iron, Emerald, Redstone, Ancient Debris.",
-    "textures/items/netherite_pickaxe.png",
-    "64 of each Ore",
-    "first_team",
-    128
-  ),
-  trial_challenge: new Challenge(
-    "Trialing Along",
-    "Wanna go on a full-on side quest? Go and obtain an Ominous Trial Key for me. Thanks!",
-    "textures/items/ominous_trial_key.png",
-    "Enchanted Mace",
-    "first_team",
-    1
+    3
   )
 };
-
-// behaviour_pack/scripts-dev/challenge_scripts/travel_challenge.ts
-var travel_dict = {};
-function check_travel_challenge(message_manager, challenge, player) {
-  if (!travel_dict[player.name]) {
-    travel_dict[player.name] = [];
-  }
-  const player_location = { x: Math.round(player.location.x), z: Math.round(player.location.z) };
-  const coord = travel_dict[player.name].find(
-    (coordinate) => coordinate.x === player_location.x && coordinate.z === player_location.z
-  );
-  if (!coord) {
-    travel_dict[player.name].push(player_location);
-    if (challenge.progress_challenge(player)) {
-      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
-    }
-  }
-}
-
-// behaviour_pack/scripts-dev/challenge_scripts/build_challenge.ts
-import { world as world3 } from "@minecraft/server";
-function check_build_challenge(message_manager, challenge, player) {
-  if (world3.getDimension("minecraft:overworld").heightRange.max === Math.round(player.location.y)) {
-    if (challenge.progress_challenge(player)) {
-      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
-    }
-  }
-}
-
-// behaviour_pack/scripts-dev/utils/check_player_has_item.ts
-import { EntityComponentTypes } from "@minecraft/server";
-function player_has_item(player, item_id) {
-  const inventory = player.getComponent(EntityComponentTypes.Inventory);
-  if (inventory?.container) {
-    const inventory_size = inventory.inventorySize;
-    const inventory_container = inventory.container;
-    for (let i = 0; i < inventory_size; i++) {
-      if (inventory_container.getItem(i)?.typeId === item_id) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-// behaviour_pack/scripts-dev/challenge_scripts/lectern_challenge.ts
-function check_lectern_challenge(message_manager, challenge, player) {
-  if (player_has_item(player, MinecraftItemTypes.Lectern)) {
-    if (challenge.progress_challenge(player)) {
-      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
-    }
-  }
-}
 
 // behaviour_pack/scripts-dev/challenge_scripts/visit_challenge.ts
 function check_visit_challenge(message_manager, challenge, player) {
@@ -3678,92 +3811,17 @@ function check_visit_challenge(message_manager, challenge, player) {
   }
 }
 
-// behaviour_pack/scripts-dev/challenge_scripts/jump_challenge.ts
-import { world as world4 } from "@minecraft/server";
-var jump_dict = {};
-function check_jump_challenge(message_manager, challenge, player, teams_manager) {
-  const current_time = /* @__PURE__ */ new Date();
-  if (world4.getDimension("minecraft:overworld").heightRange.max === Math.round(player.location.y)) {
-    jump_dict[player.name] = {
-      x: Math.round(player.location.x),
-      y: Math.round(player.location.y),
-      z: Math.round(player.location.z),
-      time: current_time
-    };
-  } else if (jump_dict[player.name] && world4.getDimension("minecraft:overworld").heightRange.min + 20 >= Math.round(player.location.y) && current_time.getTime() - jump_dict[player.name].time.getTime() < 10 * 1e3) {
-    if (challenge.progress_challenge(player)) {
-      const team = teams_manager.get_team(player);
-      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
-    }
-  } else if (jump_dict[player.name] && current_time.getTime() - jump_dict[player.name].time.getTime() >= 10 * 1e3) {
-    delete jump_dict[player.name];
-  }
-}
-
-// behaviour_pack/scripts-dev/challenge_scripts/blaze_challenge.ts
-function check_blaze_challenge(message_manager, challenge, player, teams_manager) {
-  if (player_has_item(player, MinecraftItemTypes.BlazeRod)) {
-    if (challenge.progress_challenge(player)) {
-      const team = teams_manager.get_team(player);
-      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
-    }
-  }
-}
-
 // behaviour_pack/scripts-dev/challenge_scripts/halftime_challenge.ts
-function check_halftime_challenge(message_manager, challenge, player, teams_manager, time, halftime) {
+function check_halftime_challenge(message_manager, challenge, player, time, halftime) {
   if (time >= halftime + 10 && time <= halftime + 12) {
     if (challenge.progress_challenge(player)) {
-      const team = teams_manager.get_team(player);
-      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
-    }
-  }
-}
-
-// behaviour_pack/scripts-dev/challenge_scripts/trial_challenge.ts
-function check_trial_challenge(message_manager, challenge, player, teams_manager) {
-  if (player_has_item(player, MinecraftItemTypes.OminousTrialKey)) {
-    if (challenge.progress_challenge(player)) {
-      const team = teams_manager.get_team(player);
-      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
-    }
-  }
-}
-
-// behaviour_pack/scripts-dev/utils/player_has_similar_item.ts
-import { EntityComponentTypes as EntityComponentTypes2 } from "@minecraft/server";
-function player_has_item_like(player, item_like) {
-  const inventory = player.getComponent(EntityComponentTypes2.Inventory);
-  const matches = [];
-  if (inventory?.container) {
-    const regex = new RegExp(item_like, "i");
-    const container = inventory.container;
-    for (let i = 0; i < inventory.inventorySize; i++) {
-      const item = container.getItem(i);
-      if (item && regex.test(item.typeId) && !matches.includes(item.typeId)) {
-        matches.push(item.typeId);
-      }
-    }
-  }
-  return matches;
-}
-
-// behaviour_pack/scripts-dev/challenge_scripts/wool_challenge.ts
-function check_wool_challenge(message_manager, challenge, player, teams_manager) {
-  const team = teams_manager.get_team(player);
-  if (team) {
-    const wools_present = player_has_item_like(player, "^minecraft:[a-z_]+_wool$");
-    if (wools_present.length === 16) {
-      if (challenge.progress_challenge(player)) {
-        const team2 = teams_manager.get_team(player);
-        message_manager.send_message(`${team2?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
-      }
+      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
     }
   }
 }
 
 // behaviour_pack/scripts-dev/settings.ts
-import { world as world5 } from "@minecraft/server";
+import { world as world3 } from "@minecraft/server";
 var Settings = class {
   constructor(initialized) {
     if (!initialized) {
@@ -3777,25 +3835,25 @@ var Settings = class {
       this.halftime_regeneration = true;
       this.update_settings();
     } else {
-      this.border_radius = Number(world5.getDynamicProperty("uhc:border"));
-      this.players_per_team = Number(world5.getDynamicProperty("uhc:players_per_team"));
-      this.loot_chests_enabled = Boolean(world5.getDynamicProperty("uhc:loot_chests_enabled"));
-      this.centre_chests_enabled = Boolean(world5.getDynamicProperty("uhc:centre_chests_enabled"));
-      this.grace_period_mins = Number(world5.getDynamicProperty("uhc:grace_period_mins"));
-      this.main_period_mins = Number(world5.getDynamicProperty("uhc:main_period_mins"));
-      this.deathmatch_enabled = Boolean(world5.getDynamicProperty("uhc:deathmatch_enabled"));
-      this.halftime_regeneration = Boolean(world5.getDynamicProperty("uhc:halftime_regeneration"));
+      this.border_radius = Number(world3.getDynamicProperty("uhc:border"));
+      this.players_per_team = Number(world3.getDynamicProperty("uhc:players_per_team"));
+      this.loot_chests_enabled = Boolean(world3.getDynamicProperty("uhc:loot_chests_enabled"));
+      this.centre_chests_enabled = Boolean(world3.getDynamicProperty("uhc:centre_chests_enabled"));
+      this.grace_period_mins = Number(world3.getDynamicProperty("uhc:grace_period_mins"));
+      this.main_period_mins = Number(world3.getDynamicProperty("uhc:main_period_mins"));
+      this.deathmatch_enabled = Boolean(world3.getDynamicProperty("uhc:deathmatch_enabled"));
+      this.halftime_regeneration = Boolean(world3.getDynamicProperty("uhc:halftime_regeneration"));
     }
   }
   update_settings() {
-    world5.setDynamicProperty("uhc:border", this.border_radius);
-    world5.setDynamicProperty("uhc:players_per_team", this.players_per_team);
-    world5.setDynamicProperty("uhc:loot_chests_enabled", this.loot_chests_enabled);
-    world5.setDynamicProperty("uhc:centre_chests_enabled", this.centre_chests_enabled);
-    world5.setDynamicProperty("uhc:grace_period_mins", this.grace_period_mins);
-    world5.setDynamicProperty("uhc:main_period_mins", this.main_period_mins);
-    world5.setDynamicProperty("uhc:deathmatch_enabled", this.deathmatch_enabled);
-    world5.setDynamicProperty("uhc:halftime_regeneration", this.halftime_regeneration);
+    world3.setDynamicProperty("uhc:border", this.border_radius);
+    world3.setDynamicProperty("uhc:players_per_team", this.players_per_team);
+    world3.setDynamicProperty("uhc:loot_chests_enabled", this.loot_chests_enabled);
+    world3.setDynamicProperty("uhc:centre_chests_enabled", this.centre_chests_enabled);
+    world3.setDynamicProperty("uhc:grace_period_mins", this.grace_period_mins);
+    world3.setDynamicProperty("uhc:main_period_mins", this.main_period_mins);
+    world3.setDynamicProperty("uhc:deathmatch_enabled", this.deathmatch_enabled);
+    world3.setDynamicProperty("uhc:halftime_regeneration", this.halftime_regeneration);
   }
 };
 
@@ -3804,7 +3862,7 @@ import {
   EntityDamageCause,
   MolangVariableMap,
   system as system2,
-  world as world6
+  world as world4
 } from "@minecraft/server";
 var TELEPORT_THRESHOLD = 7;
 var NO_FALL_KNOCKBACK = 30;
@@ -3821,7 +3879,7 @@ var BorderManager = class {
     this.noFallUntil = /* @__PURE__ */ new Map();
     this.settings = settings;
     this.messageManager = messageManager;
-    world6.beforeEvents.entityHurt.subscribe(
+    world4.beforeEvents.entityHurt.subscribe(
       (event) => {
         if (event.hurtEntity.typeId !== "minecraft:player") return;
         const expiresAt = this.noFallUntil.get(event.hurtEntity.id);
@@ -3836,7 +3894,7 @@ var BorderManager = class {
   checkBorder() {
     const half = this.settings.border_radius;
     this.renderParticles();
-    for (const player of world6.getAllPlayers()) {
+    for (const player of world4.getAllPlayers()) {
       const overshoot = this.getOvershoot(player, half);
       if (overshoot > 0 && overshoot <= TELEPORT_THRESHOLD) {
         this.applyKnockback(player, half);
@@ -3880,7 +3938,7 @@ var BorderManager = class {
     const half = this.settings.border_radius;
     const molang = new MolangVariableMap();
     molang.setColorRGBA("variable.color", PARTICLE_COLOR);
-    for (const player of world6.getAllPlayers()) {
+    for (const player of world4.getAllPlayers()) {
       this.renderPlayerParticles(player, half, molang);
     }
   }
@@ -3906,6 +3964,106 @@ var BorderManager = class {
     }
   }
 };
+
+// behaviour_pack/scripts-dev/challenge_scripts/boat_challenge.ts
+import { EntityComponentTypes } from "@minecraft/server";
+var travel_dict = {};
+function check_boat_challenge(message_manager, challenge, player) {
+  if (!travel_dict[player.name]) {
+    travel_dict[player.name] = [];
+  }
+  const player_location = { x: Math.round(player.location.x), z: Math.round(player.location.z) };
+  const coord = travel_dict[player.name].find(
+    (coordinate) => coordinate.x === player_location.x && coordinate.z === player_location.z
+  );
+  const is_on_boat = player.getComponent(EntityComponentTypes.Riding)?.entityRidingOn.typeId === MinecraftEntityTypes.Boat;
+  if (!coord && is_on_boat) {
+    travel_dict[player.name].push(player_location);
+    if (challenge.progress_challenge(player)) {
+      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/utils/check_unique_item.ts
+import { EntityComponentTypes as EntityComponentTypes2 } from "@minecraft/server";
+function player_has_unique_item(player, item_id) {
+  const inventory = player.getComponent(EntityComponentTypes2.Inventory);
+  if (inventory?.container) {
+    const inventory_size = inventory.inventorySize;
+    const inventory_container = inventory.container;
+    for (let i = 0; i < inventory_size; i++) {
+      if (inventory_container.getItem(i)?.typeId === item_id) {
+        const item = inventory_container.getItem(i);
+        if (item?.getDynamicProperty("uhc:unique_item_parsed") !== true) {
+          item?.setDynamicProperty("uhc:unique_item_parsed", true);
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/spear_challenge.ts
+function check_spear_challenge(message_manager, challenge, player) {
+  if (player_has_unique_item(player, MinecraftItemTypes.DiamondSpear)) {
+    if (challenge.progress_challenge(player)) {
+      message_manager.send_message(`${player.name} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/hoe_challenge.ts
+function check_hoe_challenge(message_manager, challenge, player, teams_manager) {
+  if (player_has_unique_item(player, MinecraftItemTypes.DiamondHoe)) {
+    if (challenge.progress_challenge(player)) {
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/golden_apple_challenge.ts
+function check_golden_apple_challenge(message_manager, challenge, player, teams_manager) {
+  if (player_has_unique_item(player, MinecraftItemTypes.GoldenApple)) {
+    if (challenge.progress_challenge(player)) {
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
+
+// behaviour_pack/scripts-dev/utils/check_player_has_item.ts
+import { EntityComponentTypes as EntityComponentTypes3 } from "@minecraft/server";
+function player_has_item(player, item_id) {
+  const inventory = player.getComponent(EntityComponentTypes3.Inventory);
+  if (inventory?.container) {
+    const inventory_size = inventory.inventorySize;
+    const inventory_container = inventory.container;
+    for (let i = 0; i < inventory_size; i++) {
+      if (inventory_container.getItem(i)?.typeId === item_id) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/iron_armour_challenge.ts
+function check_iron_armour_challenge(message_manager, challenge, player, teams_manager) {
+  const helmet = player_has_item(player, MinecraftItemTypes.IronHelmet);
+  const chestplate = player_has_item(player, MinecraftItemTypes.IronChestplate);
+  const leggings = player_has_item(player, MinecraftItemTypes.IronLeggings);
+  const boots = player_has_item(player, MinecraftItemTypes.IronBoots);
+  const shield = player_has_item(player, MinecraftItemTypes.Shield);
+  if (helmet && chestplate && leggings && boots && shield) {
+    if (challenge.progress_challenge(player)) {
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+    }
+  }
+}
 
 // behaviour_pack/scripts-dev/game.ts
 var GameManager = class _GameManager {
@@ -3936,10 +4094,10 @@ var GameManager = class _GameManager {
     system3.runInterval(() => this.challenge_loop(), 1);
   }
   static initialize() {
-    let initialized = Boolean(world7.getDynamicProperty("uhc:initialized"));
-    let scoreboard_objective = world7.scoreboard.getObjective("uhc:teams");
+    let initialized = Boolean(world6.getDynamicProperty("uhc:initialized"));
+    let scoreboard_objective = world6.scoreboard.getObjective("uhc:teams");
     if (!scoreboard_objective) {
-      world7.scoreboard.addObjective("uhc:teams", "Teams");
+      world6.scoreboard.addObjective("uhc:teams", "Teams");
     }
     const teams_manager = new TeamsManager();
     const messageBarManager = new MessageManager();
@@ -3948,16 +4106,16 @@ var GameManager = class _GameManager {
       const game_time = 0;
       const game_status = "waiting";
       initialized = true;
-      world7.setDynamicProperty("uhc:game_time", game_time);
-      world7.setDynamicProperty("uhc:game_status", game_status);
-      world7.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, { objective: world7.scoreboard.getObjective("uhc:teams") });
-      world7.setDynamicProperty("uhc:initialized", initialized);
+      world6.setDynamicProperty("uhc:game_time", game_time);
+      world6.setDynamicProperty("uhc:game_status", game_status);
+      world6.scoreboard.setObjectiveAtDisplaySlot(DisplaySlotId.Sidebar, { objective: world6.scoreboard.getObjective("uhc:teams") });
+      world6.setDynamicProperty("uhc:initialized", initialized);
     }
     return new _GameManager(
       teams_manager,
       // @ts-ignore
-      String(world7.getDynamicProperty("uhc:game_status")),
-      Number(world7.getDynamicProperty("uhc:game_time")),
+      String(world6.getDynamicProperty("uhc:game_status")),
+      Number(world6.getDynamicProperty("uhc:game_time")),
       initialized,
       messageBarManager,
       settings
@@ -3974,33 +4132,31 @@ var GameManager = class _GameManager {
         "random.toast"
       );
     }, TicksPerSecond2 * 5);
-    world7.getAllPlayers().forEach((player) => {
-      player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
+    world6.getAllPlayers().forEach((player) => {
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.clearAll();
     });
-    world7.stopMusic();
+    world6.stopMusic();
     this.game_status = "starting";
     this.game_time = -16;
   }
   challenge_loop() {
-    if (this.game_status !== "running" || this.game_time < 10) return;
+    if (this.game_status !== "running" || this.game_time < 30) return;
     const total_time = this.settings.grace_period_mins * 60 + this.settings.main_period_mins * 60;
-    world7.getAllPlayers().forEach((player) => {
+    world6.getAllPlayers().forEach((player) => {
       if (this.teams_manager.get_team(player)) {
-        check_travel_challenge(this.message_manager, this.challenges.travel_challenge, player);
-        check_build_challenge(this.message_manager, this.challenges.build_challenge, player);
-        check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player);
         check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player);
-        check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager);
-        check_blaze_challenge(this.message_manager, this.challenges.blaze_challenge, player, this.teams_manager);
-        check_halftime_challenge(this.message_manager, this.challenges.halftime_challenge, player, this.teams_manager, this.game_time, total_time / 2);
-        check_trial_challenge(this.message_manager, this.challenges.trial_challenge, player, this.teams_manager);
-        check_wool_challenge(this.message_manager, this.challenges.wool_challenge, player, this.teams_manager);
+        check_halftime_challenge(this.message_manager, this.challenges.halftime_challenge, player, this.game_time, total_time / 2);
+        check_boat_challenge(this.message_manager, this.challenges.boat_challenge, player);
+        check_spear_challenge(this.message_manager, this.challenges.spear_challenge, player);
+        check_hoe_challenge(this.message_manager, this.challenges.hoe_challenge, player, this.teams_manager);
+        check_golden_apple_challenge(this.message_manager, this.challenges.gapple_challenge, player, this.teams_manager);
+        check_iron_armour_challenge(this.message_manager, this.challenges.iron_armour_challenge, player, this.teams_manager);
       }
     });
   }
   update_dynamic_properties() {
-    world7.setDynamicProperty("uhc:game_time", this.game_time);
-    world7.setDynamicProperty("uhc:game_status", this.game_status);
+    world6.setDynamicProperty("uhc:game_time", this.game_time);
+    world6.setDynamicProperty("uhc:game_status", this.game_status);
     this.teams_manager.teams.forEach((team) => {
       team.update();
     });
@@ -4008,46 +4164,49 @@ var GameManager = class _GameManager {
   start_game() {
     this.game_status = "running";
     const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10);
-    const challenges = new ItemStack("uhc:challenge_book", 1);
-    world7.gameRules.pvp = false;
-    world7.gameRules.naturalRegeneration = false;
-    world7.gameRules.doInsomnia = false;
-    world7.gameRules.showCoordinates = true;
-    world7.gameRules.doImmediateRespawn = true;
-    world7.gameRules.doMobSpawning = true;
-    world7.gameRules.mobGriefing = true;
-    world7.gameRules.doMobLoot = true;
-    world7.setTimeOfDay(TimeOfDay.Day);
-    world7.getAllPlayers().forEach((player) => {
+    const water_bucket = new ItemStack(MinecraftItemTypes.WaterBucket, 1);
+    const challenge_book = new ItemStack("uhc:challenge_book", 1);
+    world6.gameRules.pvp = false;
+    world6.gameRules.naturalRegeneration = false;
+    world6.gameRules.doInsomnia = false;
+    world6.gameRules.showCoordinates = true;
+    world6.gameRules.doImmediateRespawn = true;
+    world6.gameRules.doMobSpawning = true;
+    world6.gameRules.mobGriefing = true;
+    world6.gameRules.doMobLoot = true;
+    world6.setTimeOfDay(TimeOfDay.Day);
+    world6.getAllPlayers().forEach((player) => {
       player.getEffects().forEach((effect) => {
         player.removeEffect(effect.typeId);
       });
-      player.getComponent(EntityComponentTypes3.Inventory)?.container?.clearAll();
-      player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(beef);
-      player.getComponent(EntityComponentTypes3.Inventory)?.container?.addItem(challenges);
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.clearAll();
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(beef);
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(water_bucket);
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(challenge_book);
+      player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond2 * 60 * 500, { amplifier: 2 });
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.Survival);
     });
     this.teams_manager.spread_teams(this.settings.border_radius);
   }
   finish_game(team) {
-    world7.stopMusic();
+    world6.stopMusic();
     this.message_manager.send_message(`${team.get_team_name()} has won the UHC!`, "uhc.team.win");
-    world7.playMusic("uhc.music.win", { volume: 2 });
+    world6.playMusic("uhc.music.win", { volume: 2 });
     this.game_status = "finished";
-    const winning_player = world7.getPlayers({ name: team.players[0].name })[0];
-    world7.getAllPlayers().forEach((player) => {
+    const winning_player = world6.getPlayers({ name: team.players[0].name })[0];
+    world6.getAllPlayers().forEach((player) => {
       player.teleport(winning_player.location);
       player.setGameMode(GameMode.Survival);
-      player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { amplifier: 100 });
+      player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond2 * 60 * 500, { amplifier: 100 });
     });
   }
   deathmatch() {
-    world7.stopMusic();
-    world7.playMusic("uhc.music.deathmatch", { volume: 0.6, loop: true });
+    world6.stopMusic();
+    world6.playMusic("uhc.music.deathmatch", { volume: 0.6, loop: true });
     this.settings.border_radius = 100;
     this.teams_manager.spread_teams(100);
-    world7.getPlayers({ gameMode: GameMode.Spectator }).forEach((player) => {
+    world6.getPlayers({ gameMode: GameMode.Spectator }).forEach((player) => {
       player.teleport({ x: 0, y: 100, z: 0 });
     });
   }
@@ -4064,19 +4223,19 @@ var GameManager = class _GameManager {
       if (team && !this.opponent_team_left) {
         this.finish_game(team);
       }
-      world7.getDimension(MinecraftDimensionTypes.Overworld).runCommand("clear @a map");
+      world6.getDimension(MinecraftDimensionTypes.Overworld).runCommand("clear @a map");
       if (this.game_time === this.settings.grace_period_mins * 60 - 3) {
-        world7.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world6.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === this.settings.grace_period_mins * 60) {
-        world7.gameRules.pvp = true;
+        world6.gameRules.pvp = true;
         this.message_manager.send_message("Grace Period has ended. PVP is now enabled. Good luck.");
       } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2 - 3) {
-        world7.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world6.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === (this.settings.main_period_mins + this.settings.grace_period_mins) * 60 / 2) {
         let halftime_message = "Congratulations on making it through half of the game!";
         if (this.settings.halftime_regeneration) {
           halftime_message = `${halftime_message} Each team has been granted regeneration for 30 seconds.`;
-          world7.getAllPlayers().forEach((player) => {
+          world6.getAllPlayers().forEach((player) => {
             player.addEffect(MinecraftEffectTypes.Regeneration, TicksPerSecond2 * 30);
           });
         }
@@ -4086,7 +4245,7 @@ var GameManager = class _GameManager {
           "Deathmatch will commence in 3 minutes. The border will shrink to 100 blocks and all teams will be teleported to the centre and granted Resistance for 60 seconds."
         );
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60 - 3) {
-        world7.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
+        world6.getDimension(MinecraftDimensionTypes.Overworld).playSound("uhc.checkpoint", { x: 0, y: 0, z: 0 }, { volume: 1e3 });
       } else if (this.game_time === (this.settings.grace_period_mins + this.settings.main_period_mins) * 60) {
         if (this.settings.deathmatch_enabled) {
           this.deathmatch();
@@ -4096,7 +4255,7 @@ var GameManager = class _GameManager {
         }
       }
     } else if (this.game_status === "finished") {
-      world7.getAllPlayers().forEach((player) => {
+      world6.getAllPlayers().forEach((player) => {
         player.dimension.spawnItem(
           this.items[Math.floor(Math.random() * this.items.length)],
           {
@@ -4262,16 +4421,16 @@ var game_manager;
 system4.beforeEvents.startup.subscribe((event) => {
   system4.run(() => game_manager = GameManager.initialize());
 });
-world8.afterEvents.playerSpawn.subscribe((event) => {
+world7.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
-    event.player.getComponent(EntityComponentTypes4.Inventory)?.container?.clearAll();
+    event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.clearAll();
     let team_book = new ItemStack2("uhc:teams_book", 1);
     let challenge_book = new ItemStack2("uhc:challenge_book", 1);
     event.player.playMusic("uhc.music", { loop: true, volume: 0.5 });
-    event.player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(
       team_book
     );
-    event.player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(
       challenge_book
     );
     event.player.setGameMode(GameMode2.Adventure);
@@ -4313,10 +4472,18 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
       if (death_location) {
         event.player.teleport(death_location);
       }
+    } else {
+      game_manager.teams_manager.spread_player(event.player, game_manager.settings.border_radius);
+      const player_health = event.player.getComponent(EntityComponentTypes5.Health);
+      if (event.player.getDynamicProperty("uhc:had_recovery_compass") === true) {
+        const recovery_compass = new ItemStack2(MinecraftItemTypes.RecoveryCompass, 1);
+        event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(recovery_compass);
+      }
+      player_health?.setCurrentValue(player_health.effectiveMax - 5);
     }
   }
 });
-world8.beforeEvents.playerLeave.subscribe((event) => {
+world7.beforeEvents.playerLeave.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const team = game_manager.teams_manager.get_team(event.player);
     const alive_teams = game_manager.teams_manager.teams.filter((team2) => team2.players.length > 0);
@@ -4329,7 +4496,7 @@ world8.beforeEvents.playerLeave.subscribe((event) => {
     }
   }
 });
-world8.afterEvents.itemUse.subscribe((event) => {
+world7.afterEvents.itemUse.subscribe((event) => {
   if (event.itemStack.typeId === "uhc:teams_book" && game_manager.game_status !== "running") {
     team_form(game_manager, event.source);
   } else if (event.itemStack.typeId === "uhc:admin_book") {
@@ -4338,45 +4505,48 @@ world8.afterEvents.itemUse.subscribe((event) => {
     challenges_form(game_manager, event.source);
   }
 });
-world8.afterEvents.entityDie.subscribe((event) => {
-  if (event.deadEntity instanceof Player9) {
-    const team = game_manager.teams_manager.get_team(event.deadEntity);
-    if (team) {
-      team.remove_player(event.deadEntity, game_manager.message_manager);
-      event.deadEntity.setDynamicProperty("uhc:death_location", event.deadEntity.location);
+world7.afterEvents.entityDie.subscribe((event) => {
+  if (!(event.deadEntity instanceof Player8)) return;
+  if (player_has_item(event.deadEntity, MinecraftItemTypes.RecoveryCompass)) {
+    event.deadEntity.setDynamicProperty("uhc:had_recovery_compass", true);
+  } else {
+    event.deadEntity.setDynamicProperty("uhc:had_recovery_compass", false);
+  }
+  if (game_manager.game_time <= game_manager.settings.grace_period_mins * 60) return;
+  const team = game_manager.teams_manager.get_team(event.deadEntity);
+  if (team) {
+    team.remove_player(event.deadEntity, game_manager.message_manager);
+    event.deadEntity.setDynamicProperty("uhc:death_location", event.deadEntity.location);
+  }
+}, { entityTypes: [MinecraftEntityTypes.Player] });
+world7.afterEvents.playerInteractWithEntity.subscribe((event) => {
+  if (event.target.typeId !== MinecraftEntityTypes.Wolf) return;
+  const this_challenge = game_manager.challenges.tame_challenge;
+  const owner = event.target.getComponent(EntityComponentTypes5.Tameable)?.tamedToPlayer;
+  if (owner?.name === event.player.name) {
+    if (this_challenge.progress_challenge(event.player)) {
+      game_manager.message_manager.send_message(`${event.player.name} has completed ${this_challenge.name}!`, "uhc.team.win");
     }
   }
 });
-world8.afterEvents.entityDie.subscribe((event) => {
+world7.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
-    const this_challenge = game_manager.challenges.eliminate_challenge;
-    if (event.deadEntity instanceof Player9 && event.damageSource.damagingEntity instanceof Player9) {
-      const dead_team = game_manager.teams_manager.get_team(event.deadEntity);
-      const killing_team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
-      if (dead_team?.string_id !== killing_team?.string_id && dead_team?.players.length === 1) {
-        if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
-          game_manager.message_manager.send_message(`${killing_team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
-        }
+    const this_challenge = game_manager.challenges.kill_challenge;
+    if (event.deadEntity instanceof Player8 && event.damageSource.damagingEntity instanceof Player8) {
+      if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
+        game_manager.message_manager.send_message(`${event.damageSource.damagingEntity.name} has completed ${this_challenge.name}!`, "uhc.team.win");
       }
     }
   }
 });
 var valid_blocks = [
-  MinecraftBlockTypes.GoldOre,
-  MinecraftBlockTypes.DeepslateGoldOre,
-  MinecraftBlockTypes.DiamondOre,
-  MinecraftBlockTypes.DeepslateDiamondOre,
-  MinecraftBlockTypes.IronOre,
-  MinecraftBlockTypes.DeepslateIronOre,
-  MinecraftBlockTypes.EmeraldOre,
-  MinecraftBlockTypes.DeepslateEmeraldOre,
-  MinecraftBlockTypes.RedstoneOre,
-  MinecraftBlockTypes.DeepslateRedstoneOre,
-  MinecraftBlockTypes.AncientDebris
+  MinecraftBlockTypes.LargeAmethystBud,
+  MinecraftBlockTypes.MediumAmethystBud,
+  MinecraftBlockTypes.SmallAmethystBud
 ];
-world8.beforeEvents.playerBreakBlock.subscribe((event) => {
+world7.beforeEvents.playerBreakBlock.subscribe((event) => {
   if (game_manager.game_status === "running") {
-    const this_challenge = game_manager.challenges.mining_challenge;
+    const this_challenge = game_manager.challenges.amethyst_challenge;
     if (valid_blocks.includes(event.block.typeId)) {
       const team = game_manager.teams_manager.get_team(event.player);
       if (this_challenge.progress_challenge(event.player)) {
@@ -4385,14 +4555,14 @@ world8.beforeEvents.playerBreakBlock.subscribe((event) => {
     }
   }
 });
-world8.afterEvents.entityDie.subscribe((event) => {
+world7.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
-    const this_challenge = game_manager.challenges.skeleton_challenge;
-    if (event.deadEntity.typeId === MinecraftEntityTypes.Skeleton && event.damageSource.damagingEntity instanceof Player9) {
+    const this_challenge = game_manager.challenges.villager_challenge;
+    if (event.deadEntity.typeId === MinecraftEntityTypes.VillagerV2 && event.damageSource.damagingEntity instanceof Player8) {
       const team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
       if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
         game_manager.message_manager.send_message(`${team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
       }
     }
   }
-});
+}, { entityTypes: [MinecraftEntityTypes.VillagerV2] });

@@ -96,7 +96,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     visit_challenge: new Challenge(
         'Shaken, Not Stirred',
         'Your journey will surely not be easy. Visit the centre of the world, at [0, 0]',
-        'textures/items/compass.png',
+        'textures/items/compass_item.png',
         '16 Stacks of Logs',
         'player',
         1
@@ -112,7 +112,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     halftime_challenge: new Challenge(
         'Where are the Cheerleaders?',
         'If you really think you are a master of the UHC, try surviving until halftime',
-        'textures/items/clock.png',
+        'textures/items/clock_item.png',
         '1 Nug',
         'player',
         1
@@ -120,7 +120,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     boat_challenge: new Challenge(
         'Land Ho',
         'A true sailor knows their way round. Travel 200 blocks on a boat.',
-        'textures/items/oak_boat.png',
+        'textures/items/boat_oak.png',
         '20 Sponges',
         'player',
         200
@@ -128,7 +128,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     kill_challenge: new Challenge(
         'KDR',
         'They say you should aim for a Kill-to-Death ratio of 2. So do that. Kill 2 Players.',
-        'textures/items/player_head.png',
+        'textures/items/copper_sword.png',
         'Ravager Spawn Egg',
         'player',
         2
@@ -136,7 +136,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     spear_challenge: new Challenge(
         'Remarkable Sparkle',
         "Let's make this fun. Craft a Diamond Spear.",
-        'textures/items/diamond_spear.png',
+        'textures/items/spear/diamond_spear.png',
         '512 of Crying Obsidian and Gilded Blackstone',
         'player',
         1
@@ -154,7 +154,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     amethyst_challenge: new Challenge(
         'Purple Rain',
         'Can you find one in time? Break one Amethyst Bud.',
-        'textures/items/amethyst_cluster.png',
+        'textures/items/amethyst_shard.png',
         '3 Budding Amethyst',
         'team',
         1
@@ -170,7 +170,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     gapple_challenge: new Challenge(
         'Snapple Apple',
         'Craft 3 Golden Apples. It is that simple.',
-        'textures/items/golden_apple.png',
+        'textures/items/apple_golden.png',
         '1 Enchanted Golden Apple',
         'team',
         3
@@ -180,7 +180,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     iron_armour_challenge: new Challenge(
         'Avengers, Assemble!',
         'Get one full set of iron armour. That is: a helmet, chestplate, leggings, boots, and a shield!',
-        'textures/items/iron_chestplatw.png',
+        'textures/items/iron_chestplate.png',
         'Team Coloured Helmet',
         'first_team',
         1
@@ -188,7 +188,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     brewing_challenge: new Challenge(
         'Quick Brew',
         'Brew ANY potion.',
-        'textures/items/water_bottle.png',
+        'textures/items/potion_bottle_heal.png',
         'Totem of Togetherness',
         'first_team',
         1
@@ -196,7 +196,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     baby_challenge: new Challenge(
         'Hit Me Baby One More Time',
         'Use a Golden Dandelion on a Hot, Temperate, and Cold Baby!',
-        'textures/items/golden_dandelion.png',
+        'textures/blocks/golden_dandelion.png',
         '6 Nugs',
         'first_team',
         3

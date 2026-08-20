@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-      "target": "es2025",
+      "target": "es2016",
       "module": "commonjs",
       "strict": true,
       "esModuleInterop": true,
