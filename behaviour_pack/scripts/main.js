@@ -3993,16 +3993,17 @@ function player_has_unique_item(player, item_id) {
     const inventory_size = inventory.inventorySize;
     const inventory_container = inventory.container;
     for (let i = 0; i < inventory_size; i++) {
-      if (inventory_container.getItem(i)?.typeId === item_id) {
-        const item = inventory_container.getItem(i);
-        if (item?.getDynamicProperty("uhc:unique_item_parsed") !== true) {
-          item?.setDynamicProperty("uhc:unique_item_parsed", true);
-          return true;
+      const item = inventory_container.getItem(i);
+      if (item?.typeId === item_id) {
+        if (item.getDynamicProperty("uhc:unique_item_parsed") !== true) {
+          item.setDynamicProperty("uhc:unique_item_parsed", true);
+          inventory_container.setItem(i, item);
+          return item.amount;
         }
       }
     }
   }
-  return false;
+  return 0;
 }
 
 // behaviour_pack/scripts-dev/challenge_scripts/spear_challenge.ts
@@ -4026,10 +4027,13 @@ function check_hoe_challenge(message_manager, challenge, player, teams_manager) 
 
 // behaviour_pack/scripts-dev/challenge_scripts/golden_apple_challenge.ts
 function check_golden_apple_challenge(message_manager, challenge, player, teams_manager) {
-  if (player_has_unique_item(player, MinecraftItemTypes.GoldenApple)) {
-    if (challenge.progress_challenge(player)) {
-      const team = teams_manager.get_team(player);
-      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+  const unique_apple_count = player_has_unique_item(player, MinecraftItemTypes.GoldenApple);
+  if (unique_apple_count) {
+    for (let i = 0; i < unique_apple_count; i++) {
+      if (challenge.progress_challenge(player)) {
+        const team = teams_manager.get_team(player);
+        message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+      }
     }
   }
 }
@@ -4174,6 +4178,8 @@ var GameManager = class _GameManager {
     world6.gameRules.doMobSpawning = true;
     world6.gameRules.mobGriefing = true;
     world6.gameRules.doMobLoot = true;
+    world6.gameRules.playersSleepingPercentage = 0;
+    world6.gameRules.playerWaypoints = "off";
     world6.setTimeOfDay(TimeOfDay.Day);
     world6.getAllPlayers().forEach((player) => {
       player.getEffects().forEach((effect) => {
@@ -4183,7 +4189,7 @@ var GameManager = class _GameManager {
       player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(beef);
       player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(water_bucket);
       player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(challenge_book);
-      player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond2 * 60 * 500, { amplifier: 2 });
+      player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond2 * 60 * 500, { amplifier: 1 });
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.Survival);
     });
@@ -4523,6 +4529,7 @@ world7.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (event.target.typeId !== MinecraftEntityTypes.Wolf) return;
   const this_challenge = game_manager.challenges.tame_challenge;
   const owner = event.target.getComponent(EntityComponentTypes5.Tameable)?.tamedToPlayer;
+  console.log(owner ? owner.name : "not tamed");
   if (owner?.name === event.player.name) {
     if (this_challenge.progress_challenge(event.player)) {
       game_manager.message_manager.send_message(`${event.player.name} has completed ${this_challenge.name}!`, "uhc.team.win");
@@ -4542,7 +4549,8 @@ world7.afterEvents.entityDie.subscribe((event) => {
 var valid_blocks = [
   MinecraftBlockTypes.LargeAmethystBud,
   MinecraftBlockTypes.MediumAmethystBud,
-  MinecraftBlockTypes.SmallAmethystBud
+  MinecraftBlockTypes.SmallAmethystBud,
+  MinecraftBlockTypes.AmethystCluster
 ];
 world7.beforeEvents.playerBreakBlock.subscribe((event) => {
   if (game_manager.game_status === "running") {

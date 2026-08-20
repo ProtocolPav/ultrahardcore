@@ -157,6 +157,8 @@ world.afterEvents.playerInteractWithEntity.subscribe(event => {
 
     const owner = event.target.getComponent(EntityComponentTypes.Tameable)?.tamedToPlayer
 
+    console.log(owner ? owner.name : 'not tamed')
+
     if (owner?.name === event.player.name) {
         if (this_challenge.progress_challenge(event.player)) {
             game_manager.message_manager.send_message(`${event.player.name} has completed ${this_challenge.name}!`, 'uhc.team.win')
@@ -182,6 +184,7 @@ const valid_blocks: string[] = [
     MinecraftBlockTypes.LargeAmethystBud,
     MinecraftBlockTypes.MediumAmethystBud,
     MinecraftBlockTypes.SmallAmethystBud,
+    MinecraftBlockTypes.AmethystCluster,
 ]
 
 world.beforeEvents.playerBreakBlock.subscribe(event => {

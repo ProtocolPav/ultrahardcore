@@ -185,6 +185,8 @@ export class GameManager {
         world.gameRules.doMobSpawning = true
         world.gameRules.mobGriefing = true
         world.gameRules.doMobLoot = true
+        world.gameRules.playersSleepingPercentage = 0
+        world.gameRules.playerWaypoints = "off"
         world.setTimeOfDay(TimeOfDay.Day)
 
         world.getAllPlayers().forEach((player: Player) => {
@@ -195,7 +197,7 @@ export class GameManager {
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(water_bucket)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenge_book)
-            player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond * 60 * 500, {amplifier: 2})
+            player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond * 60 * 500, {amplifier: 1})
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
             player.setGameMode(GameMode.Survival)
         })
