@@ -165,7 +165,8 @@ export class GameManager {
         this.game_status = 'running'
 
         const beef = new ItemStack(MinecraftItemTypes.CookedBeef, 10)
-        const challenges = new ItemStack('uhc:challenge_book', 1)
+        const water_bucket = new ItemStack(MinecraftItemTypes.WaterBucket, 1)
+        const challenge_book = new ItemStack('uhc:challenge_book', 1)
         world.gameRules.pvp = false
         world.gameRules.naturalRegeneration = false
         world.gameRules.doInsomnia = false
@@ -181,9 +182,10 @@ export class GameManager {
                 player.removeEffect(effect.typeId)
             })
             player.getComponent(EntityComponentTypes.Inventory)?.container?.clearAll()
-            //player.runCommand('clear @a')
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
-            player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenges)
+            player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(water_bucket)
+            player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenge_book)
+            player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond * 60 * 500, {amplifier: 2})
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
             player.setGameMode(GameMode.Survival)
         })
