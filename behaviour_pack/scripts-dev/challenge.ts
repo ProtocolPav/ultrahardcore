@@ -92,6 +92,7 @@ export class Challenge {
 }
 
 export const game_challenges: {[index: string]: Challenge} = {
+    // Tiny Challenges
     visit_challenge: new Challenge(
         'Shaken, Not Stirred',
         'Your journey will surely not be easy. Visit the centre of the world, at [0, 0]',
@@ -141,6 +142,7 @@ export const game_challenges: {[index: string]: Challenge} = {
         1
     ),
 
+    // Medium Challenges
     hoe_challenge: new Challenge(
         'Priority Hoe',
         'The biggest waste of materials ever. Craft 1 Diamond Hoe.',
@@ -174,60 +176,29 @@ export const game_challenges: {[index: string]: Challenge} = {
         3
     ),
 
-    halftime_challenge: new Challenge(
-        'Halftime',
-        'If you really think you are a master of the UHC, try surviving until halftime',
-        'textures/items/gold_ingot.png',
-        '15 of each Mineral Block',
-        'team',
+    // XXL Challenges
+    iron_armour_challenge: new Challenge(
+        'Avengers, Assemble!',
+        'Get one full set of iron armour. That is: a helmet, chestplate, leggings, boots, and a shield!',
+        'textures/items/iron_chestplatw.png',
+        'Team Coloured Helmet',
+        'first_team',
         1
     ),
-    skeleton_challenge: new Challenge(
-        'Die, Undead',
-        'Kill the undead. Simple. Kill 15 Skeletons',
-        'textures/items/gold_ingot.png',
-        '+140XP Levels',
-        'team',
-        15
+    brewing_challenge: new Challenge(
+        'Quick Brew',
+        'Brew ANY potion.',
+        'textures/items/water_bottle.png',
+        'Totem of Togetherness',
+        'first_team',
+        1
     ),
-    blaze_challenge: new Challenge(
-        'Blazing Through',
-        'This challenge requires you going to the nether. Can you obtain a single Blaze Rod?',
-        'textures/items/gold_ingot.png',
+    baby_challenge: new Challenge(
+        'Hit Me Baby One More Time',
+        'Use a Golden Dandelion on a Hot, Temperate, and Cold Baby!',
+        'textures/items/golden_dandelion.png',
         '6 Nugs',
-        'team',
-        1
-    ),
-    wool_challenge: new Challenge(
-        'Wool Collection',
-        'A collectors dream... or nightmare? I dont know. Just collect all 16 colours of wool. One member of your team should hold all 16 colours at once to successfully complete this challenge.',
-        'textures/items/shears.png',
-        'Shulker Box',
         'first_team',
-        1
-    ),
-    eliminate_challenge: new Challenge(
-        'Back To The Lobby',
-        'Send them back to the lobby! Eliminate another team.',
-        'textures/items/netherite_sword.png',
-        'Steve Head',
-        'first_team',
-        1
-    ),
-    mining_challenge: new Challenge(
-        'Miners Delight',
-        'This one needs some real focus. Mine 128 different ores. Valid ores: Gold, Diamond, Iron, Emerald, Redstone, Ancient Debris.',
-        'textures/items/netherite_pickaxe.png',
-        '64 of each Ore',
-        'first_team',
-        128
-    ),
-    trial_challenge: new Challenge(
-        'Trialing Along',
-        'Wanna go on a full-on side quest? Go and obtain an Ominous Trial Key for me. Thanks!',
-        'textures/items/ominous_trial_key.png',
-        'Enchanted Mace',
-        'first_team',
-        1
+        3
     )
 }

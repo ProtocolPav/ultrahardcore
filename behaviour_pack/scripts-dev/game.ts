@@ -28,6 +28,7 @@ import check_boat_challenge from "./challenge_scripts/boat_challenge";
 import check_spear_challenge from "./challenge_scripts/spear_challenge";
 import check_hoe_challenge from "./challenge_scripts/hoe_challenge";
 import check_golden_apple_challenge from "./challenge_scripts/golden_apple_challenge";
+import check_iron_armour_challenge from "./challenge_scripts/iron_armour_challenge";
 
 export class GameManager {
     teams_manager: TeamsManager;
@@ -153,7 +154,11 @@ export class GameManager {
                 check_hoe_challenge(this.message_manager, this.challenges.hoe_challenge, player, this.teams_manager)
                 // Amethyst challenge checked via events
                 // Villager challenge checked via events
-                check_golden_apple_challenge(this.message_manager, this.challenges.hoe_challenge, player, this.teams_manager)
+                check_golden_apple_challenge(this.message_manager, this.challenges.gapple_challenge, player, this.teams_manager)
+
+                check_iron_armour_challenge(this.message_manager, this.challenges.iron_armour_challenge, player, this.teams_manager)
+                // Potion
+                // dandelion
             }
         })
     }
