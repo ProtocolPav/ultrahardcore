@@ -4,10 +4,10 @@
   "workspaces": {
     "": {
       "dependencies": {
-        "@minecraft/server": "2.8.0",
+        "@minecraft/server": "2.9.0",
         "@minecraft/server-net": "1.0.0-beta.1.26.31-stable",
         "@minecraft/server-ui": "2.1.0",
-        "@minecraft/vanilla-data": "^1.26.31",
+        "@minecraft/vanilla-data": "^1.26.44",
       },
       "devDependencies": {
         "@types/lodash": "^4.17.13",
@@ -66,7 +66,7 @@
 
     "@minecraft/common": ["@minecraft/common@1.2.0", "", {}, "sha512-JdmEq4P3Z/FtoBzhLijFgMSVFnFRrUoLwY8DHHrgtFo0mfLTOLTB1RErYjLMsA6b7BGVNxkX/pfFRiH7QZ0XwQ=="],
 
-    "@minecraft/server": ["@minecraft/server@2.8.0", "", { "peerDependencies": { "@minecraft/common": "^1.2.0", "@minecraft/vanilla-data": ">=1.20.70" } }, "sha512-5VPlToP3IihUWrLHQJdNPSq++vPYnB+IZUVdO6kJ/VWVE29pN230f9SiCD28XU+Ujfh/EdjU3anktXG77pjWLA=="],
+    "@minecraft/server": ["@minecraft/server@2.9.0", "", { "peerDependencies": { "@minecraft/common": "^1.2.0", "@minecraft/vanilla-data": ">=1.20.70" } }, "sha512-tzPwJbcXs4H3daAy5v0KldOMUwgSr4cc5x6TpEvsr3Jto9XtvsBcNUVLVdni5NEZCizQ0mzBwnLCXgxyYpR91A=="],
 
     "@minecraft/server-admin": ["@minecraft/server-admin@1.0.0-beta.release.1.19.50", "", {}, "sha512-RVHU4LLs0gZeTntbfcUEc+WM9DEWXbl1kK+vh02kCta8KSWWmW2aGX+vNdrJjrlyAVy3+uZgzLAb3O67g24xig=="],
 
@@ -74,7 +74,7 @@
 
     "@minecraft/server-ui": ["@minecraft/server-ui@2.1.0", "", { "peerDependencies": { "@minecraft/common": "^1.0.0", "@minecraft/server": "^2.0.0" } }, "sha512-7zXyqK6HI62aH0RlfObLitBc7EldpoAH3AeC8JWOaI6CCNoCi2DG2U78ELdq+NrUIjvCE87Bix/I+hgXsQ5AdA=="],
 
-    "@minecraft/vanilla-data": ["@minecraft/vanilla-data@1.26.31", "", {}, "sha512-EkaBw/FBfEw/iezLNHtdb+SvM+vKixLf3ihHCdxfDKG3o5kdPlXlpHlutlA8cOkkQ+N/xphzJDw47F7h7Yy6Yw=="],
+    "@minecraft/vanilla-data": ["@minecraft/vanilla-data@1.26.44", "", {}, "sha512-77Q/ZYrNUDqb1y9velRhal3H2jWVrHS0LnACn48gb6D7dhp9PVGqLGYPztAxkEcaopOkoKDt72j2vvjZqm7/Yg=="],
 
     "@types/lodash": ["@types/lodash@4.17.13", "", {}, "sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg=="],
 

@@ -149,18 +149,29 @@ world.afterEvents.entityDie.subscribe(event => {
 
 // Event-Based Challenges
 
-// Elimination Challenge
+// Taming Challenge
+world.afterEvents.playerInteractWithEntity.subscribe(event => {
+    if (event.target.typeId !== MinecraftEntityTypes.Wolf) return
+
+    const this_challenge = game_manager.challenges.tame_challenge
+
+    const owner = event.target.getComponent(EntityComponentTypes.Tameable)?.tamedToPlayer
+
+    if (owner?.name === event.player.name) {
+        if (this_challenge.progress_challenge(event.player)) {
+            game_manager.message_manager.send_message(`${event.player.name} has completed ${this_challenge.name}!`, 'uhc.team.win')
+        }
+    }
+})
+
+// Kill Challenge
 world.afterEvents.entityDie.subscribe(event => {
     if (game_manager.game_status === 'running') {
-        const this_challenge = game_manager.challenges.eliminate_challenge
-        if (event.deadEntity instanceof Player && event.damageSource.damagingEntity instanceof Player) {
-            const dead_team = game_manager.teams_manager.get_team(event.deadEntity)
-            const killing_team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity)
+        const this_challenge = game_manager.challenges.kill_challenge
 
-            if (dead_team?.string_id !== killing_team?.string_id && dead_team?.players.length === 1) {
-                if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
-                    game_manager.message_manager.send_message(`${killing_team?.get_team_name()} has completed ${this_challenge.name}!`, 'uhc.team.win')
-                }
+        if (event.deadEntity instanceof Player && event.damageSource.damagingEntity instanceof Player) {
+            if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
+                game_manager.message_manager.send_message(`${event.damageSource.damagingEntity.name} has completed ${this_challenge.name}!`, 'uhc.team.win')
             }
         }
     }

@@ -92,38 +92,55 @@ export class Challenge {
 }
 
 export const game_challenges: {[index: string]: Challenge} = {
-    travel_challenge: new Challenge(
-        'Traveler',
-        'Are you a true traveler? Prove it by traveling 500 blocks in this world!',
-        'textures/items/iron_ingot.png',
-        '1 Nug',
-        'player',
-        500
-    ),
-    build_challenge: new Challenge(
-        'High High High',
-        'I hear that getting the high ground can help a lot. Build up to build height (y320)',
-        'textures/items/iron_ingot.png',
-        '384 Blocks',
-        'player',
-        1
-    ),
-    lectern_challenge: new Challenge(
-        'Book Reader',
-        'A simple one, really. Craft a Lectern',
-        'textures/items/iron_ingot.png',
-        'Enchantment Book',
-        'player',
-        1
-    ),
     visit_challenge: new Challenge(
-        'Centrist',
+        'Shaken, Not Stirred',
         'Your journey will surely not be easy. Visit the centre of the world, at [0, 0]',
         'textures/items/iron_ingot.png',
-        'Enchanted Diamond Sword',
+        '16 Stacks of Logs',
         'player',
         1
     ),
+    tame_challenge: new Challenge(
+        'Best Friend',
+        "They say a player's best friend is a dog. So go tame one!",
+        'textures/items/iron_ingot.png',
+        'Wolf Spawn Egg',
+        'player',
+        1
+    ),
+    halftime_challenge: new Challenge(
+        'Where are the Cheerleaders?',
+        'If you really think you are a master of the UHC, try surviving until halftime',
+        'textures/items/gold_ingot.png',
+        '1 Nug',
+        'player',
+        1
+    ),
+    boat_challenge: new Challenge(
+        'Land Ho',
+        'A true sailor knows their way round. Travel 200 blocks on a boat.',
+        'textures/items/gold_ingot.png',
+        '20 Sponges',
+        'player',
+        200
+    ),
+    kill_challenge: new Challenge(
+        'KDR',
+        'They say you should aim for a Kill-to-Death ratio of 2. So do that. Kill 2 Players.',
+        'textures/items/gold_ingot.png',
+        'Ravager Spawn Egg',
+        'player',
+        2
+    ),
+    spear_challenge: new Challenge(
+        'Remarkable Sparkle',
+        "Let's make this fun. Craft a Diamond Spear.",
+        'textures/items/gold_ingot.png',
+        '512 of Crying Obsidian and Gilded Blackstone',
+        'player',
+        1
+    ),
+
     jump_challenge: new Challenge(
         'Icarus',
         'Icarus once tried the impossible - flying. That ended well! You should try it too. Jump from y320 down to y-50',
