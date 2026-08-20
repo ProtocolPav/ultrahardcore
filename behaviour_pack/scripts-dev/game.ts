@@ -25,6 +25,7 @@ import check_wool_challenge from "./challenge_scripts/wool_challenge";
 import {Settings} from "./settings";
 import {BorderManager} from "./border";
 import check_boat_challenge from "./challenge_scripts/boat_challenge";
+import check_spear_challenge from "./challenge_scripts/spear_challenge";
 
 export class GameManager {
     teams_manager: TeamsManager;
@@ -141,8 +142,11 @@ export class GameManager {
         world.getAllPlayers().forEach((player: Player) => {
             if (this.teams_manager.get_team(player)) {
                 check_visit_challenge(this.message_manager, this.challenges.visit_challenge, player)
+                // Tame challenge checked via events
                 check_halftime_challenge(this.message_manager, this.challenges.halftime_challenge, player, this.game_time, total_time/2)
                 check_boat_challenge(this.message_manager, this.challenges.boat_challenge, player)
+                // Kill challenge checked via events
+                check_spear_challenge(this.message_manager, this.challenges.spear_challenge, player)
 
                 check_build_challenge(this.message_manager, this.challenges.build_challenge, player)
                 check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player)
