@@ -26,6 +26,8 @@ import {Settings} from "./settings";
 import {BorderManager} from "./border";
 import check_boat_challenge from "./challenge_scripts/boat_challenge";
 import check_spear_challenge from "./challenge_scripts/spear_challenge";
+import check_hoe_challenge from "./challenge_scripts/hoe_challenge";
+import check_golden_apple_challenge from "./challenge_scripts/golden_apple_challenge";
 
 export class GameManager {
     teams_manager: TeamsManager;
@@ -148,12 +150,10 @@ export class GameManager {
                 // Kill challenge checked via events
                 check_spear_challenge(this.message_manager, this.challenges.spear_challenge, player)
 
-                check_build_challenge(this.message_manager, this.challenges.build_challenge, player)
-                check_lectern_challenge(this.message_manager, this.challenges.lectern_challenge, player)
-                check_jump_challenge(this.message_manager, this.challenges.jump_challenge, player, this.teams_manager)
-                check_blaze_challenge(this.message_manager, this.challenges.blaze_challenge, player, this.teams_manager)
-                check_trial_challenge(this.message_manager, this.challenges.trial_challenge, player, this.teams_manager)
-                check_wool_challenge(this.message_manager, this.challenges.wool_challenge, player, this.teams_manager)
+                check_hoe_challenge(this.message_manager, this.challenges.hoe_challenge, player, this.teams_manager)
+                // Amethyst challenge checked via events
+                // Villager challenge checked via events
+                check_golden_apple_challenge(this.message_manager, this.challenges.hoe_challenge, player, this.teams_manager)
             }
         })
     }

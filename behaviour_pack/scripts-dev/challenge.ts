@@ -95,7 +95,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     visit_challenge: new Challenge(
         'Shaken, Not Stirred',
         'Your journey will surely not be easy. Visit the centre of the world, at [0, 0]',
-        'textures/items/iron_ingot.png',
+        'textures/items/compass.png',
         '16 Stacks of Logs',
         'player',
         1
@@ -103,7 +103,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     tame_challenge: new Challenge(
         'Best Friend',
         "They say a player's best friend is a dog. So go tame one!",
-        'textures/items/iron_ingot.png',
+        'textures/items/bone.png',
         'Wolf Spawn Egg',
         'player',
         1
@@ -111,7 +111,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     halftime_challenge: new Challenge(
         'Where are the Cheerleaders?',
         'If you really think you are a master of the UHC, try surviving until halftime',
-        'textures/items/gold_ingot.png',
+        'textures/items/clock.png',
         '1 Nug',
         'player',
         1
@@ -119,7 +119,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     boat_challenge: new Challenge(
         'Land Ho',
         'A true sailor knows their way round. Travel 200 blocks on a boat.',
-        'textures/items/gold_ingot.png',
+        'textures/items/oak_boat.png',
         '20 Sponges',
         'player',
         200
@@ -127,7 +127,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     kill_challenge: new Challenge(
         'KDR',
         'They say you should aim for a Kill-to-Death ratio of 2. So do that. Kill 2 Players.',
-        'textures/items/gold_ingot.png',
+        'textures/items/player_head.png',
         'Ravager Spawn Egg',
         'player',
         2
@@ -135,20 +135,45 @@ export const game_challenges: {[index: string]: Challenge} = {
     spear_challenge: new Challenge(
         'Remarkable Sparkle',
         "Let's make this fun. Craft a Diamond Spear.",
-        'textures/items/gold_ingot.png',
+        'textures/items/diamond_spear.png',
         '512 of Crying Obsidian and Gilded Blackstone',
         'player',
         1
     ),
 
-    jump_challenge: new Challenge(
-        'Icarus',
-        'Icarus once tried the impossible - flying. That ended well! You should try it too. Jump from y320 down to y-50',
-        'textures/items/gold_ingot.png',
-        '640 Blocks',
+    hoe_challenge: new Challenge(
+        'Priority Hoe',
+        'The biggest waste of materials ever. Craft 1 Diamond Hoe.',
+        'textures/items/diamond_hoe.png',
+        '512 Mud',
         'team',
         1
     ),
+    amethyst_challenge: new Challenge(
+        'Purple Rain',
+        'Can you find one in time? Break one Amethyst Bud.',
+        'textures/items/amethyst_cluster.png',
+        '3 Budding Amethyst',
+        'team',
+        1
+    ),
+    villager_challenge: new Challenge(
+        'View To Kill',
+        "If you can't kill a player, you can definitely kill a villager.",
+        'textures/items/emerald.png',
+        '3 Enchanted Books of your choice',
+        'team',
+        1
+    ),
+    gapple_challenge: new Challenge(
+        'Snapple Apple',
+        'Craft 3 Golden Apples. It is that simple.',
+        'textures/items/golden_apple.png',
+        '1 Enchanted Golden Apple',
+        'team',
+        3
+    ),
+
     halftime_challenge: new Challenge(
         'Halftime',
         'If you really think you are a master of the UHC, try surviving until halftime',

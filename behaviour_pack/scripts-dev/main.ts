@@ -177,19 +177,16 @@ world.afterEvents.entityDie.subscribe(event => {
     }
 })
 
-// Mining Challenge
+// Amethyst Mining Challenge
 const valid_blocks: string[] = [
-    MinecraftBlockTypes.GoldOre, MinecraftBlockTypes.DeepslateGoldOre,
-    MinecraftBlockTypes.DiamondOre, MinecraftBlockTypes.DeepslateDiamondOre,
-    MinecraftBlockTypes.IronOre, MinecraftBlockTypes.DeepslateIronOre,
-    MinecraftBlockTypes.EmeraldOre, MinecraftBlockTypes.DeepslateEmeraldOre,
-    MinecraftBlockTypes.RedstoneOre, MinecraftBlockTypes.DeepslateRedstoneOre,
-    MinecraftBlockTypes.AncientDebris
+    MinecraftBlockTypes.LargeAmethystBud,
+    MinecraftBlockTypes.MediumAmethystBud,
+    MinecraftBlockTypes.SmallAmethystBud,
 ]
 
 world.beforeEvents.playerBreakBlock.subscribe(event => {
     if (game_manager.game_status === 'running') {
-        const this_challenge = game_manager.challenges.mining_challenge
+        const this_challenge = game_manager.challenges.amethyst_challenge
         if (valid_blocks.includes(event.block.typeId)) {
             const team = game_manager.teams_manager.get_team(event.player)
 
@@ -200,13 +197,13 @@ world.beforeEvents.playerBreakBlock.subscribe(event => {
     }
 })
 
-// Skeleton Challenge
+// Villager Kill Challenge
 world.afterEvents.entityDie.subscribe(event => {
     if (game_manager.game_status === 'running') {
-        const this_challenge = game_manager.challenges.skeleton_challenge
+        const this_challenge = game_manager.challenges.villager_challenge
 
         if (
-            event.deadEntity.typeId === MinecraftEntityTypes.Skeleton
+            event.deadEntity.typeId === MinecraftEntityTypes.VillagerV2
             && event.damageSource.damagingEntity instanceof Player
         ) {
             const team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity)
@@ -216,4 +213,4 @@ world.afterEvents.entityDie.subscribe(event => {
             }
         }
     }
-})
+}, {entityTypes: [MinecraftEntityTypes.VillagerV2]})
