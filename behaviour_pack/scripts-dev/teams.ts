@@ -104,6 +104,22 @@ export class TeamsManager {
         })
     }
 
+    spread_player(player: Player, radius: number) {
+        let r = radius * Math.sqrt(Math.random())
+        let theta = Math.random() * 2 * Math.PI
+
+        let coordinates = { x: r * Math.cos(theta), y: 0, z: r * Math.sin(theta) }
+
+        let block = world.getDimension(MinecraftDimensionTypes.Overworld).getTopmostBlock(
+            {x: coordinates.x, z: coordinates.z},
+        )
+
+        if (block) coordinates.y = block.y+1
+
+        player.addEffect(MinecraftEffectTypes.Resistance, TicksPerSecond*60, {amplifier: 100})
+        player.teleport(coordinates, {keepVelocity: false})
+    }
+
     winner_check(): Team | undefined {
         let teams_alive = 0
         let winning_team: Team | undefined = undefined

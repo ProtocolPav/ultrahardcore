@@ -8,10 +8,11 @@ import {
     world
 } from "@minecraft/server";
 import {GameManager} from "./game";
-import {MinecraftBlockTypes, MinecraftEffectTypes, MinecraftEntityTypes} from "@minecraft/vanilla-data";
+import {MinecraftBlockTypes, MinecraftEffectTypes, MinecraftEntityTypes, MinecraftItemTypes} from "@minecraft/vanilla-data";
 import {team_form} from "./forms/team";
 import {admin_form} from "./forms/admin";
 import {challenges_form} from "./forms/challenges";
+import player_has_item from "./utils/check_player_has_item";
 
 let game_manager: GameManager
 
@@ -81,6 +82,17 @@ world.afterEvents.playerSpawn.subscribe(event => {
             if (death_location) {
                 event.player.teleport(death_location)
             }
+        } else {
+            // If player died during grace period, they will respawn in a random location
+            game_manager.teams_manager.spread_player(event.player, game_manager.settings.border_radius)
+            const player_health = event.player.getComponent(EntityComponentTypes.Health)
+
+            if (event.player.getDynamicProperty('uhc:had_recovery_compass') === true) {
+                const recovery_compass = new ItemStack(MinecraftItemTypes.RecoveryCompass, 1)
+                event.player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(recovery_compass)
+            }
+
+            player_health?.setCurrentValue(player_health.effectiveMax-5)
         }
     }
 })
@@ -116,14 +128,23 @@ world.afterEvents.itemUse.subscribe(event => {
 })
 
 world.afterEvents.entityDie.subscribe(event => {
-    if (event.deadEntity instanceof Player) {
-        const team = game_manager.teams_manager.get_team(event.deadEntity)
-        if (team) {
-            team.remove_player(event.deadEntity, game_manager.message_manager)
-            event.deadEntity.setDynamicProperty('uhc:death_location', event.deadEntity.location)
-        }
+    if (!(event.deadEntity instanceof Player)) return
+
+    if (player_has_item(event.deadEntity, MinecraftItemTypes.RecoveryCompass)) {
+        event.deadEntity.setDynamicProperty('uhc:had_recovery_compass', true)
+    } else {
+        event.deadEntity.setDynamicProperty('uhc:had_recovery_compass', false)
     }
-})
+
+    if (game_manager.game_time <= game_manager.settings.grace_period_mins*60) return
+
+    // If not in grace period, then deaths will count.
+    const team = game_manager.teams_manager.get_team(event.deadEntity)
+    if (team) {
+        team.remove_player(event.deadEntity, game_manager.message_manager)
+        event.deadEntity.setDynamicProperty('uhc:death_location', event.deadEntity.location)
+    }
+}, {entityTypes: [MinecraftEntityTypes.Player]})
 
 
 // Event-Based Challenges
