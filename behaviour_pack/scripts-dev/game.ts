@@ -134,7 +134,7 @@ export class GameManager {
     }
 
     private challenge_loop() {
-        if (this.game_status !== 'running' || this.game_time < 10) return;
+        if (this.game_status !== 'running' || this.game_time < 30) return;
 
         const total_time = this.settings.grace_period_mins*60 + this.settings.main_period_mins*60
 
