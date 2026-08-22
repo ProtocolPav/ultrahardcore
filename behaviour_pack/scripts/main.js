@@ -1,10 +1,10 @@
 // behaviour_pack/scripts-dev/main.ts
 import {
-  EntityComponentTypes as EntityComponentTypes6,
+  EntityComponentTypes as EntityComponentTypes5,
   GameMode as GameMode2,
   ItemStack as ItemStack2,
-  Player as Player9,
-  system as system6,
+  Player as Player8,
+  system as system5,
   TicksPerSecond as TicksPerSecond3,
   world as world8
 } from "@minecraft/server";
@@ -12,10 +12,10 @@ import {
 // behaviour_pack/scripts-dev/game.ts
 import {
   DisplaySlotId,
-  EntityComponentTypes as EntityComponentTypes5,
+  EntityComponentTypes as EntityComponentTypes4,
   GameMode,
   ItemStack,
-  system as system5,
+  system as system4,
   TicksPerSecond as TicksPerSecond2,
   TimeOfDay,
   world as world7
@@ -3785,7 +3785,7 @@ var game_challenges = {
   ),
   brewing_challenge: new Challenge(
     "Quick Brew",
-    "Brew ANY potion.",
+    "Craft a Brewing Stand",
     "textures/items/potion_bottle_heal.png",
     "Totem of Togetherness",
     "first_team",
@@ -4122,43 +4122,14 @@ function random_offset(pos) {
   };
 }
 
-// behaviour_pack/scripts-dev/utils/check_player_has_potion.ts
-import { system as system4, EntityComponentTypes as EntityComponentTypes4, ItemComponentTypes } from "@minecraft/server";
-var INVALID_POTIONS = [
-  MinecraftPotionEffectTypes.Awkward,
-  MinecraftPotionEffectTypes.Mundane,
-  MinecraftPotionEffectTypes.Thick,
-  MinecraftPotionEffectTypes.Water
-];
-function player_has_potion(player) {
-  return new Promise((resolve) => {
-    system4.run(() => {
-      const inventory = player.getComponent(EntityComponentTypes4.Inventory);
-      let found = false;
-      if (inventory?.container) {
-        for (let i = 0; i < inventory.inventorySize; i++) {
-          const potion = inventory.container.getItem(i)?.getComponent(ItemComponentTypes.Potion);
-          if (potion) {
-            found = true;
-            break;
-          }
-        }
-      }
-      resolve(found);
-    });
-  });
-}
-
 // behaviour_pack/scripts-dev/challenge_scripts/potion_challenge.ts
 function check_potion_challenge(message_manager, challenge, player, teams_manager) {
-  player_has_potion(player).then((has_potion) => {
-    if (has_potion) {
-      if (challenge.progress_challenge(player)) {
-        const team = teams_manager.get_team(player);
-        message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
-      }
+  if (player_has_item(player, MinecraftItemTypes.BrewingStand)) {
+    if (challenge.progress_challenge(player)) {
+      const team = teams_manager.get_team(player);
+      message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
     }
-  });
+  }
 }
 
 // behaviour_pack/scripts-dev/game.ts
@@ -4186,9 +4157,9 @@ var GameManager = class _GameManager {
       new ItemStack(MinecraftItemTypes.PinkPetals, 1)
     ];
     this.challenges = game_challenges;
-    system5.runInterval(() => this.game_loop(), 20);
-    system5.runInterval(() => this.challenge_loop(), 1);
-    system5.runInterval(() => this.bell_loop(), 10);
+    system4.runInterval(() => this.game_loop(), 20);
+    system4.runInterval(() => this.challenge_loop(), 1);
+    system4.runInterval(() => this.bell_loop(), 10);
   }
   static initialize() {
     let initialized = Boolean(world7.getDynamicProperty("uhc:initialized"));
@@ -4223,14 +4194,14 @@ var GameManager = class _GameManager {
       `The game is about to start! Each team will be teleported to their starting locations in 15 seconds. May the best team win.`,
       "uhc.start.before"
     );
-    system5.runTimeout(() => {
+    system4.runTimeout(() => {
       this.message_manager.send_message(
         `You might be teleported into the sky, do not worry! You will have resistance to save your fall.`,
         "random.toast"
       );
     }, TicksPerSecond2 * 5);
     world7.getAllPlayers().forEach((player) => {
-      player.getComponent(EntityComponentTypes5.Inventory)?.container?.clearAll();
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.clearAll();
     });
     world7.stopMusic();
     this.game_status = "starting";
@@ -4253,7 +4224,7 @@ var GameManager = class _GameManager {
     });
   }
   bell_loop() {
-    system5.runJob(find_and_trigger_bell());
+    system4.runJob(find_and_trigger_bell());
     world7.getAllPlayers().forEach((player) => {
       if (player_has_item(player, MinecraftItemTypes.RecoveryCompass)) {
         player.setDynamicProperty("uhc:had_recovery_compass", true);
@@ -4289,10 +4260,10 @@ var GameManager = class _GameManager {
       player.getEffects().forEach((effect) => {
         player.removeEffect(effect.typeId);
       });
-      player.getComponent(EntityComponentTypes5.Inventory)?.container?.clearAll();
-      player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(beef);
-      player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(water_bucket);
-      player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(challenge_book);
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.clearAll();
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(beef);
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(water_bucket);
+      player.getComponent(EntityComponentTypes4.Inventory)?.container?.addItem(challenge_book);
       player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond2 * 60 * 500, { amplifier: 1, showParticles: false });
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.Survival);
@@ -4528,38 +4499,38 @@ Reward: ${challenge.reward} (On Everthorn Server)
 
 // behaviour_pack/scripts-dev/main.ts
 var game_manager;
-system6.beforeEvents.startup.subscribe((event) => {
-  system6.run(() => game_manager = GameManager.initialize());
+system5.beforeEvents.startup.subscribe((event) => {
+  system5.run(() => game_manager = GameManager.initialize());
 });
 world8.afterEvents.playerSpawn.subscribe((event) => {
   if (game_manager.game_status !== "running" && event.initialSpawn) {
-    event.player.getComponent(EntityComponentTypes6.Inventory)?.container?.clearAll();
+    event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.clearAll();
     let team_book = new ItemStack2("uhc:teams_book", 1);
     let challenge_book = new ItemStack2("uhc:challenge_book", 1);
     event.player.playMusic("uhc.music", { loop: true, volume: 0.5 });
-    event.player.getComponent(EntityComponentTypes6.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(
       team_book
     );
-    event.player.getComponent(EntityComponentTypes6.Inventory)?.container?.addItem(
+    event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(
       challenge_book
     );
     event.player.setGameMode(GameMode2.Adventure);
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
-    system6.runTimeout(() => {
+    system5.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l5\xA7r! The game is about to start. Sit back, relax, and good luck!`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 5);
-    system6.runTimeout(() => {
+    system5.runTimeout(() => {
       game_manager.message_manager.send_message(
         `Select your team by pressing :_input_key.use:`,
         "random.toast",
         event.player
       );
     }, TicksPerSecond3 * 8);
-    system6.runTimeout(() => {
+    system5.runTimeout(() => {
       game_manager.message_manager.send_message(
         `For admins: \xA7e/give @p uhc:admin_book\xA7r to edit settings and start the game`,
         "random.toast",
@@ -4584,10 +4555,10 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
       }
     } else {
       game_manager.teams_manager.spread_player(event.player, game_manager.settings.border_radius);
-      const player_health = event.player.getComponent(EntityComponentTypes6.Health);
+      const player_health = event.player.getComponent(EntityComponentTypes5.Health);
       if (event.player.getDynamicProperty("uhc:had_recovery_compass") === true) {
         const recovery_compass = new ItemStack2(MinecraftItemTypes.RecoveryCompass, 1);
-        event.player.getComponent(EntityComponentTypes6.Inventory)?.container?.addItem(recovery_compass);
+        event.player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(recovery_compass);
       }
       player_health?.setCurrentValue(player_health.effectiveMax - 5);
     }
@@ -4616,7 +4587,7 @@ world8.afterEvents.itemUse.subscribe((event) => {
   }
 });
 world8.afterEvents.entityDie.subscribe((event) => {
-  if (!(event.deadEntity instanceof Player9)) return;
+  if (!(event.deadEntity instanceof Player8)) return;
   if (game_manager.game_time <= game_manager.settings.grace_period_mins * 60) return;
   const team = game_manager.teams_manager.get_team(event.deadEntity);
   if (team) {
@@ -4626,7 +4597,7 @@ world8.afterEvents.entityDie.subscribe((event) => {
 }, { entityTypes: [MinecraftEntityTypes.Player] });
 world8.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (event.target.typeId !== MinecraftEntityTypes.Wolf) return;
-  const tameable = event.target.getComponent(EntityComponentTypes6.Tameable);
+  const tameable = event.target.getComponent(EntityComponentTypes5.Tameable);
   const this_challenge = game_manager.challenges.tame_challenge;
   if (tameable?.isTamed === void 0) {
     if (this_challenge.progress_challenge(event.player)) {
@@ -4640,7 +4611,7 @@ world8.afterEvents.playerInteractWithEntity.subscribe((event) => {
 world8.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const this_challenge = game_manager.challenges.kill_challenge;
-    if (event.deadEntity instanceof Player9 && event.damageSource.damagingEntity instanceof Player9) {
+    if (event.deadEntity instanceof Player8 && event.damageSource.damagingEntity instanceof Player8) {
       if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
         game_manager.message_manager.send_message(`${event.damageSource.damagingEntity.name} has completed ${this_challenge.name}!`, "uhc.team.win");
       }
@@ -4667,7 +4638,7 @@ world8.beforeEvents.playerBreakBlock.subscribe((event) => {
 world8.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
     const this_challenge = game_manager.challenges.villager_challenge;
-    if (event.deadEntity.typeId === MinecraftEntityTypes.VillagerV2 && event.damageSource.damagingEntity instanceof Player9) {
+    if (event.deadEntity.typeId === MinecraftEntityTypes.VillagerV2 && event.damageSource.damagingEntity instanceof Player8) {
       const team = game_manager.teams_manager.get_team(event.damageSource.damagingEntity);
       if (this_challenge.progress_challenge(event.damageSource.damagingEntity)) {
         game_manager.message_manager.send_message(`${team?.get_team_name()} has completed ${this_challenge.name}!`, "uhc.team.win");
@@ -4678,7 +4649,7 @@ world8.afterEvents.entityDie.subscribe((event) => {
 var TEAM_MAPPING = {};
 world8.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (event.beforeItemStack?.typeId !== MinecraftItemTypes.GoldenDandelion) return;
-  const baby = event.target.getComponent(EntityComponentTypes6.IsBaby);
+  const baby = event.target.getComponent(EntityComponentTypes5.IsBaby);
   if (!baby) return;
   const climate_variant = event.target.getProperty("minecraft:climate_variant");
   if (!climate_variant) return;
