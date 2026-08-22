@@ -230,11 +230,16 @@ world.afterEvents.playerInteractWithEntity.subscribe(event => {
 
     const climate_variant: string = event.target.getProperty("minecraft:climate_variant") as string
 
+    if (!climate_variant) return
+    if (!['hot', 'cold', 'temperate'].includes(climate_variant)) return
+
     const team = game_manager.teams_manager.get_team(event.player)
+
+    if (!TEAM_MAPPING[team ? team.string_id : 'NONE']) {TEAM_MAPPING[team ? team.string_id : 'NONE'] = []}
 
     const this_challenge = game_manager.challenges.baby_challenge
 
-    if (climate_variant && !TEAM_MAPPING[team ? team.string_id : 'NONE'].includes(climate_variant)) {
+    if (!TEAM_MAPPING[team ? team.string_id : 'NONE'].includes(climate_variant)) {
         TEAM_MAPPING[team ? team.string_id : 'NONE'].push(climate_variant)
 
         if (this_challenge.progress_challenge(event.player)) {
