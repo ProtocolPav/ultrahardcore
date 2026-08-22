@@ -31,12 +31,12 @@
     },
     "uhc.music": {
       "category": "music",
-      "sounds": ["sounds/uhc/lobby_music_2"],
+      "sounds": ["sounds/uhc/music_2"],
       "stream": true
     },
     "uhc.music.win": {
       "category": "music",
-      "sounds": ["sounds/uhc/winner_music_3"],
+      "sounds": ["sounds/uhc/victory_3"],
       "interruptible": false,
       "stream": true
     },
