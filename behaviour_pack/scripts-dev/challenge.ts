@@ -187,7 +187,7 @@ export const game_challenges: {[index: string]: Challenge} = {
     ),
     brewing_challenge: new Challenge(
         'Quick Brew',
-        'Brew ANY potion.',
+        'Craft a Brewing Stand',
         'textures/items/potion_bottle_heal.png',
         'Totem of Togetherness',
         'first_team',

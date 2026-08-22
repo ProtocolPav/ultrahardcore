@@ -12,12 +12,10 @@ export default function check_potion_challenge(
     player: Player,
     teams_manager: TeamsManager
 ) {
-    player_has_potion(player).then(has_potion => {
-        if (has_potion) {
-            if (challenge.progress_challenge(player)) {
-                const team = teams_manager.get_team(player)
-                message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, 'uhc.team.win')
-            }
+    if (player_has_item(player, MinecraftItemTypes.BrewingStand)) {
+        if (challenge.progress_challenge(player)) {
+            const team = teams_manager.get_team(player)
+            message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, 'uhc.team.win')
         }
-    })
+    }
 }
