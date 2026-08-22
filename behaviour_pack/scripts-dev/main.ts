@@ -227,9 +227,9 @@ world.afterEvents.playerInteractWithEntity.subscribe(event => {
 
     if (!baby) return
 
-    const variant = event.target.getComponent(EntityComponentTypes.MarkVariant)
+    const variant = event.target.getProperty("minecraft:climate_variant")
 
-    console.log(variant?.typeId)
+    console.log(variant)
 
     const this_challenge = game_manager.challenges.baby_challenge
 

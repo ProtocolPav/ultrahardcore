@@ -4636,8 +4636,8 @@ world8.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (event.beforeItemStack?.typeId !== MinecraftItemTypes.GoldenDandelion) return;
   const baby = event.target.getComponent(EntityComponentTypes5.IsBaby);
   if (!baby) return;
-  const variant = event.target.getComponent(EntityComponentTypes5.MarkVariant);
-  console.log(variant?.typeId);
+  const variant = event.target.getProperty("minecraft:climate_variant");
+  console.log(variant);
   const this_challenge = game_manager.challenges.baby_challenge;
   if (false) {
     if (this_challenge.progress_challenge(event.player)) {
