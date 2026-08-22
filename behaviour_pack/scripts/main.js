@@ -4138,7 +4138,7 @@ function player_has_potion(player) {
       if (inventory?.container) {
         for (let i = 0; i < inventory.inventorySize; i++) {
           const potion = inventory.container.getItem(i)?.getComponent(ItemComponentTypes.Potion);
-          if (potion && !INVALID_POTIONS.includes(potion.potionEffectType.id)) {
+          if (potion) {
             found = true;
             break;
           }
