@@ -4639,6 +4639,9 @@ world8.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (!baby) return;
   const climate_variant = event.target.getProperty("minecraft:climate_variant");
   const team = game_manager.teams_manager.get_team(event.player);
+  if (!TEAM_MAPPING[team ? team.string_id : "NONE"]) {
+    TEAM_MAPPING[team ? team.string_id : "NONE"] = [];
+  }
   const this_challenge = game_manager.challenges.baby_challenge;
   if (climate_variant && !TEAM_MAPPING[team ? team.string_id : "NONE"].includes(climate_variant)) {
     TEAM_MAPPING[team ? team.string_id : "NONE"].push(climate_variant);
