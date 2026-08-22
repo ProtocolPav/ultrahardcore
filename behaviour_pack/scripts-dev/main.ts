@@ -219,6 +219,7 @@ world.afterEvents.entityDie.subscribe(event => {
     }
 }, {entityTypes: [MinecraftEntityTypes.VillagerV2]})
 
+const TEAM_MAPPING: {[key: string]: string[]} = {}
 // Dandelion Challenge
 world.afterEvents.playerInteractWithEntity.subscribe(event => {
     if (event.beforeItemStack?.typeId !== MinecraftItemTypes.GoldenDandelion) return
@@ -227,16 +228,18 @@ world.afterEvents.playerInteractWithEntity.subscribe(event => {
 
     if (!baby) return
 
-    const variant = event.target.getProperty("minecraft:climate_variant")
+    const climate_variant: string = event.target.getProperty("minecraft:climate_variant") as string
 
-    console.log(variant)
+    const team = game_manager.teams_manager.get_team(event.player)
 
     const this_challenge = game_manager.challenges.baby_challenge
 
-    if (false) {
+    if (climate_variant && !TEAM_MAPPING[team ? team.string_id : 'NONE'].includes(climate_variant)) {
+        TEAM_MAPPING[team ? team.string_id : 'NONE'].push(climate_variant)
+
         if (this_challenge.progress_challenge(event.player)) {
             game_manager.message_manager.send_message(
-                `${event.player.name} has completed ${this_challenge.name}!`,
+                `${team?.get_team_name()} has completed ${this_challenge.name}!`,
                 'uhc.team.win'
             )
         }
