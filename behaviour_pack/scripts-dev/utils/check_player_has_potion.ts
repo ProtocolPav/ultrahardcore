@@ -17,7 +17,7 @@ export default function player_has_potion(player: Player) {
         for (let i = 0; i < inventory_size; i++) {
             const potion = inventory_container.getItem(i)?.getComponent(ItemComponentTypes.Potion)
 
-            if (potion?.potionEffectType && !INVALID_POTIONS.includes(potion.potionEffectType.id)) {
+            if (potion && !INVALID_POTIONS.includes(potion.potionEffectType.id)) {
                 return true
             }
         }

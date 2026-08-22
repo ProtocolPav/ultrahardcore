@@ -4137,7 +4137,7 @@ function player_has_potion(player) {
     const inventory_container = inventory.container;
     for (let i = 0; i < inventory_size; i++) {
       const potion = inventory_container.getItem(i)?.getComponent(ItemComponentTypes.Potion);
-      if (potion?.potionEffectType && !INVALID_POTIONS.includes(potion.potionEffectType.id)) {
+      if (potion && !INVALID_POTIONS.includes(potion.potionEffectType.id)) {
         return true;
       }
     }
@@ -4287,7 +4287,7 @@ var GameManager = class _GameManager {
       player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(beef);
       player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(water_bucket);
       player.getComponent(EntityComponentTypes5.Inventory)?.container?.addItem(challenge_book);
-      player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond2 * 60 * 500, { amplifier: 1 });
+      player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond2 * 60 * 500, { amplifier: 1, showParticles: false });
       player.addEffect(MinecraftEffectTypes.InstantHealth, 1, { amplifier: 255 });
       player.setGameMode(GameMode.Survival);
     });

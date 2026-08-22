@@ -214,7 +214,7 @@ export class GameManager {
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(beef)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(water_bucket)
             player.getComponent(EntityComponentTypes.Inventory)?.container?.addItem(challenge_book)
-            player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond * 60 * 500, {amplifier: 1})
+            player.addEffect(MinecraftEffectTypes.HealthBoost, TicksPerSecond * 60 * 500, {amplifier: 1, showParticles: false})
             player.addEffect(MinecraftEffectTypes.InstantHealth, 1, {amplifier: 255})
             player.setGameMode(GameMode.Survival)
         })
