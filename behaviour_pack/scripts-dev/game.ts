@@ -29,6 +29,7 @@ import check_spear_challenge from "./challenge_scripts/spear_challenge";
 import check_hoe_challenge from "./challenge_scripts/hoe_challenge";
 import check_golden_apple_challenge from "./challenge_scripts/golden_apple_challenge";
 import check_iron_armour_challenge from "./challenge_scripts/iron_armour_challenge";
+import {find_and_trigger_bell} from "./utils/bell_loop";
 
 export class GameManager {
     teams_manager: TeamsManager;
@@ -76,6 +77,7 @@ export class GameManager {
 
         system.runInterval(() => this.game_loop(), 20)
         system.runInterval(() => this.challenge_loop(), 1)
+        system.runInterval(() => this.bell_loop(), 10)
     }
 
     static initialize(): GameManager {
@@ -161,6 +163,10 @@ export class GameManager {
                 // dandelion
             }
         })
+    }
+
+    private bell_loop() {
+        system.runJob(find_and_trigger_bell())
     }
 
     private update_dynamic_properties() {
