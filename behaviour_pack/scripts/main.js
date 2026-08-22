@@ -4533,15 +4533,21 @@ world7.afterEvents.entityDie.subscribe((event) => {
 }, { entityTypes: [MinecraftEntityTypes.Player] });
 world7.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (event.target.typeId !== MinecraftEntityTypes.Wolf) return;
-  const this_challenge = game_manager.challenges.tame_challenge;
-  const owner = event.target.getComponent(EntityComponentTypes5.Tameable)?.tamedToPlayer;
-  console.log(owner ? owner.name : "not tamed to any player");
-  console.log(event.target.getComponent(EntityComponentTypes5.Tameable)?.isTamed ? "is tamed" : "is not tamed");
-  if (owner?.name === event.player.name) {
-    if (this_challenge.progress_challenge(event.player)) {
-      game_manager.message_manager.send_message(`${event.player.name} has completed ${this_challenge.name}!`, "uhc.team.win");
+  system4.run(() => {
+    const tameable = event.target.getComponent(EntityComponentTypes5.Tameable);
+    const owner = tameable?.tamedToPlayer;
+    console.log(owner ? owner.name : "not tamed to any player");
+    console.log(tameable?.isTamed ? "is tamed" : "is not tamed");
+    const this_challenge = game_manager.challenges.tame_challenge;
+    if (owner?.id === event.player.id) {
+      if (this_challenge.progress_challenge(event.player)) {
+        game_manager.message_manager.send_message(
+          `${event.player.name} has completed ${this_challenge.name}!`,
+          "uhc.team.win"
+        );
+      }
     }
-  }
+  });
 });
 world7.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
