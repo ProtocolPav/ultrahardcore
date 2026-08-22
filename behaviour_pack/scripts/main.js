@@ -4247,6 +4247,13 @@ var GameManager = class _GameManager {
   }
   bell_loop() {
     system4.runJob(find_and_trigger_bell());
+    world7.getAllPlayers().forEach((player) => {
+      if (player_has_item(player, MinecraftItemTypes.RecoveryCompass)) {
+        player.setDynamicProperty("uhc:had_recovery_compass", true);
+      } else {
+        player.setDynamicProperty("uhc:had_recovery_compass", false);
+      }
+    });
   }
   update_dynamic_properties() {
     world7.setDynamicProperty("uhc:game_time", this.game_time);
@@ -4533,7 +4540,7 @@ world8.afterEvents.playerSpawn.subscribe((event) => {
     event.player.addEffect(MinecraftEffectTypes.Resistance, 2e7, { showParticles: false, amplifier: 100 });
     system5.runTimeout(() => {
       game_manager.message_manager.send_message(
-        `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l4\xA7r! The game is about to start. Sit back, relax, and good luck!`,
+        `Welcome, \xA7l${event.player.name}\xA7r to the \xA76Everthorn UHC \xA7l5\xA7r! The game is about to start. Sit back, relax, and good luck!`,
         "random.toast",
         event.player
       );
@@ -4603,11 +4610,6 @@ world8.afterEvents.itemUse.subscribe((event) => {
 });
 world8.afterEvents.entityDie.subscribe((event) => {
   if (!(event.deadEntity instanceof Player9)) return;
-  if (player_has_item(event.deadEntity, MinecraftItemTypes.RecoveryCompass)) {
-    event.deadEntity.setDynamicProperty("uhc:had_recovery_compass", true);
-  } else {
-    event.deadEntity.setDynamicProperty("uhc:had_recovery_compass", false);
-  }
   if (game_manager.game_time <= game_manager.settings.grace_period_mins * 60) return;
   const team = game_manager.teams_manager.get_team(event.deadEntity);
   if (team) {

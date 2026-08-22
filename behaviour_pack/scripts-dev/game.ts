@@ -31,6 +31,7 @@ import check_golden_apple_challenge from "./challenge_scripts/golden_apple_chall
 import check_iron_armour_challenge from "./challenge_scripts/iron_armour_challenge";
 import {find_and_trigger_bell} from "./utils/bell_loop";
 import check_potion_challenge from "./challenge_scripts/potion_challenge";
+import player_has_item from "./utils/check_player_has_item";
 
 export class GameManager {
     teams_manager: TeamsManager;
@@ -168,6 +169,15 @@ export class GameManager {
 
     private bell_loop() {
         system.runJob(find_and_trigger_bell())
+
+        // TEMP THING FOR COMPASS FIX
+        world.getAllPlayers().forEach((player: Player) => {
+            if (player_has_item(player, MinecraftItemTypes.RecoveryCompass)) {
+                player.setDynamicProperty('uhc:had_recovery_compass', true)
+            } else {
+                player.setDynamicProperty('uhc:had_recovery_compass', false)
+            }
+        })
     }
 
     private update_dynamic_properties() {

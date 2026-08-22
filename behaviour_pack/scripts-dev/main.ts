@@ -42,7 +42,7 @@ world.afterEvents.playerSpawn.subscribe(event => {
 
         system.runTimeout(() => {
             game_manager.message_manager.send_message(
-                `Welcome, §l${event.player.name}§r to the §6Everthorn UHC §l4§r! The game is about to start. Sit back, relax, and good luck!`,
+                `Welcome, §l${event.player.name}§r to the §6Everthorn UHC §l5§r! The game is about to start. Sit back, relax, and good luck!`,
                 'random.toast',
                 event.player
             )
@@ -129,12 +129,6 @@ world.afterEvents.itemUse.subscribe(event => {
 
 world.afterEvents.entityDie.subscribe(event => {
     if (!(event.deadEntity instanceof Player)) return
-
-    if (player_has_item(event.deadEntity, MinecraftItemTypes.RecoveryCompass)) {
-        event.deadEntity.setDynamicProperty('uhc:had_recovery_compass', true)
-    } else {
-        event.deadEntity.setDynamicProperty('uhc:had_recovery_compass', false)
-    }
 
     if (game_manager.game_time <= game_manager.settings.grace_period_mins*60) return
 
