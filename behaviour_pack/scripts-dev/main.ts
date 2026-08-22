@@ -157,7 +157,8 @@ world.afterEvents.playerInteractWithEntity.subscribe(event => {
 
     const owner = event.target.getComponent(EntityComponentTypes.Tameable)?.tamedToPlayer
 
-    console.log(owner ? owner.name : 'not tamed')
+    console.log(owner ? owner.name : 'not tamed to any player')
+    console.log(event.target.getComponent(EntityComponentTypes.Tameable)?.isTamed ? 'is tamed' : 'is not tamed')
 
     if (owner?.name === event.player.name) {
         if (this_challenge.progress_challenge(event.player)) {

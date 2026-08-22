@@ -4039,9 +4039,10 @@ function check_golden_apple_challenge(message_manager, challenge, player, teams_
 }
 
 // behaviour_pack/scripts-dev/utils/check_player_has_item.ts
-import { EntityComponentTypes as EntityComponentTypes3 } from "@minecraft/server";
+import { EntityComponentTypes as EntityComponentTypes3, EquipmentSlot } from "@minecraft/server";
 function player_has_item(player, item_id) {
   const inventory = player.getComponent(EntityComponentTypes3.Inventory);
+  const armour = player.getComponent(EntityComponentTypes3.Equippable);
   if (inventory?.container) {
     const inventory_size = inventory.inventorySize;
     const inventory_container = inventory.container;
@@ -4051,6 +4052,11 @@ function player_has_item(player, item_id) {
       }
     }
   }
+  if (armour?.getEquipment(EquipmentSlot.Feet)?.typeId === item_id) return true;
+  else if (armour?.getEquipment(EquipmentSlot.Legs)?.typeId === item_id) return true;
+  else if (armour?.getEquipment(EquipmentSlot.Chest)?.typeId === item_id) return true;
+  else if (armour?.getEquipment(EquipmentSlot.Head)?.typeId === item_id) return true;
+  else if (armour?.getEquipment(EquipmentSlot.Offhand)?.typeId === item_id) return true;
   return false;
 }
 
@@ -4529,7 +4535,8 @@ world7.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (event.target.typeId !== MinecraftEntityTypes.Wolf) return;
   const this_challenge = game_manager.challenges.tame_challenge;
   const owner = event.target.getComponent(EntityComponentTypes5.Tameable)?.tamedToPlayer;
-  console.log(owner ? owner.name : "not tamed");
+  console.log(owner ? owner.name : "not tamed to any player");
+  console.log(event.target.getComponent(EntityComponentTypes5.Tameable)?.isTamed ? "is tamed" : "is not tamed");
   if (owner?.name === event.player.name) {
     if (this_challenge.progress_challenge(event.player)) {
       game_manager.message_manager.send_message(`${event.player.name} has completed ${this_challenge.name}!`, "uhc.team.win");
