@@ -4632,3 +4632,19 @@ world8.afterEvents.entityDie.subscribe((event) => {
     }
   }
 }, { entityTypes: [MinecraftEntityTypes.VillagerV2] });
+world8.afterEvents.playerInteractWithEntity.subscribe((event) => {
+  if (event.beforeItemStack?.typeId !== MinecraftItemTypes.GoldenDandelion) return;
+  const baby = event.target.getComponent(EntityComponentTypes5.IsBaby);
+  if (!baby) return;
+  const variant = event.target.getComponent(EntityComponentTypes5.MarkVariant);
+  console.log(variant?.typeId);
+  const this_challenge = game_manager.challenges.baby_challenge;
+  if (false) {
+    if (this_challenge.progress_challenge(event.player)) {
+      game_manager.message_manager.send_message(
+        `${event.player.name} has completed ${this_challenge.name}!`,
+        "uhc.team.win"
+      );
+    }
+  }
+});
