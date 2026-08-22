@@ -4159,7 +4159,6 @@ var GameManager = class _GameManager {
     this.challenges = game_challenges;
     system4.runInterval(() => this.game_loop(), 20);
     system4.runInterval(() => this.challenge_loop(), 1);
-    system4.runInterval(() => this.bell_loop(), 10);
   }
   static initialize() {
     let initialized = Boolean(world7.getDynamicProperty("uhc:initialized"));

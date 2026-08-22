@@ -79,7 +79,7 @@ export class GameManager {
 
         system.runInterval(() => this.game_loop(), 20)
         system.runInterval(() => this.challenge_loop(), 1)
-        system.runInterval(() => this.bell_loop(), 10)
+        //system.runInterval(() => this.bell_loop(), 10)
     }
 
     static initialize(): GameManager {
