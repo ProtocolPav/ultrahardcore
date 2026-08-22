@@ -4536,8 +4536,7 @@ world7.afterEvents.playerInteractWithEntity.subscribe((event) => {
   system4.run(() => {
     const tameable = event.target.getComponent(EntityComponentTypes5.Tameable);
     const owner = tameable?.tamedToPlayer;
-    console.log(owner ? owner.name : "not tamed to any player");
-    console.log(tameable?.isTamed ? "is tamed" : "is not tamed");
+    console.log(tameable?.isTamed === void 0 ? "is tamed" : "is not tamed");
     const this_challenge = game_manager.challenges.tame_challenge;
     if (owner?.id === event.player.id) {
       if (this_challenge.progress_challenge(event.player)) {

@@ -153,18 +153,22 @@ world.afterEvents.entityDie.subscribe(event => {
 world.afterEvents.playerInteractWithEntity.subscribe(event => {
     if (event.target.typeId !== MinecraftEntityTypes.Wolf) return
 
-    const this_challenge = game_manager.challenges.tame_challenge
+    system.run(() => {
+        const tameable = event.target.getComponent(EntityComponentTypes.Tameable)
+        const owner = tameable?.tamedToPlayer
 
-    const owner = event.target.getComponent(EntityComponentTypes.Tameable)?.tamedToPlayer
+        console.log(tameable?.isTamed === undefined ? 'is tamed' : 'is not tamed')
 
-    console.log(owner ? owner.name : 'not tamed to any player')
-    console.log(event.target.getComponent(EntityComponentTypes.Tameable)?.isTamed ? 'is tamed' : 'is not tamed')
-
-    if (owner?.name === event.player.name) {
-        if (this_challenge.progress_challenge(event.player)) {
-            game_manager.message_manager.send_message(`${event.player.name} has completed ${this_challenge.name}!`, 'uhc.team.win')
+        const this_challenge = game_manager.challenges.tame_challenge
+        if (owner?.id === event.player.id) {
+            if (this_challenge.progress_challenge(event.player)) {
+                game_manager.message_manager.send_message(
+                    `${event.player.name} has completed ${this_challenge.name}!`,
+                    'uhc.team.win'
+                )
+            }
         }
-    }
+    })
 })
 
 // Kill Challenge
