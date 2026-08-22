@@ -30,6 +30,7 @@ import check_hoe_challenge from "./challenge_scripts/hoe_challenge";
 import check_golden_apple_challenge from "./challenge_scripts/golden_apple_challenge";
 import check_iron_armour_challenge from "./challenge_scripts/iron_armour_challenge";
 import {find_and_trigger_bell} from "./utils/bell_loop";
+import check_potion_challenge from "./challenge_scripts/potion_challenge";
 
 export class GameManager {
     teams_manager: TeamsManager;
@@ -159,8 +160,8 @@ export class GameManager {
                 check_golden_apple_challenge(this.message_manager, this.challenges.gapple_challenge, player, this.teams_manager)
 
                 check_iron_armour_challenge(this.message_manager, this.challenges.iron_armour_challenge, player, this.teams_manager)
-                // Potion
-                // dandelion
+                check_potion_challenge(this.message_manager, this.challenges.potion_challenge, player, this.teams_manager)
+                // dandelion via events
             }
         })
     }
