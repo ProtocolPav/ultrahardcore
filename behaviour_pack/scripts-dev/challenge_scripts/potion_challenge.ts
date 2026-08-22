@@ -12,10 +12,12 @@ export default function check_potion_challenge(
     player: Player,
     teams_manager: TeamsManager
 ) {
-    if (player_has_potion(player)) {
-        if (challenge.progress_challenge(player)) {
-            const team = teams_manager.get_team(player)
-            message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, 'uhc.team.win')
+    player_has_potion(player).then(has_potion => {
+        if (has_potion) {
+            if (challenge.progress_challenge(player)) {
+                const team = teams_manager.get_team(player)
+                message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, 'uhc.team.win')
+            }
         }
-    }
+    })
 }
