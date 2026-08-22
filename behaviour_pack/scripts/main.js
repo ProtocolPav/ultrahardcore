@@ -4025,19 +4025,6 @@ function check_hoe_challenge(message_manager, challenge, player, teams_manager) 
   }
 }
 
-// behaviour_pack/scripts-dev/challenge_scripts/golden_apple_challenge.ts
-function check_golden_apple_challenge(message_manager, challenge, player, teams_manager) {
-  const unique_apple_count = player_has_unique_item(player, MinecraftItemTypes.GoldenApple);
-  if (unique_apple_count) {
-    for (let i = 0; i < unique_apple_count; i++) {
-      if (challenge.progress_challenge(player)) {
-        const team = teams_manager.get_team(player);
-        message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
-      }
-    }
-  }
-}
-
 // behaviour_pack/scripts-dev/utils/check_player_has_item.ts
 import { EntityComponentTypes as EntityComponentTypes3, EquipmentSlot } from "@minecraft/server";
 function player_has_item(player, item_id) {
@@ -4047,8 +4034,9 @@ function player_has_item(player, item_id) {
     const inventory_size = inventory.inventorySize;
     const inventory_container = inventory.container;
     for (let i = 0; i < inventory_size; i++) {
-      if (inventory_container.getItem(i)?.typeId === item_id) {
-        return true;
+      const item = inventory_container.getItem(i);
+      if (item?.typeId === item_id) {
+        return item.amount;
       }
     }
   }
@@ -4058,6 +4046,19 @@ function player_has_item(player, item_id) {
   else if (armour?.getEquipment(EquipmentSlot.Head)?.typeId === item_id) return true;
   else if (armour?.getEquipment(EquipmentSlot.Offhand)?.typeId === item_id) return true;
   return false;
+}
+
+// behaviour_pack/scripts-dev/challenge_scripts/golden_apple_challenge.ts
+function check_golden_apple_challenge(message_manager, challenge, player, teams_manager) {
+  const unique_apple_count = player_has_item(player, MinecraftItemTypes.GoldenApple);
+  if (unique_apple_count) {
+    for (let i = 0; i < unique_apple_count; i++) {
+      if (challenge.progress_challenge(player)) {
+        const team = teams_manager.get_team(player);
+        message_manager.send_message(`${team?.get_team_name()} has completed ${challenge.name}!`, "uhc.team.win");
+      }
+    }
+  }
 }
 
 // behaviour_pack/scripts-dev/challenge_scripts/iron_armour_challenge.ts

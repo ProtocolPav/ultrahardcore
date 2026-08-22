@@ -9,8 +9,10 @@ export default function player_has_item(player: Player, item_id: string) {
         const inventory_container = inventory.container
 
         for (let i = 0; i < inventory_size; i++) {
-            if (inventory_container.getItem(i)?.typeId === item_id) {
-                return true
+            const item = inventory_container.getItem(i)
+
+            if (item?.typeId === item_id) {
+                return item.amount
             }
         }
     }
