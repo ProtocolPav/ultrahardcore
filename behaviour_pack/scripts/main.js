@@ -4533,20 +4533,16 @@ world7.afterEvents.entityDie.subscribe((event) => {
 }, { entityTypes: [MinecraftEntityTypes.Player] });
 world7.afterEvents.playerInteractWithEntity.subscribe((event) => {
   if (event.target.typeId !== MinecraftEntityTypes.Wolf) return;
-  system4.run(() => {
-    const tameable = event.target.getComponent(EntityComponentTypes5.Tameable);
-    const owner = tameable?.tamedToPlayer;
-    console.log(tameable?.isTamed === void 0 ? "is tamed" : "is not tamed");
-    const this_challenge = game_manager.challenges.tame_challenge;
-    if (owner?.id === event.player.id) {
-      if (this_challenge.progress_challenge(event.player)) {
-        game_manager.message_manager.send_message(
-          `${event.player.name} has completed ${this_challenge.name}!`,
-          "uhc.team.win"
-        );
-      }
+  const tameable = event.target.getComponent(EntityComponentTypes5.Tameable);
+  const this_challenge = game_manager.challenges.tame_challenge;
+  if (tameable?.isTamed === void 0) {
+    if (this_challenge.progress_challenge(event.player)) {
+      game_manager.message_manager.send_message(
+        `${event.player.name} has completed ${this_challenge.name}!`,
+        "uhc.team.win"
+      );
     }
-  });
+  }
 });
 world7.afterEvents.entityDie.subscribe((event) => {
   if (game_manager.game_status === "running") {
